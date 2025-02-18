@@ -1,0 +1,27 @@
+package egovframework.example.config;
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean;
+
+@Configuration
+public class {{txtFileName}} {
+
+    @Bean(name = "{{txtServiceName}}")
+    public {{txtServiceClass}} {{txtServiceName}}() {
+        {{txtServiceClass}} service = new {{txtServiceClass}}();
+        {{#if chkProperty}}
+        service.set{{txtPropertyName}}("{{txtPropertyValue}}");
+        {{/if}}
+        return service;
+    }
+
+    @Bean(name = "{{txtJobName}}")
+    public MethodInvokingJobDetailFactoryBean {{txtJobName}}({{txtServiceClass}} {{txtServiceName}}) {
+        MethodInvokingJobDetailFactoryBean jobDetailFactoryBean = new MethodInvokingJobDetailFactoryBean();
+        jobDetailFactoryBean.setTargetObject({{txtServiceName}});
+        jobDetailFactoryBean.setTargetMethod("{{txtServiceMethod}}");
+        jobDetailFactoryBean.setConcurrent({{cboConcurrent}});
+        return jobDetailFactoryBean;
+    }
+}

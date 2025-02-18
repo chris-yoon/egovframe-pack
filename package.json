@@ -1,0 +1,204 @@
+{
+  "name": "vscode-egovframe-initializr",
+  "displayName": "eGovFrame Initializr",
+  "description": "Generate eGovFrame code from DDL and project from templates",
+  "version": "0.1.0",
+  "publisher": "egovframework",
+  "engines": {
+    "vscode": "^1.75.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/egovframework/egovframe-initializr.git"
+  },
+  "icon": "images/logo.png",
+  "activationEvents": [
+    "onContextMenu:editor/context"
+  ],
+  "main": "./out/extension.js",
+  "readme": "README.md",
+  "contributes": {
+    "commands": [
+      {
+        "command": "extension.generateCode",
+        "title": "eGovFrame: CRUD Code Generator from DDL"
+      },
+      {
+        "command": "extension.generateProject",
+        "title": "eGovFrame: Start > New Project"
+      },
+      {
+        "command": "extension.uploadTemplates",
+        "title": "eGovFrame: Custom Code Generator from DDL and VM templates"
+      },
+      {
+        "command": "extension.downloadTemplateContext",
+        "title": "eGovFrame: Download TemplateContext as JSON from DDL"
+      },
+      {
+        "command": "extension.generateProjectByForm",
+        "title": "eGovFrame: Start > New Project (Form)"
+      },
+      {
+        "command": "extension.generateConfig",
+        "title": "eGovFrame: Generate Config"
+      },
+      {
+        "command": "extension.collapseAllProjects",
+        "title": "Collapse All",
+        "icon": "$(collapse-all)"
+      },
+      {
+        "command": "extension.collapseAllConfigs",
+        "title": "Collapse All",
+        "icon": "$(collapse-all)"
+      },
+      {
+        "command": "extension.insertSampleDDL",
+        "title": "Insert Sample DDL",
+        "icon": "$(code)"
+      }
+    ],
+    "menus": {
+      "explorer/context": [
+        {
+          "command": "extension.generateProject",
+          "when": "explorerResourceIsFolder",
+          "group": "navigation"
+        },
+        {
+          "command": "extension.generateProjectByForm",
+          "when": "explorerResourceIsFolder",
+          "group": "navigation"
+        },
+        {
+          "command": "extension.generateConfig",
+          "title": "eGovFrame: Generate Config",
+          "when": "explorerResourceIsFolder || explorerResourceIsFile",
+          "group": "navigation"
+        }
+      ],
+      "editor/context": [
+        {
+          "command": "extension.generateCode",
+          "when": "editorTextFocus",
+          "group": "navigation"
+        },
+        {
+          "command": "extension.uploadTemplates",
+          "when": "editorTextFocus",
+          "group": "navigation"
+        },
+        {
+          "command": "extension.downloadTemplateContext",
+          "when": "editorTextFocus",
+          "group": "navigation"
+        }
+      ],
+      "view/title": [
+        {
+          "command": "extension.collapseAllProjects",
+          "when": "view == egovframeProjectView",
+          "group": "navigation"
+        },
+        {
+          "command": "extension.collapseAllConfigs",
+          "when": "view == egovframeConfigView",
+          "group": "navigation"
+        },
+        {
+          "command": "extension.insertSampleDDL",
+          "when": "view == egovframeCodeView",
+          "group": "navigation"
+        }
+      ]
+    },
+    "keybindings": [
+      {
+        "command": "extension.generateCode",
+        "key": "ctrl+shift+g",
+        "when": "editorTextFocus"
+      }
+    ],
+    "configuration": {
+      "type": "object",
+      "title": "eGovFrame Initializr Configuration",
+      "properties": {
+        "egovframeInitializr.defaultPackageName": {
+          "type": "string",
+          "default": "egovframework.example.sample",
+          "description": "Default package name for CRUD Code Generator from DDL"
+        }
+      }
+    },
+    "customEditors": [
+      {
+        "viewType": "egovframe.customEditor",
+        "displayName": "eGovFrame Custom Editor",
+        "selector": [
+          {
+            "filenamePattern": "*.xmlgen"
+          }
+        ]
+      }
+    ],
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "egovframeViews",
+          "title": "eGovFrame",
+          "icon": "images/egov_frame_style_text_transparent.svg"
+        }
+      ]
+    },
+    "views": {
+      "egovframeViews": [
+        {
+          "id": "egovframeProjectView",
+          "name": "Generate Projects"
+        },
+        {
+          "type": "webview",
+          "id": "egovframeCodeView",
+          "name": "Generate Code from DDL"
+        },
+        {
+          "id": "egovframeConfigView",
+          "name": "Generate Configurations"
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "pretest": "npm run compile && npm run lint",
+    "lint": "eslint src --ext ts",
+    "test": "vscode-test"
+  },
+  "devDependencies": {
+    "@types/fs-extra": "^11.0.4",
+    "@types/handlebars": "^4.1.0",
+    "@types/mocha": "^10.0.7",
+    "@types/node": "20.x",
+    "@types/vscode": "^1.75.0",
+    "@types/yauzl": "^2.10.3",
+    "@typescript-eslint/eslint-plugin": "^7.14.1",
+    "@typescript-eslint/parser": "^7.11.0",
+    "@vscode/test-cli": "^0.0.9",
+    "@vscode/test-electron": "^2.4.1",
+    "eslint": "^8.57.0",
+    "typescript": "^5.4.5"
+  },
+  "dependencies": {
+    "extract-zip": "^2.0.1",
+    "fs-extra": "^11.2.0",
+    "handlebars": "^4.7.8",
+    "handlebars-helpers": "^0.10.0",
+    "yauzl": "^3.1.3"
+  }
+}

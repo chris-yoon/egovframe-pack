@@ -1,0 +1,88 @@
+package egovframework.example.config;
+
+import org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator;
+import org.springframework.aop.support.DefaultPointcutAdvisor;
+import org.springframework.aop.support.annotation.AnnotationMatchingPointcut;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.jdbc.datasource.DataSourceTransactionManager;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.annotation.AnnotationTransactionAttributeSource;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
+import org.springframework.transaction.interceptor.*;
+import org.springframework.transaction.support.TransactionTemplate;
+import javax.sql.DataSource;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+
+@Configuration
+{{#if chkAnnotationTransactionManagement}}
+@EnableTransactionManagement
+{{/if}}
+public class {{txtFileName}} {
+
+    private final DataSource dataSource;
+
+    public {{txtFileName}}(DataSource dataSource) {
+        this.dataSource = dataSource;
+    }
+
+    @Bean(name = "{{txtTransactionName}}")
+    public PlatformTransactionManager transactionManager() {
+        return new DataSourceTransactionManager(dataSource);
+    }
+
+    {{#if chkTransactionTemplate}}
+    @Bean(name = "{{txtTransactionTemplateName}}")
+    public TransactionTemplate transactionTemplate() {
+        return new TransactionTemplate(transactionManager());
+    }
+    {{/if}}
+
+    {{#if chkConfigurationalTransactionManagement}}
+    @Bean
+    public DefaultAdvisorAutoProxyCreator advisorAutoProxyCreator() {
+        return new DefaultAdvisorAutoProxyCreator();
+    }
+
+    @Bean(name = "{{txtPointCutName}}")
+    public AnnotationMatchingPointcut pointcut() {
+        return new AnnotationMatchingPointcut(null, {{txtPointCutExpression}}.class);
+    }
+
+    @Bean(name = "{{txtAdviceName}}")
+    public TransactionInterceptor transactionInterceptor() {
+        TransactionInterceptor interceptor = new TransactionInterceptor();
+        interceptor.setTransactionManager(transactionManager());
+        
+        MatchAlwaysTransactionAttributeSource source = new MatchAlwaysTransactionAttributeSource();
+        RuleBasedTransactionAttribute transactionAttribute = new RuleBasedTransactionAttribute();
+        transactionAttribute.setName("{{txtMethodName}}");
+        transactionAttribute.setReadOnly({{chkReadOnly}});
+        
+        {{#if chkTimeout}}
+        transactionAttribute.setTimeout({{txtTimeout}});
+        {{/if}}
+        transactionAttribute.setPropagationBehaviorName("PROPAGATION_{{cmbPropagation}}");
+        transactionAttribute.setIsolationLevelName("ISOLATION_{{cmbIsolation}}");
+        
+        {{#if chkRollbackFor}}
+        transactionAttribute.setRollbackRules(Collections.singletonList(new RollbackRuleAttribute({{txtRollbackFor}}.class)));
+        {{/if}}
+        {{#if chkNoRollbackFor}}
+        transactionAttribute.setNoRollbackRules(Collections.singletonList(new NoRollbackRuleAttribute({{txtNoRollbackFor}}.class)));
+        {{/if}}
+
+        source.setTransactionAttribute(transactionAttribute);
+        interceptor.setTransactionAttributeSource(source);
+        
+        return interceptor;
+    }
+
+    @Bean
+    public DefaultPointcutAdvisor defaultPointcutAdvisor() {
+        return new DefaultPointcutAdvisor(pointcut(), transactionInterceptor());
+    }
+    {{/if}}
+}

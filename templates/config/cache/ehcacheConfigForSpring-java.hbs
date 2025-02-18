@@ -1,0 +1,25 @@
+package egovframework.example.config;
+
+import org.springframework.cache.ehcache.EhCacheFactoryBean;
+import org.springframework.cache.ehcache.EhCacheManagerFactoryBean;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.core.io.ClassPathResource;
+
+@Configuration
+public class {{txtFileName}} {
+
+    @Bean
+    public EhCacheManagerFactoryBean ehCacheManagerFactoryBean() {
+        EhCacheManagerFactoryBean factoryBean = new EhCacheManagerFactoryBean();
+        factoryBean.setConfigLocation(new ClassPathResource("{{txtConfigLocation}}"));
+        return factoryBean;
+    }
+
+    @Bean(name = "{{txtCacheName}}")
+    public EhCacheFactoryBean ehCacheFactoryBean(EhCacheManagerFactoryBean ehCacheManagerFactoryBean) {
+        EhCacheFactoryBean cacheFactoryBean = new EhCacheFactoryBean();
+        cacheFactoryBean.setCacheManager(ehCacheManagerFactoryBean.getObject());
+        return cacheFactoryBean;
+    }
+}

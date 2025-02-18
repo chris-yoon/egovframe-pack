@@ -1,0 +1,144 @@
+{{~setVar "D" "$"~}}
+{{~setVar "voInstanceName" (concat classNameFirstCharLower "VO")~}}
+{{~setVar "listPath" (concat "/" classNameFirstCharLower "/" className "List.do")~}}
+{{~setVar "addViewPath" (concat "/" classNameFirstCharLower "/add" className "View.do")~}}
+{{~setVar "addPath" (concat "/" classNameFirstCharLower "/add" className ".do")~}}
+{{~setVar "selectPath" (concat "/" classNameFirstCharLower "/select" className ".do")~}}
+{{~setVar "updatePath" (concat "/" classNameFirstCharLower "/update" className ".do")~}}
+{{~setVar "updateViewPath" (concat "/" classNameFirstCharLower "/update" className "View.do")~}}
+{{~setVar "deletePath" (concat "/" classNameFirstCharLower "/delete" className ".do")~}}
+{{~setVar "registerPageName" (concat className "Register.jsp")~}}
+{{~setVar "selectFunctionName" (concat "fncSelect" className)~}}
+{{~setVar "addViewFunctionName" (concat "fncAdd" className "View")~}}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+
+<!-- 핸들바스에서 조건을 사용하여 등록 또는 수정 플래그 설정 -->
+{{#if (eq pkAttributes.length 0)}}
+  {{#with (empty voInstanceName.attributes.[0].ccName)}}
+    {{setVar "registerFlag" "등록" else "수정"}}
+  {{/with}}
+{{else}}
+  {{#with (empty voInstanceName.pkAttributes.[0].ccName)}}
+    {{setVar "registerFlag" "등록" else "수정"}}
+  {{/with}}
+{{/if}}
+
+<title>{{registerFlag}}</title>
+<link type="text/css" rel="stylesheet" href="/css/egovframework/sample.css"/>
+
+<script type="text/javascript">
+  /* 글 목록 화면 function */
+  function fn_egov_selectList() {
+    document.getElementById("detailForm").action = '{{listPath}}';
+    document.getElementById("detailForm").submit();		
+  }
+
+  /* 글 삭제 function */
+  function fn_egov_delete() {
+    document.getElementById("detailForm").action = '{{deletePath}}';
+    document.getElementById("detailForm").submit();		
+  }
+
+  /* 글 등록 function */
+  function fn_egov_save() {	
+    var frm = document.getElementById("detailForm");
+
+    /* TODO Validation 기능 보완 */
+    frm.action = '{{#if (eq registerFlag "등록")}}{{addPath}}{{else}}{{updatePath}}{{/if}}';
+    frm.submit();
+  }
+</script>
+</head>
+<body>
+
+<form id="detailForm" method="post">
+<div id="content_pop">
+  <!-- 타이틀 -->
+  <div id="title">
+    <ul>
+      <li><img src="/images/title_dot.gif" alt="" /> {{registerFlag}}</li>
+    </ul>
+  </div>
+  <!-- // 타이틀 -->
+  
+  <div id="table">
+    <table width="100%" border="1" cellpadding="0" cellspacing="0">
+      <colgroup>
+        <col width="150"/>
+        <col width=""/>
+      </colgroup>
+
+      {{#if (eq registerFlag "수정")}}
+        {{#if (eq pkAttributes.length 0)}}
+          {{#each pkAttributes}}
+            <tr>
+              <th>{{columnName}} *</th>
+              <td>
+                <input type="text" name="{{ccName}}" value="{{voInstanceName.ccName}}" readonly="true" class="essentiality"/>
+              </td>			
+            </tr>
+          {{/each}}	   		
+        {{else}}		
+          <tr>
+            <th>{{attributes.[0].columnName}} *</th>
+            <td>
+              <input type="text" name="{{attributes.[0].ccName}}" value="{{voInstanceName.attributes.[0].ccName}}" readonly="true" class="essentiality"/>
+            </td>			
+          </tr>
+        {{/if}}
+      {{else}}
+        {{#if (eq pkAttributes.length 0)}}
+          {{#each pkAttributes}}
+            <tr>
+              <th>{{columnName}} *</th>
+              <td>
+                <input type="text" name="{{ccName}}" class="txt" />
+              </td>			
+            </tr>
+          {{/each}}		   	
+        {{else}}		
+          <tr>
+            <th>{{attributes.[0].columnName}} *</th>
+            <td>
+              <input type="text" name="{{attributes.[0].ccName}}" class="txt"/>
+            </td>			
+          </tr>
+        {{/if}}
+      {{/if}}
+
+      {{#each attributes}}
+        {{#unless isPrimaryKey}}
+          <tr>
+            <th>{{columnName}}</th>
+            <td>
+              <input type="text" name="{{ccName}}" class="txt"/>
+              <div>{{error ccName}}</div>
+            </td>
+          </tr>	
+        {{/unless}}
+      {{/each}}
+    </table>
+  </div>
+  
+  <div id="sysbtn">
+    <ul>
+      <li><span class="btn_blue_l"><a href="javascript:fn_egov_selectList();">List</a><img src="/images/btn_bg_r.gif" alt="" /></span></li>
+      <li><span class="btn_blue_l"><a href="javascript:fn_egov_save();">{{registerFlag}}</a><img src="/images/btn_bg_r.gif" alt="" /></span></li>
+      {{#if (eq registerFlag "수정")}}
+      <li><span class="btn_blue_l"><a href="javascript:fn_egov_delete();">삭제</a><img src="/images/btn_bg_r.gif" alt="" /></span></li>
+      {{/if}}
+      <li><span class="btn_blue_l"><a href="javascript:document.detailForm.reset();">Reset</a><img src="/images/btn_bg_r.gif" alt="" /></span></li>
+    </ul>
+  </div>
+</div>
+<!-- 검색조건 유지 -->
+<input type="hidden" name="searchCondition" value="{{searchVO.searchCondition}}"/>
+<input type="hidden" name="searchKeyword" value="{{searchVO.searchKeyword}}"/>
+<input type="hidden" name="pageIndex" value="{{searchVO.pageIndex}}"/>
+</form>
+
+</body>
+</html>

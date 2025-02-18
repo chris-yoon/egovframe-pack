@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>New Cron Trigger</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: bold;
+    }
+    input[type="text"] {
+      width: 95%;
+      padding: 8px;
+      margin-bottom: 20px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    .radio-group {
+      display: inline-flex;
+      margin-bottom: 20px;
+    }
+    .radio-group label {
+      font-weight: normal;
+      margin-right: 20px;
+      display: inline-flex;
+      align-items: center;
+    }
+    button {
+      background-color: #007acc;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #005f9e;
+    }
+  </style>
+</head>
+<body>
+  <h1>Create Cron Trigger</h1>
+
+  <form id="cronTriggerForm">
+    <h2>Generation Type</h2>
+    <div class="radio-group">
+      <label for="rdoXml">
+        <input type="radio" id="rdoXml" name="generationType" value="xml" checked onchange="updateFileName()">
+        XML
+      </label>
+
+      <label for="rdoJavaConfig">
+        <input type="radio" id="rdoJavaConfig" name="generationType" value="javaConfig" onchange="updateFileName()">
+        JavaConfig
+      </label>
+    </div>
+
+    <h2>Generation File</h2>
+    <label for="txtFileName">File Name</label>
+    <input type="text" id="txtFileName" name="txtFileName" value="context-scheduling" placeholder="Enter file name" required />
+
+    <h2>Configuration</h2>
+    <label for="txtTriggerName">Trigger Name</label>
+    <input type="text" id="txtTriggerName" name="txtTriggerName" placeholder="Enter trigger name" required />
+
+    <label for="txtJobName">Job Name</label>
+    <input type="text" id="txtJobName" name="txtJobName" placeholder="Enter job name" required />
+
+    <label for="txtExpression">Cron Expression</label>
+    <input type="text" id="txtExpression" name="txtExpression" value="*/10 * * * * ?" placeholder="Enter cron expression" required />
+
+    <button type="button" onclick="submitForm()">Generate</button>
+  </form>
+
+  <script>
+    const vscode = acquireVsCodeApi();
+
+    function updateFileName() {
+      const isXmlSelected = document.getElementById('rdoXml').checked;
+      const fileNameInput = document.getElementById('txtFileName');
+
+      if (isXmlSelected) {
+        fileNameInput.value = 'context-scheduling';
+      } else {
+        fileNameInput.value = 'EgovSchedulingConfig';
+      }
+    }
+
+    function submitForm() {
+      // Prevent the form from submitting normally
+      event.preventDefault();
+
+      // Get the selected generation type
+      const generationType = document.querySelector('input[name="generationType"]:checked').value;
+      const command = generationType === 'xml' ? 'generateXml' : 'generateJavaConfigByForm';
+
+      // Get the selected radio button value for Type
+      const form = document.getElementById('cronTriggerForm');
+      const formData = {
+        txtFileName: form.txtFileName.value,
+        txtTriggerName: form.txtTriggerName.value,
+        txtJobName: form.txtJobName.value,
+        txtExpression: form.txtExpression.value
+      };
+      vscode.postMessage({
+        command: command,
+        data: formData
+      });
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>New eGovFrame Project</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: bold;
+    }
+    input[type="text"],
+    select {
+      width: 95%;
+      padding: 8px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      margin-bottom: 20px;
+    }
+    button {
+      background-color: #007acc;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #005f9e;
+    }
+  </style>
+</head>
+<body>
+  <h1>Create eGovFrame Project</h1>
+
+  <form id="projectForm">
+    <label for="template">Select Template:</label>
+    <select id="template" name="template"></select>
+    <br><br>
+
+    <label for="projectName">Project Name:</label>
+    <input type="text" id="projectName" name="projectName" required>
+    <br><br>
+
+    <label for="groupID">Group ID:</label>
+    <input type="text" id="groupID" name="groupID" required>
+    <br><br>
+
+    <button type="submit">Generate Project</button>
+  </form>
+
+  <script>
+    const vscode = acquireVsCodeApi();
+
+    document.getElementById('projectForm').onsubmit = function(e) {
+      e.preventDefault();
+
+      const templateSelect = document.getElementById("template");
+      const template = templateSelect.options[templateSelect.selectedIndex].value;
+      const projectName = document.getElementById("projectName").value;
+      const groupID = document.getElementById("groupID").value;
+
+      vscode.postMessage({
+        command: "generateProjectByForm",
+        data: {
+          template,
+          projectName,
+          groupID
+        }
+      });
+    };
+
+    // Populate template options
+    window.addEventListener('message', event => {
+      const message = event.data; 
+      const templateSelect = document.getElementById("template");
+
+      if (message.command === 'loadTemplates') {
+        const templates = message.templates;
+        templates.forEach(template => {
+          const option = document.createElement("option");
+          option.value = template.fileName;
+          option.textContent = template.displayName;
+          templateSelect.appendChild(option);
+        });
+      }
+    });
+
+    vscode.postMessage({ command: 'loadTemplates' });
+  </script>
+</body>
+</html>

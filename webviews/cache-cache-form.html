@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>New Cache</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: bold;
+    }
+    input[type="text"], select {
+      width: 95%;
+      padding: 8px;
+      margin-bottom: 20px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    .radio-group {
+      display: inline-flex;
+      margin-bottom: 20px;
+    }
+    .radio-group label {
+      font-weight: normal;
+      margin-right: 20px;
+      display: inline-flex;
+      align-items: center;
+    }
+    button {
+      background-color: #007acc;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #005f9e;
+    }
+    .page {
+      display: none;
+    }
+    .page.active {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <h1>Set Default Cache</h1>
+
+  <form id="ehcacheForm">
+    <div id="page1" class="page active">
+      <h2>Generation Type</h2>
+      <div class="radio-group">
+        <label for="rdoXml">
+          <input type="radio" id="rdoXml" name="generationType" value="xml" checked onchange="updateFileName()">
+          XML
+        </label>
+  
+        <label for="rdoJavaConfig">
+          <input type="radio" id="rdoJavaConfig" name="generationType" value="javaConfig" onchange="updateFileName()">
+          JavaConfig
+        </label>
+      </div>
+  
+        <h2>Generation File</h2>
+      <label for="txtFileName">File Name</label>
+      <input type="text" id="txtFileName" name="txtFileName" value="context-ehcache" required />
+
+      <h2>Configuration</h2>
+      <label for="txtDiskStore">Disk Store Path</label>
+      <input type="text" id="txtDiskStore" name="txtDiskStore" value="user.dir/second" required />
+
+      <label for="txtDftMaxElements">Default Cache Max Elements</label>
+      <input type="text" id="txtDftMaxElements" name="txtDftMaxElements" value="10000" required />
+
+      <label for="txtDftEternal">Default Cache Eternal</label>
+      <select id="txtDftEternal" name="txtDftEternal" required>
+        <option value="true">True</option>
+        <option value="false" selected>False</option>
+      </select>
+
+      <label for="txtDftIdelTime">Default Cache Idle Time (sec)</label>
+      <input type="text" id="txtDftIdelTime" name="txtDftIdelTime" value="120" required />
+
+      <label for="txtDftLiveTime">Default Cache Live Time (sec)</label>
+      <input type="text" id="txtDftLiveTime" name="txtDftLiveTime" value="120" required />
+
+      <label for="txtDftOverfow">Default Cache Overflow to Disk</label>
+      <select id="txtDftOverfow" name="txtDftOverfow" required>
+        <option value="true" selected>True</option>
+        <option value="false">False</option>
+      </select>
+
+      <label for="txtDftDiskPersistence">Default Cache Disk Persistent</label>
+      <select id="txtDftDiskPersistence" name="txtDftDiskPersistence" required>
+        <option value="true" selected>True</option>
+        <option value="false">False</option>
+      </select>
+
+      <label for="txtDftDiskExpiry">Default Cache Disk Expiry (sec)</label>
+      <input type="text" id="txtDftDiskExpiry" name="txtDftDiskExpiry" value="120" required />
+
+      <button type="button" onclick="showPage(2)">Next</button>
+    </div>
+
+    <div id="page2" class="page">
+      <h2>Set Custom Cache</h2>
+
+      <label for="txtCacheName">Cache Name</label>
+      <input type="text" id="txtCacheName" name="txtCacheName" placeholder="Enter cache name" required />
+
+      <label for="txtMaxElements">Max Elements</label>
+      <input type="text" id="txtMaxElements" name="txtMaxElements" value="100" required />
+
+      <label for="txtEternal">Eternal</label>
+      <select id="txtEternal" name="txtEternal" required>
+        <option value="true">True</option>
+        <option value="false" selected>False</option>
+      </select>
+
+      <label for="txtIdleTime">Idle Time (sec)</label>
+      <input type="text" id="txtIdleTime" name="txtIdleTime" value="360" required />
+
+      <label for="txtLiveTime">Live Time (sec)</label>
+      <input type="text" id="txtLiveTime" name="txtLiveTime" value="1000" required />
+
+      <label for="txtOverflowToDisk">Overflow to Disk</label>
+      <select id="txtOverflowToDisk" name="txtOverflowToDisk" required>
+        <option value="true">True</option>
+        <option value="false" selected>False</option>
+      </select>
+
+      <label for="txtDiskPersistent">Disk Persistent</label>
+      <select id="txtDiskPersistent" name="txtDiskPersistent" required>
+        <option value="true">True</option>
+        <option value="false" selected>False</option>
+      </select>
+
+      <label for="cboMemoryPolicy">Memory Store Eviction Policy</label>
+      <select id="cboMemoryPolicy" name="cboMemoryPolicy" required>
+        <option value="LRU" selected>LRU</option>
+        <option value="FIFO">FIFO</option>
+        <option value="LFU">LFU</option>
+      </select>
+
+      <button type="button" onclick="showPage(1)">Previous</button>
+      <button type="button" onclick="submitForm()">Generate</button>
+    </div>
+  </form>
+
+  <script>
+    function showPage(pageNumber) {
+      const pages = document.querySelectorAll('.page');
+      pages.forEach((page) => page.classList.remove('active'));
+      document.getElementById('page' + pageNumber).classList.add('active');
+    }
+
+    const vscode = acquireVsCodeApi();
+
+    function updateFileName() {
+      const isXmlSelected = document.getElementById('rdoXml').checked;
+      const fileNameInput = document.getElementById('txtFileName');
+
+      if (isXmlSelected) {
+        fileNameInput.value = 'context-ehcache';
+      } else {
+        fileNameInput.value = 'EgovEhcacheConfig';
+      }
+    }
+
+    function submitForm() {
+      // Prevent the form from submitting normally
+      event.preventDefault();
+
+      // Get the selected generation type
+      const generationType = document.querySelector('input[name="generationType"]:checked').value;
+      const command = generationType === 'xml' ? 'generateXml' : 'generateJavaConfigByForm';
+
+      // Get the selected radio button value for Type
+      const formData = {
+        txtFileName: document.getElementById('txtFileName').value,
+        txtDiskStore: document.getElementById('txtDiskStore').value,
+        txtDftMaxElements: document.getElementById('txtDftMaxElements').value,
+        txtDftEternal: document.getElementById('txtDftEternal').value,
+        txtDftIdelTime: document.getElementById('txtDftIdelTime').value,
+        txtDftLiveTime: document.getElementById('txtDftLiveTime').value,
+        txtDftOverfow: document.getElementById('txtDftOverfow').value,
+        txtDftDiskPersistence: document.getElementById('txtDftDiskPersistence').value,
+        txtDftDiskExpiry: document.getElementById('txtDftDiskExpiry').value,
+        txtCacheName: document.getElementById('txtCacheName').value,
+        txtMaxElements: document.getElementById('txtMaxElements').value,
+        txtEternal: document.getElementById('txtEternal').value,
+        txtIdleTime: document.getElementById('txtIdleTime').value,
+        txtLiveTime: document.getElementById('txtLiveTime').value,
+        txtOverflowToDisk: document.getElementById('txtOverflowToDisk').value,
+        txtDiskPersistent: document.getElementById('txtDiskPersistent').value,
+        cboMemoryPolicy: document.getElementById('cboMemoryPolicy').value,
+      };
+      vscode.postMessage({
+        command: command,
+        data: formData
+      });
+    }
+  </script>
+</body>
+</html>

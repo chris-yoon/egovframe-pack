@@ -1,0 +1,19 @@
+package egovframework.example.config;
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.scheduling.quartz.JobDetailBean;
+import org.springframework.scheduling.quartz.SimpleTriggerBean;
+
+@Configuration
+public class {{txtFileName}} {
+
+    @Bean(name = "{{txtTriggerName}}")
+    public SimpleTriggerBean {{txtTriggerName}}(JobDetailBean {{txtJobName}}) {
+        SimpleTriggerBean simpleTriggerBean = new SimpleTriggerBean();
+        simpleTriggerBean.setJobDetail({{txtJobName}});
+        simpleTriggerBean.setStartDelay({{txtStartDelay}});
+        simpleTriggerBean.setRepeatInterval({{txtRepeatInterval}});
+        return simpleTriggerBean;
+    }
+}

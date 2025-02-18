@@ -1,0 +1,96 @@
+{{#*inline "c3p0"}}
+package egovframework.example.config;
+
+import com.mchange.v2.c3p0.ComboPooledDataSource;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+@Configuration
+public class {{txtFileName}} {
+
+    @Bean(name = "{{txtDatasourceName}}")
+    public ComboPooledDataSource {{txtDatasourceName}}() {
+        ComboPooledDataSource dataSource = new ComboPooledDataSource();
+        
+        dataSource.setDriverClass("{{txtDriver}}");
+        dataSource.setJdbcUrl("{{txtUrl}}");
+        dataSource.setUser("{{txtUser}}");
+        
+        {{#if txtPasswd}}
+        dataSource.setPassword("{{txtPasswd}}");
+        {{/if}}
+        
+        dataSource.setInitialPoolSize(3);
+        dataSource.setMinPoolSize(3);
+        dataSource.setMaxPoolSize(50);
+        dataSource.setIdleConnectionTestPeriod(200);
+        dataSource.setAcquireIncrement(1);
+        dataSource.setMaxStatements(0);  // 0 means: statement caching is turned off
+        dataSource.setNumHelperThreads(3);  // Default is 3
+
+        return dataSource;
+    }
+}
+{{/inline}}
+{{#*inline "dbcp"}}
+package egovframework.example.config;
+
+import org.apache.commons.dbcp.BasicDataSource;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+@Configuration
+public class {{txtFileName}} {
+
+    @Bean(name = "{{txtDatasourceName}}")
+    public BasicDataSource {{txtDatasourceName}}() {
+        BasicDataSource dataSource = new BasicDataSource();
+        
+        dataSource.setDriverClassName("{{txtDriver}}");
+        dataSource.setUrl("{{txtUrl}}");
+        dataSource.setUsername("{{txtUser}}");
+        
+        {{#if txtPasswd}}
+        dataSource.setPassword("{{txtPasswd}}");
+        {{/if}}
+
+        dataSource.setDefaultAutoCommit(false);
+        dataSource.setPoolPreparedStatements(true);
+        
+        return dataSource;
+    }
+}
+{{/inline}}
+{{#*inline "jdbc"}}
+package egovframework.example.config;
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.jdbc.datasource.DriverManagerDataSource;
+
+@Configuration
+public class {{txtFileName}} {
+
+    @Bean(name = "{{txtDatasourceName}}")
+    public DriverManagerDataSource {{txtDatasourceName}}() {
+        DriverManagerDataSource dataSource = new DriverManagerDataSource();
+        
+        dataSource.setDriverClassName("{{txtDriver}}");
+        dataSource.setUrl("{{txtUrl}}");
+        dataSource.setUsername("{{txtUser}}");
+        
+        {{#if txtPasswd}}
+        dataSource.setPassword("{{txtPasswd}}");
+        {{/if}}
+
+        return dataSource;
+    }
+}
+{{/inline}}
+{{#if (eq rdoType "C3P0")}}
+    {{> c3p0}}
+{{else if (eq rdoType "DBCP")}}
+    {{> dbcp}}
+{{else}}
+    {{> jdbc}}
+{{/if}}

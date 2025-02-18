@@ -1,0 +1,41 @@
+package egovframework.example.config;
+
+import org.egovframe.rte.fdl.idgnr.impl.EgovTableIdGnrService;
+import org.egovframe.rte.fdl.idgnr.impl.strategy.EgovIdGnrStrategyImpl;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import javax.sql.DataSource;
+
+@Configuration
+public class {{txtFileName}} {
+
+    private final DataSource dataSource;
+
+    public {{txtFileName}}(DataSource dataSource) {
+        this.dataSource = dataSource;
+    }
+
+    @Bean(name = "{{txtIdServiceName}}")
+    public EgovTableIdGnrService {{txtIdServiceName}}() {
+        EgovTableIdGnrService tableIdGnrService = new EgovTableIdGnrService();
+        tableIdGnrService.setDataSource(dataSource);
+        tableIdGnrService.setTable("{{txtTableId}}");
+        tableIdGnrService.setTableName("{{txtTableName}}");
+        tableIdGnrService.setBlockSize({{txtBlockSize}});
+        {{#if chkStrategy}}
+        tableIdGnrService.setStrategy({{txtStrategyName}}());
+        {{/if}}
+        return tableIdGnrService;
+    }
+
+    {{#if chkStrategy}}
+    @Bean(name = "{{txtStrategyName}}")
+    public EgovIdGnrStrategyImpl {{txtStrategyName}}() {
+        EgovIdGnrStrategyImpl strategy = new EgovIdGnrStrategyImpl();
+        strategy.setPrefix("{{txtPrefix}}");
+        strategy.setCipers({{txtCipers}});
+        strategy.setFillChar("{{txtFillChar}}");
+        return strategy;
+    }
+    {{/if}}
+}

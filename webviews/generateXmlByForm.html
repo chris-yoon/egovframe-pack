@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>XML Generator</title>
+</head>
+<body>
+    <h1>XML Generator</h1>
+    <form id="xmlForm">
+        <label for="txtIdServiceName">Bean Name:</label>
+        <input type="text" id="txtIdServiceName" name="txtIdServiceName"><br><br>
+        
+        <label for="txtDatasourceName">Data Source Name:</label>
+        <input type="text" id="txtDatasourceName" name="txtDatasourceName"><br><br>
+        
+        <label for="txtQuery">Query:</label>
+        <input type="text" id="txtQuery" name="txtQuery"><br><br>
+        
+        <label for="rdoType">Type:</label>
+        <input type="radio" id="rdoBigDecimal" name="rdoType" value="BigDecimal">
+        <label for="rdoBigDecimal">BigDecimal</label>
+        <input type="radio" id="rdoDefault" name="rdoType" value="Default" checked>
+        <label for="rdoDefault">Default</label><br><br>
+        
+        <button type="button" onclick="submitForm()">Generate</button>
+    </form>
+    <script>
+        const vscode = acquireVsCodeApi();
+
+        function submitForm() {
+            const form = document.getElementById('xmlForm');
+            const data = {
+                txtIdServiceName: form.txtIdServiceName.value,
+                txtDatasourceName: form.txtDatasourceName.value,
+                txtQuery: form.txtQuery.value,
+                rdoType: form.rdoType.value
+            };
+            vscode.postMessage({
+                command: 'generateConfig',
+                data: data
+            });
+        }
+    </script>
+</body>
+</html>

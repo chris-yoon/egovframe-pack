@@ -1,0 +1,142 @@
+{{!-- Handlebars 템플릿 변환 --}}
+{{~setVar "controllerPackage" (concat packageName ".web")~}}
+{{~setVar "servicePackage" (concat packageName ".service")~}}
+package {{controllerPackage}};
+
+import java.util.List;
+
+import javax.annotation.Resource;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.ui.ModelMap;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.SessionAttributes;
+import org.springframework.web.bind.support.SessionStatus;
+
+import org.egovframe.rte.fdl.property.EgovPropertyService;
+import org.egovframe.rte.ptl.mvc.tags.ui.pagination.PaginationInfo;
+
+import {{servicePackage}}.{{className}}Service;
+import {{servicePackage}}.{{className}}DefaultVO;
+import {{servicePackage}}.{{className}}VO;
+
+/**
+ * @Class Name : {{className}}Controller.java
+ * @Description : {{className}} Controller class
+ * @Modification Information
+ *
+ * @author {{author}}
+ * @since {{date}}
+ * @version {{version}}
+ * @see
+ *  
+ *  Copyright (C)  All right reserved.
+ */
+
+@Controller
+@SessionAttributes(types={{className}}VO.class)
+public class {{className}}Controller {
+
+    @Resource(name = "{{classNameFirstCharLower}}Service")
+    private {{className}}Service {{classNameFirstCharLower}}Service;
+    
+    /** EgovPropertyService */
+    @Resource(name = "propertiesService")
+    protected EgovPropertyService propertiesService;
+	
+    /**
+	 * {{tableName}} 목록을 조회한다. (paging)
+	 * @param searchVO - 조회할 정보가 담긴 {{className}}DefaultVO
+	 * @return "/{{classNameFirstCharLower}}/{{className}}List"
+	 * @exception Exception
+	 */
+    @RequestMapping(value="/{{classNameFirstCharLower}}/{{className}}List.do")
+    public String select{{className}}List(@ModelAttribute("searchVO") {{className}}DefaultVO searchVO, ModelMap model)
+        throws Exception {
+    	
+    	/** EgovPropertyService.sample */
+    	searchVO.setPageUnit(propertiesService.getInt("pageUnit"));
+    	searchVO.setPageSize(propertiesService.getInt("pageSize"));
+    	
+    	/** paging */
+      PaginationInfo paginationInfo = new PaginationInfo();
+      paginationInfo.setCurrentPageNo(searchVO.getPageIndex());
+      paginationInfo.setRecordCountPerPage(searchVO.getPageUnit());
+      paginationInfo.setPageSize(searchVO.getPageSize());
+		
+      searchVO.setFirstIndex(paginationInfo.getFirstRecordIndex());
+      searchVO.setLastIndex(paginationInfo.getLastRecordIndex());
+      searchVO.setRecordCountPerPage(paginationInfo.getRecordCountPerPage());
+		
+      List<?> {{classNameFirstCharLower}}List = {{classNameFirstCharLower}}Service.select{{className}}List(searchVO);
+      model.addAttribute("resultList", {{classNameFirstCharLower}}List);
+        
+      int totCnt = {{classNameFirstCharLower}}Service.select{{className}}ListTotCnt(searchVO);
+      paginationInfo.setTotalRecordCount(totCnt);
+      model.addAttribute("paginationInfo", paginationInfo);
+        
+      return "/{{classNameFirstCharLower}}/{{className}}List";
+    } 
+    
+    @RequestMapping("/{{classNameFirstCharLower}}/add{{className}}View.do")
+    public String add{{className}}View(
+            @ModelAttribute("searchVO") {{className}}DefaultVO searchVO, Model model)
+            throws Exception {
+        model.addAttribute("{{classNameFirstCharLower}}VO", new {{className}}VO());
+        return "/{{classNameFirstCharLower}}/{{className}}Register";
+    }
+    
+    @RequestMapping("/{{classNameFirstCharLower}}/add{{className}}.do")
+    public String add{{className}}(
+            {{className}}VO {{classNameFirstCharLower}}VO,
+            @ModelAttribute("searchVO") {{className}}DefaultVO searchVO, SessionStatus status)
+            throws Exception {
+        {{classNameFirstCharLower}}Service.insert{{className}}({{classNameFirstCharLower}}VO);
+        status.setComplete();
+        return "forward:/{{classNameFirstCharLower}}/{{className}}List.do";
+    }
+    
+    @RequestMapping("/{{classNameFirstCharLower}}/update{{className}}View.do")
+    public String update{{className}}View(
+            @RequestParam("nttId") java.math.BigDecimal nttId ,
+            @ModelAttribute("searchVO") {{className}}DefaultVO searchVO, Model model)
+            throws Exception {
+        {{className}}VO {{classNameFirstCharLower}}VO = new {{className}}VO();
+        {{classNameFirstCharLower}}VO.setNttId(nttId);        
+        // 변수명은 CoC 에 따라 {{classNameFirstCharLower}}VO
+        model.addAttribute(select{{className}}({{classNameFirstCharLower}}VO, searchVO));
+        return "/{{classNameFirstCharLower}}/{{className}}Register";
+    }
+
+    @RequestMapping("/{{classNameFirstCharLower}}/select{{className}}.do")
+    public @ModelAttribute("{{classNameFirstCharLower}}VO")
+    {{className}}VO select{{className}}(
+            {{className}}VO {{classNameFirstCharLower}}VO,
+            @ModelAttribute("searchVO") {{className}}DefaultVO searchVO) throws Exception {
+        return {{classNameFirstCharLower}}Service.select{{className}}({{classNameFirstCharLower}}VO);
+    }
+
+    @RequestMapping("/{{classNameFirstCharLower}}/update{{className}}.do")
+    public String update{{className}}(
+            {{className}}VO {{classNameFirstCharLower}}VO,
+            @ModelAttribute("searchVO") {{className}}DefaultVO searchVO, SessionStatus status)
+            throws Exception {
+        {{classNameFirstCharLower}}Service.update{{className}}({{classNameFirstCharLower}}VO);
+        status.setComplete();
+        return "forward:/{{classNameFirstCharLower}}/{{className}}List.do";
+    }
+    
+    @RequestMapping("/{{classNameFirstCharLower}}/delete{{className}}.do")
+    public String delete{{className}}(
+            {{className}}VO {{classNameFirstCharLower}}VO,
+            @ModelAttribute("searchVO") {{className}}DefaultVO searchVO, SessionStatus status)
+            throws Exception {
+        {{classNameFirstCharLower}}Service.delete{{className}}({{classNameFirstCharLower}}VO);
+        status.setComplete();
+        return "forward:/{{classNameFirstCharLower}}/{{className}}List.do";
+    }
+
+}

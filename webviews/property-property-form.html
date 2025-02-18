@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>New Property</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: bold;
+    }
+    input[type="text"],
+    select {
+      width: 95%;
+      padding: 8px;
+      margin-bottom: 20px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    .conditional {
+      display: none;
+    }
+    .radio-group {
+      display: inline-flex;
+      margin-bottom: 20px;
+    }
+    .radio-group label {
+      font-weight: normal;
+      margin-right: 20px;
+      display: inline-flex;
+      align-items: center;
+    }
+    button {
+      background-color: #007acc;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #005f9e;
+    }
+  </style>
+</head>
+<body>
+  <h1>Create Property</h1>
+
+  <form id="springBeanForm">
+    <h2>Generation Type</h2>
+    <div class="radio-group">
+      <label for="rdoXml">
+        <input type="radio" id="rdoXml" name="generationType" value="xml" checked onchange="updateFileName()">
+        XML
+      </label>
+
+      <label for="rdoJavaConfig">
+        <input type="radio" id="rdoJavaConfig" name="generationType" value="javaConfig" onchange="updateFileName()">
+        JavaConfig
+      </label>
+    </div>
+
+    <h2>Generation File</h2>
+    <label for="txtFileName">File Name</label>
+    <input type="text" id="txtFileName" name="txtFileName" value="context-properties" placeholder="Enter file name" required />
+
+    <h2>Configuration</h2>
+    <label for="txtPropertyServiceName">Property Service Name</label>
+    <input type="text" id="txtPropertyServiceName" name="txtPropertyServiceName" placeholder="Enter property service name" required />
+
+    <label for="rdoType">Type</label>
+    <label>
+      <input type="radio" id="rdoTypeInternal" name="rdoType" value="Internal Properties" checked />
+      Internal Properties
+    </label>
+    <label>
+      <input type="radio" id="rdoTypeExternal" name="rdoType" value="External File" />
+      External File
+    </label>
+
+    <!-- Internal Properties Section -->
+    <div id="internalPropertiesSection" class="conditional">
+      <label for="txtKey">Key</label>
+      <input type="text" id="txtKey" name="txtKey" placeholder="Enter key" />
+
+      <label for="txtValue">Value</label>
+      <input type="text" id="txtValue" name="txtValue" placeholder="Enter value" />
+    </div>
+
+    <!-- External File Section -->
+    <div id="externalFileSection" class="conditional">
+      <label for="cboEncoding">Encoding</label>
+      <select id="cboEncoding" name="cboEncoding">
+        <option value="UTF-8">UTF-8</option>
+        <option value="ISO-8859-1">ISO-8859-1</option>
+        <option value="Windows-1252">Windows-1252</option>
+      </select>
+
+      <label for="txtPropertyFile">Property File Name</label>
+      <input type="text" id="txtPropertyFile" name="txtPropertyFile" value="classpath*:" placeholder="Enter property file name" />
+    </div>
+
+    <button type="button" onclick="submitForm()">Generate</button>
+  </form>
+
+  <script>
+    const vscode = acquireVsCodeApi();
+
+    function toggleSections() {
+      const rdoType = document.querySelector('input[name="rdoType"]:checked').value;
+      const internalSection = document.getElementById('internalPropertiesSection');
+      const externalSection = document.getElementById('externalFileSection');
+
+      if (rdoType === 'Internal Properties') {
+        internalSection.style.display = 'block';
+        externalSection.style.display = 'none';
+      } else {
+        internalSection.style.display = 'none';
+        externalSection.style.display = 'block';
+      }
+    }
+
+    // Set up event listeners for radio buttons
+    document.getElementById('rdoTypeInternal').addEventListener('change', toggleSections);
+    document.getElementById('rdoTypeExternal').addEventListener('change', toggleSections);
+
+    // Initialize the form with the correct sections visible
+    toggleSections();
+    function updateFileName() {
+      const isXmlSelected = document.getElementById('rdoXml').checked;
+      const fileNameInput = document.getElementById('txtFileName');
+
+      if (isXmlSelected) {
+        fileNameInput.value = 'context-properties';
+      } else {
+        fileNameInput.value = 'EgovPropertiesConfig';
+      }
+    }
+
+    function submitForm() {
+      // Prevent the form from submitting normally
+      event.preventDefault();
+
+      // Get the selected generation type
+      const generationType = document.querySelector('input[name="generationType"]:checked').value;
+      const command = generationType === 'xml' ? 'generateXml' : 'generateJavaConfigByForm';
+
+      const rdoType = document.querySelector('input[name="rdoType"]:checked').value;
+
+      const form = document.getElementById('springBeanForm');
+      const formData = {
+        txtFileName: form.txtFileName.value,
+        txtPropertyServiceName: form.txtPropertyServiceName.value,
+        rdoType: rdoType,
+        txtKey: form.txtKey.value,
+        txtValue: form.txtValue.value,
+        cboEncoding: form.cboEncoding.value,
+        txtPropertyFile: form.txtPropertyFile.value
+      };
+      vscode.postMessage({
+        command: command,
+        data: formData
+      });
+    }
+  </script>
+</body>
+</html>

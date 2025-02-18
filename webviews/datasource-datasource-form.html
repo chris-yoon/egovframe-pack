@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>New DataSource</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: bold;
+    }
+    input[type="text"], input[type="password"], select {
+      width: 95%;
+      padding: 8px;
+      margin-bottom: 20px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    .radio-group {
+      display: inline-flex;
+      margin-bottom: 20px;
+    }
+    .radio-group label {
+      font-weight: normal;
+      margin-right: 20px;
+      display: inline-flex;
+      align-items: center;
+    }
+    button {
+      background-color: #007acc;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #005f9e;
+    }
+  </style>
+</head>
+<body>
+  <h1>Create DataSource</h1>
+
+  <form id="dataSourceForm">
+    <h2>Generation Type</h2>
+    <div class="radio-group">
+      <label for="rdoXml">
+        <input type="radio" id="rdoXml" name="generationType" value="xml" checked onchange="updateFileName()">
+        XML
+      </label>
+  
+      <label for="rdoJavaConfig">
+        <input type="radio" id="rdoJavaConfig" name="generationType" value="javaConfig" onchange="updateFileName()">
+        JavaConfig
+      </label>
+    </div>
+
+    <h2>Generation File</h2>
+    <label for="txtFileName">File Name</label>
+    <input type="text" id="txtFileName" name="txtFileName" value="context-datasource" placeholder="Enter file name" required />
+
+    <h2>Configuration</h2>
+
+    <label for="txtDatasourceName">DataSource Name</label>
+    <input type="text" id="txtDatasourceName" name="txtDatasourceName" placeholder="Enter datasource name" required />
+
+    <label for="rdoType">Driver Type</label>
+    <select id="rdoType" name="rdoType" required>
+      <option value="C3P0" selected>C3P0</option>
+      <option value="DBCP">DBCP</option>
+      <option value="JDBC">JDBC</option>
+    </select>
+
+    <label for="txtDriver">Driver</label>
+    <input type="text" id="txtDriver" name="txtDriver" placeholder="Enter driver class name" required />
+
+    <label for="txtUrl">URL</label>
+    <input type="text" id="txtUrl" name="txtUrl" placeholder="Enter database URL" required />
+
+    <label for="txtUser">User</label>
+    <input type="text" id="txtUser" name="txtUser" placeholder="Enter username" required />
+
+    <label for="txtPasswd">Password</label>
+    <input type="password" id="txtPasswd" name="txtPasswd" placeholder="Enter password" />
+
+    <button type="submit">Generate</button>
+  </form>
+
+  <script>
+    const vscode = acquireVsCodeApi();
+
+    function updateFileName() {
+      const isXmlSelected = document.getElementById('rdoXml').checked;
+      const fileNameInput = document.getElementById('txtFileName');
+
+      if (isXmlSelected) {
+        fileNameInput.value = 'context-datasource';
+      } else {
+        fileNameInput.value = 'EgovDataSourceConfig';
+      }
+    }
+
+    document.getElementById('dataSourceForm').addEventListener('submit', function(event) {
+      event.preventDefault();
+
+      // Get the selected generation type
+      const generationType = document.querySelector('input[name="generationType"]:checked').value;
+      const command = generationType === 'xml' ? 'generateXml' : 'generateJavaConfigByForm';
+
+      const formData = {
+        txtFileName: document.getElementById('txtFileName').value,
+        txtDatasourceName: document.getElementById('txtDatasourceName').value,
+        rdoType: document.getElementById('rdoType').value,
+        txtDriver: document.getElementById('txtDriver').value,
+        txtUrl: document.getElementById('txtUrl').value,
+        txtUser: document.getElementById('txtUser').value,
+        txtPasswd: document.getElementById('txtPasswd').value,
+      };
+
+      vscode.postMessage({
+        command: command,
+        data: formData
+      });
+    });
+  </script>
+</body>
+</html>

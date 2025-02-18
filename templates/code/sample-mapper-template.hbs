@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="{{namespace}}">
+  
+  <resultMap id="{{resultMapId}}" type="{{resultMapType}}">
+  {{#each attributes}}
+    <result property="{{ccName}}" column="{{columnName}}" />
+  {{/each}}
+  </resultMap>
+  
+  <insert id="insert{{tableName}}">
+    <![CDATA[
+      INSERT INTO {{tableName}} 
+      (
+{{#each attributes}}
+        {{#if @first}}{{columnName}}{{else}}, {{columnName}}{{/if}}
+{{/each}}
+      )
+      VALUES (
+{{#each attributes}}
+        {{#if @first}}#{{{ccName}}}{{else}}, #{{{ccName}}}{{/if}}
+{{/each}}
+      )
+    ]]>
+  </insert>  
+
+  <update id="update{{tableName}}">
+    <![CDATA[
+      UPDATE {{tableName}}
+      SET
+{{#each attributes}}
+        {{#if @first}}{{columnName}} = #{{{ccName}}}{{else}}, {{columnName}} = #{{{ccName}}}{{/if}}
+{{/each}}
+      WHERE 
+{{#each pkAttributes}}
+        {{#if @first}}{{columnName}} = #{{{ccName}}}{{else}} AND {{columnName}} = #{{{ccName}}}{{/if}}
+{{/each}}
+    ]]>
+  </update>
+
+  <select id="select{{tableName}}" resultMap="{{resultMapId}}">
+    <![CDATA[
+      SELECT
+{{#each attributes}}
+        {{#if @first}}{{columnName}}{{else}}, {{columnName}}{{/if}}
+{{/each}}
+      FROM {{tableName}}
+      WHERE 
+{{#each pkAttributes}}
+        {{#if @first}}{{columnName}} = #{{{ccName}}}{{else}} AND {{columnName}} = #{{{ccName}}}{{/if}}
+{{/each}}
+    ]]>
+  </select>
+
+  <select id="select{{tableName}}List" resultMap="{{resultMapId}}">
+    <![CDATA[
+      SELECT
+{{#each attributes}}
+        {{#if @first}}{{columnName}}{{else}}, {{columnName}}{{/if}}
+{{/each}}
+      FROM {{tableName}}
+      WHERE 1=1
+      <if test="searchKeyword != null and searchKeyword != ''">
+        <if test="searchCondition == 0">
+          AND {{pkAttributes.[0].columnName}} = #{{{searchKeyword}}}
+        </if>
+        <if test="searchCondition == 1">
+          AND {{attributes.[0].columnName}} LIKE CONCAT('%', #{{{searchKeyword}}}, '%')
+        </if>
+      </if>
+      ORDER BY {{sortOrder}}
+      LIMIT #{{{recordCountPerPage}}} OFFSET #{{{firstIndex}}}
+    ]]>
+  </select>
+
+  <select id="select{{tableName}}ListTotCnt" resultType="int">
+    <![CDATA[
+      SELECT COUNT(*)
+      FROM {{tableName}}
+      WHERE 1=1
+      <if test="searchKeyword != null and searchKeyword != ''">
+        <if test="searchCondition == 0">
+          AND {{pkAttributes.[0].columnName}} = #{{{searchKeyword}}}
+        </if>
+        <if test="searchCondition == 1">
+          AND {{attributes.[0].columnName}} LIKE CONCAT('%', #{{{searchKeyword}}}, '%')
+        </if>
+      </if>
+    ]]>
+  </select>
+</mapper>

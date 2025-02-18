@@ -1,0 +1,127 @@
+{{!-- Set variables --}}
+{{~setVar "D" "$"~}}
+{{~setVar "Q" '"'~}}
+{{!-- Define paths --}}
+{{~setVar "listPath" (concat "/" classNameFirstCharLower "/" className "List.do")~}}
+{{~setVar "addViewPath" (concat "/" classNameFirstCharLower "/add" className "View.do")~}}
+{{~setVar "addPath" (concat "/" classNameFirstCharLower "/add" className ".do")~}}
+{{~setVar "selectPath" (concat "/" classNameFirstCharLower "/select" className ".do")~}}
+{{~setVar "updatePath" (concat "/" classNameFirstCharLower "/update" className ".do")~}}
+{{~setVar "updateViewPath" (concat "/" classNameFirstCharLower "/update" className "View.do")~}}
+{{~setVar "deletePath" (concat "/" classNameFirstCharLower "/delete" className ".do")~}}
+{{!-- Define list page and functions --}}
+{{~setVar "listPageName" (concat className "List.html")~}}
+{{~setVar "selectFunctionName" (concat "fncSelect" className)~}}
+{{~setVar "addViewFunctionName" (concat "fncAdd" className "View")~}}
+<!DOCTYPE html>
+<html xmlns="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>목록</title>
+    <link rel="stylesheet" href="/css/egovframework/sample.css" />
+    <script type="text/javascript">
+        /* 글 수정 화면 function */
+
+        function fn_egov_select({{#if pkAttributes.length}}{{#each pkAttributes}}{{this.ccName}}{{#if @last}}{{else}},{{/if}}{{/each}}{{else}}{{attributes.[0].ccName}}{{/if}}) {
+            {{#if pkAttributes.length}}
+                {{#each pkAttributes}}
+                document.getElementById("listForm").{{this.ccName}}.value = {{this.ccName}};
+                {{/each}}
+            {{else}}
+                document.getElementById("listForm").{{attributes.[0].ccName}}.value = {{attributes.[0].ccName}};
+            {{/if}}
+            document.getElementById("listForm").action = "{{updateViewPath}}";
+            document.getElementById("listForm").submit();
+        }
+
+        /* 글 등록 화면 function */
+        function fn_egov_addView() {
+            document.getElementById("listForm").action = "{{addViewPath}}";
+            document.getElementById("listForm").submit();
+        }
+
+        /* pagination 페이지 링크 function */
+        function fn_egov_link_page(pageNo){
+            document.getElementById("listForm").pageIndex.value = pageNo;
+            document.getElementById("listForm").action = '{{listPath}}';
+            document.getElementById("listForm").submit();
+        }
+    </script>
+</head>
+<body>
+<form id="listForm" method="post">
+    {{#if pkAttributes.length}}
+        {{#each pkAttributes}}
+        <input type="hidden" name="{{this.ccName}}" />
+        {{/each}}
+    {{else}}
+        <input type="hidden" name="{{attributes.[0].ccName}}" />
+    {{/if}}
+    <div id="content_pop">
+        <!-- 타이틀 -->
+        <div id="title">
+            <ul>
+                <li><img src="/images/egovframework/example/title_dot.gif" alt="title" /> List </li>
+            </ul>
+        </div>
+        <!-- // 타이틀 -->
+        <!-- List -->
+        <div id="table">
+            <table width="100%" border="0" cellpadding="0" cellspacing="0">
+                <colgroup>
+                    {{#each attributes}}            
+                    <col/>                
+                    {{/each}}                
+                </colgroup>      
+                <tr>
+                    {{#each attributes}}
+                    <th align="center">{{this.pcName}}</th>
+                    {{/each}}           
+                </tr>
+                {{#each resultList}}
+                <tr>
+                    {{#if ../pkAttributes.length}}
+                        {{#setLinkParams ../pkAttributes this}}
+                        {{/setLinkParams}}
+                        {{#each ../attributes}}
+                            {{#if this.isPrimaryKey}}               
+                            <td align="center" class="listtd"><a href="javascript:fn_egov_select({{../linkParams}})">{{this.ccName}}</a>&nbsp;</td>
+                            {{else}}
+                            <td align="center" class="listtd">{{this.ccName}}&nbsp;</td>
+                            {{/if}}
+                        {{/each}}
+                    {{else}}
+                        <td align="center" class="listtd"><a href="javascript:fn_egov_select({{attributes.[0].ccName}})">{{attributes.[0].ccName}}</a>&nbsp;</td>
+                        {{#each ../attributes}}
+                        <td align="center" class="listtd">{{this.ccName}}&nbsp;</td>
+                        {{/each}}
+                    {{/if}}
+                </tr>
+                {{/each}}
+            </table>
+        </div>
+        <!-- /List -->
+        <div id="paging">
+            <ul>
+                {{#each paginationInfo}}
+                <li>
+                    <a href="javascript:void(0);" onclick="fn_egov_link_page({{this}})">{{this}}</a>
+                </li>
+                {{/each}}
+            </ul>
+            <input type="hidden" name="pageIndex" value="{{pageIndex}}" />
+        </div>
+        <div id="sysbtn1">
+            <ul>
+                <li>
+                    <div id="sysbtn">
+                        <span class="btn_blue_l"><a href="javascript:fn_egov_addView();">등록</a><img src="/images/egovframework/example/btn_bg_r.gif" alt="" />
+                        </span>
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </div>
+</form>
+</body>
+</html>
