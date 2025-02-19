@@ -32,6 +32,7 @@ const path = __importStar(require("path"));
 // 데이터베이스의 다양한 데이터 타입을 Java의 데이터 타입으로 매핑하는 기능을 제공하는 클래스
 class DatabaseDefinition {
     predefinedDataTypes;
+    // 생성자에서 데이터베이스 데이터 타입과 Java 데이터 타입의 매핑을 정의한다.
     constructor() {
         this.predefinedDataTypes = {
             'VARCHAR': 'java.lang.String',
@@ -105,15 +106,20 @@ async function showFileList(files) {
 function activate(context) {
     // generateCode 명령: 사용자가 DDL을 입력하면, 이를 파싱하여 템플릿 파일을 렌더링하고 파일을 생성한다.
     let generateCodeDisposable = vscode.commands.registerCommand('extension.generateCode', async () => {
+        // 현재 활성화된 텍스트 에디터를 가져온다.
         const editor = vscode.window.activeTextEditor;
+        // 선택된 텍스트를 DDL로 사용한다.
         let ddl = editor?.document.getText(editor.selection);
+        // DDL이 선택되지 않은 경우, Webview를 통해 입력받는다.
         if (!ddl) {
             ddl = await showDDLInputWebview(context);
+            // Webview를 통해 입력받은 DDL이 없으면 오류 메시지를 표시하고 종료한다.
             if (!ddl) {
                 vscode.window.showErrorMessage('No DDL statement provided.');
                 return;
             }
         }
+        // 사용자에게 생성된 파일을 저장할 폴더를 선택하도록 요청한다.
         const selectedFolder = await vscode.window.showOpenDialog({
             title: 'Select Folder to Save Generated Files',
             canSelectFolders: true,
@@ -121,14 +127,20 @@ function activate(context) {
             canSelectMany: false,
             openLabel: 'Select Folder'
         });
+        // 선택된 폴더가 없으면 오류 메시지를 표시하고 종료한다.
         if (!selectedFolder || selectedFolder.length === 0) {
             vscode.window.showErrorMessage('No folder selected.');
             return;
         }
+        // 선택된 폴더의 경로를 가져온다.
         const folderPath = selectedFolder[0].fsPath;
+        // src/main/java 경로를 생성한다.
         const baseJavaPath = path.join(folderPath, 'src', 'main', 'java');
+        // 기본 패키지 이름을 가져온다.
         const defaultPackageName = vscode.workspace.getConfiguration('egovframeInitializr').get('defaultPackageName', 'egovframework.example.sample');
+        // 패키지 경로를 생성한다.
         const packagePath = defaultPackageName.replace(/\./g, path.sep);
+        // 생성된 파일을 저장할 경로로 초기화한다.
         let targetPackagePath = folderPath;
         let targetMapperPath = folderPath;
         let targetJspPath = folderPath;
@@ -136,6 +148,7 @@ function activate(context) {
         let targetControllerPath = folderPath;
         let targetServicePath = folderPath;
         let targetServiceImplPath = folderPath;
+        // 선택된 폴더에 src/main/java가 있는지 확인하고, 있다면 해당 경로를 사용한다.
         if (await fs.pathExists(baseJavaPath)) {
             targetPackagePath = path.join(baseJavaPath, packagePath);
             targetMapperPath = path.join(folderPath, 'src', 'main', 'resources', 'mappers');
@@ -152,6 +165,7 @@ function activate(context) {
             await fs.ensureDir(targetServicePath);
             await fs.ensureDir(targetServiceImplPath);
         }
+        // 템플릿 파일의 경로를 정의한다.
         const templateFilePaths = {
             mapperTemplateFilePath: vscode.Uri.joinPath(context.extensionUri, 'templates', 'code', 'sample-mapper-template.hbs').fsPath,
             jspListTemplateFilePath: vscode.Uri.joinPath(context.extensionUri, 'templates', 'code', 'sample-jsp-list.hbs').fsPath,
@@ -166,8 +180,11 @@ function activate(context) {
             mapperInterfaceTemplateFilePath: vscode.Uri.joinPath(context.extensionUri, 'templates', 'code', 'sample-mapper-interface-template.hbs').fsPath,
             daoTemplateFilePath: vscode.Uri.joinPath(context.extensionUri, 'templates', 'code', 'sample-dao-template.hbs').fsPath
         };
+        // DDL을 파싱하고, 템플릿 파일을 렌더링한다.
         try {
+            // DDL을 파싱한다.
             const { tableName, attributes, pkAttributes } = parseDDL(ddl);
+            // 렌더링된 템플릿 파일의 내용을 저장한다.
             const fileContents = {
                 [`${tableName}_Mapper.xml`]: await renderTemplate(templateFilePaths.mapperTemplateFilePath, getTemplateContext(tableName, attributes, pkAttributes)),
                 [`${tableName}List.jsp`]: await renderTemplate(templateFilePaths.jspListTemplateFilePath, getTemplateContext(tableName, attributes, pkAttributes)),
@@ -182,11 +199,14 @@ function activate(context) {
                 [`${tableName}Mapper.java`]: await renderTemplate(templateFilePaths.mapperInterfaceTemplateFilePath, getTemplateContext(tableName, attributes, pkAttributes)),
                 [`${tableName}DAO.java`]: await renderTemplate(templateFilePaths.daoTemplateFilePath, getTemplateContext(tableName, attributes, pkAttributes))
             };
+            // 파일 생성을 선택하는 다이얼로그를 표시한다.
             const filesToGenerate = Object.keys(fileContents).map(fileName => ({
                 filePath: getFilePathForOutput(folderPath, tableName, fileName),
                 content: fileContents[fileName],
             }));
+            // 생성할 파일목록을 보여주고 선택한 파일을 반환한다.
             const selectedFilePaths = await showFileList(filesToGenerate);
+            // 선택된 파일을 생성한다.
             for (const file of filesToGenerate) {
                 if (selectedFilePaths.includes(file.filePath)) {
                     await fs.outputFile(file.filePath, file.content);
@@ -200,6 +220,7 @@ function activate(context) {
     });
     context.subscriptions.push(generateCodeDisposable);
 }
+// getFilePathForOutput 함수는 생성된 파일의 경로를 반환한다.
 function getFilePathForOutput(folderPath, tableName, fileName) {
     const baseJavaPath = path.join(folderPath, 'src', 'main', 'java');
     const defaultPackageName = vscode.workspace.getConfiguration('egovframeInitializr').get('defaultPackageName', 'egovframework.example.sample');

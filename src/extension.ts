@@ -15,6 +15,24 @@ export function activate(context: vscode.ExtensionContext) {
   activateGenerateProjectByForm(context);
   activategenerateCodeContainer(context);
   activategenerateProjectContainer(context);
+
+  context.subscriptions.push(
+    vscode.commands.registerCommand('extension.openPackageSettings', async () => {
+      const config = vscode.workspace.getConfiguration('egovframeInitializr');
+      const currentValue = config.get<string>('defaultPackageName', 'egovframework.example.sample');
+      
+      const newValue = await vscode.window.showInputBox({
+        prompt: 'Enter default package name',
+        placeHolder: 'e.g., egovframework.example.sample',
+        value: currentValue
+      });
+
+      if (newValue !== undefined) {
+        await config.update('defaultPackageName', newValue, vscode.ConfigurationTarget.Global);
+        vscode.window.showInformationMessage(`Default package name updated to: ${newValue}`);
+      }
+    })
+  );
 }
 
 export function deactivate() {}

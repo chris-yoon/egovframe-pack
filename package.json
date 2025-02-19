@@ -4,6 +4,7 @@
   "description": "Generate eGovFrame code from DDL and project from templates",
   "version": "0.1.0",
   "publisher": "egovframework",
+  "enabledApiProposals": ["contribViewContainerTitle"],
   "engines": {
     "vscode": "^1.75.0"
   },
@@ -60,6 +61,11 @@
         "command": "extension.insertSampleDDL",
         "title": "Insert Sample DDL",
         "icon": "$(code)"
+      },
+      {
+        "command": "extension.openPackageSettings",
+        "title": "Package Settings",
+        "icon": "$(gear)"
       }
     ],
     "menus": {
@@ -111,6 +117,11 @@
         },
         {
           "command": "extension.insertSampleDDL",
+          "when": "view == egovframeCodeView",
+          "group": "navigation"
+        },
+        {
+          "command": "extension.openPackageSettings",
           "when": "view == egovframeCodeView",
           "group": "navigation"
         }
@@ -195,10 +206,15 @@
     "typescript": "^5.4.5"
   },
   "dependencies": {
+    "@types/oracledb": "^6.5.3",
+    "@types/pg": "^8.11.11",
     "extract-zip": "^2.0.1",
     "fs-extra": "^11.2.0",
     "handlebars": "^4.7.8",
     "handlebars-helpers": "^0.10.0",
+    "mysql2": "^3.12.0",
+    "oracledb": "^6.7.2",
+    "pg": "^8.13.3",
     "yauzl": "^3.1.3"
   }
 }
