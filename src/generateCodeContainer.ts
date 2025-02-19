@@ -5,6 +5,7 @@ import {
   getFilePathForOutput,
   getTemplateContext,
   renderTemplate,
+  showFileList,
   registerHandlebarsHelpers
 } from './utils/codeGeneratorUtils';
 import { parseDDL } from './utils/ddlParser';
@@ -56,7 +57,7 @@ class MyWebviewViewProvider implements vscode.WebviewViewProvider {
 
       switch (message.command) {
         case 'generateCode':
-          await this.generateCode(ddl);
+          await this.generateCode(ddl, this.context);
           break;
         case 'uploadTemplates':
           await this.uploadTemplates(ddl);
@@ -196,7 +197,8 @@ class MyWebviewViewProvider implements vscode.WebviewViewProvider {
 `;
   }
 
-  private async generateCode(ddl: string) {
+  private async generateCode(ddl: string, context: vscode.ExtensionContext) {
+    // 사용자에게 생성된 파일을 저장할 폴더를 선택하도록 한다.
     const selectedFolder = await vscode.window.showOpenDialog({
       title: 'Select Folder to Save Generated Files',
       canSelectFolders: true,
@@ -205,44 +207,104 @@ class MyWebviewViewProvider implements vscode.WebviewViewProvider {
       openLabel: 'Select Folder'
     });
 
+    // 선택된 폴더가 없으면 오류 메시지를 표시하고 종료한다.
     if (!selectedFolder || selectedFolder.length === 0) {
       vscode.window.showErrorMessage('No folder selected.');
       return;
     }
 
+    // 선택된 폴더의 경로를 가져온다.
     const folderPath = selectedFolder[0].fsPath;
+    // src/main/java 경로를 생성한다.
+    const baseJavaPath = path.join(folderPath, 'src', 'main', 'java');
+    // 기본 패키지 이름을 가져온다.
+    const defaultPackageName = vscode.workspace.getConfiguration('egovframeInitializr').get<string>('defaultPackageName', 'egovframework.example.sample');
+    // 패키지 경로를 생성한다.
+    const packagePath = defaultPackageName.replace(/\./g, path.sep);
 
+    // 생성된 파일을 저장할 경로로 초기화한다.
+    let targetPackagePath = folderPath;
+    let targetMapperPath = folderPath;
+    let targetJspPath = folderPath;
+    let targetThymeleafPath = folderPath;
+    let targetControllerPath = folderPath;
+    let targetServicePath = folderPath;
+    let targetServiceImplPath = folderPath;
+
+    // 선택된 폴더에 src/main/java가 있는지 확인하고, 있다면 해당 경로를 사용한다.
+    if (await fs.pathExists(baseJavaPath)) {
+      targetPackagePath = path.join(baseJavaPath, packagePath);
+      targetMapperPath = path.join(folderPath, 'src', 'main', 'resources', 'mappers');
+      targetJspPath = path.join(folderPath, 'src', 'main', 'webapp', 'views');
+      targetThymeleafPath = path.join(folderPath, 'src', 'main', 'resources', 'templates', 'thymeleaf');
+      targetControllerPath = path.join(baseJavaPath, packagePath, 'web');
+      targetServicePath = path.join(baseJavaPath, packagePath, 'service');
+      targetServiceImplPath = path.join(baseJavaPath, packagePath, 'service', 'impl');
+      await fs.ensureDir(targetPackagePath);
+      await fs.ensureDir(targetMapperPath);
+      await fs.ensureDir(targetJspPath);
+      await fs.ensureDir(targetThymeleafPath);
+      await fs.ensureDir(targetControllerPath);
+      await fs.ensureDir(targetServicePath);
+      await fs.ensureDir(targetServiceImplPath);
+    }
+
+    // 템플릿 파일의 경로를 정의한다.
+    const templateFilePaths = {
+      mapperTemplateFilePath: vscode.Uri.joinPath(context.extensionUri, 'templates', 'code', 'sample-mapper-template.hbs').fsPath,
+      jspListTemplateFilePath: vscode.Uri.joinPath(context.extensionUri, 'templates', 'code', 'sample-jsp-list.hbs').fsPath,
+      jspRegisterTemplateFilePath: vscode.Uri.joinPath(context.extensionUri, 'templates', 'code', 'sample-jsp-register.hbs').fsPath,
+      thymeleafListTemplateFilePath: vscode.Uri.joinPath(context.extensionUri, 'templates', 'code', 'sample-thymeleaf-list.hbs').fsPath,
+      thymeleafRegisterTemplateFilePath: vscode.Uri.joinPath(context.extensionUri, 'templates', 'code', 'sample-thymeleaf-register.hbs').fsPath,
+      controllerTemplateFilePath: vscode.Uri.joinPath(context.extensionUri, 'templates', 'code', 'sample-controller-template.hbs').fsPath,
+      serviceTemplateFilePath: vscode.Uri.joinPath(context.extensionUri, 'templates', 'code', 'sample-service-template.hbs').fsPath,
+      defaultVoTemplateFilePath: vscode.Uri.joinPath(context.extensionUri, 'templates', 'code', 'sample-default-vo-template.hbs').fsPath,
+      voTemplateFilePath: vscode.Uri.joinPath(context.extensionUri, 'templates', 'code', 'sample-vo-template.hbs').fsPath,
+      serviceImplTemplateFilePath: vscode.Uri.joinPath(context.extensionUri, 'templates', 'code', 'sample-service-impl-template.hbs').fsPath,
+      mapperInterfaceTemplateFilePath: vscode.Uri.joinPath(context.extensionUri, 'templates', 'code', 'sample-mapper-interface-template.hbs').fsPath,
+      daoTemplateFilePath: vscode.Uri.joinPath(context.extensionUri, 'templates', 'code', 'sample-dao-template.hbs').fsPath
+    };
+
+    // DDL을 파싱하고, 템플릿 파일을 렌더링한다.
     try {
+      // DDL을 파싱한다.
       const { tableName, attributes, pkAttributes } = parseDDL(ddl);
-      const templateContext = getTemplateContext(tableName, attributes, pkAttributes);
 
-      const filesToGenerate = {
-        [`${tableName}_Mapper.xml`]: await renderTemplate(path.join(this.context.extensionUri.fsPath, 'templates', 'code', 'sample-mapper-template.hbs'), templateContext),
-        [`${tableName}List.jsp`]: await renderTemplate(path.join(this.context.extensionUri.fsPath, 'templates', 'code', 'sample-jsp-list.hbs'), templateContext),
-        [`${tableName}Register.jsp`]: await renderTemplate(path.join(this.context.extensionUri.fsPath, 'templates', 'code', 'sample-jsp-register.hbs'), templateContext),
-        [`${tableName}List.html`]: await renderTemplate(path.join(this.context.extensionUri.fsPath, 'templates', 'code', 'sample-thymeleaf-list.hbs'), templateContext),
-        [`${tableName}Register.html`]: await renderTemplate(path.join(this.context.extensionUri.fsPath, 'templates', 'code', 'sample-thymeleaf-register.hbs'), templateContext),
-        [`${tableName}Controller.java`]: await renderTemplate(path.join(this.context.extensionUri.fsPath, 'templates', 'code', 'sample-controller-template.hbs'), templateContext),
-        [`${tableName}Service.java`]: await renderTemplate(path.join(this.context.extensionUri.fsPath, 'templates', 'code', 'sample-service-template.hbs'), templateContext),
-        [`${tableName}DefaultVO.java`]: await renderTemplate(path.join(this.context.extensionUri.fsPath, 'templates', 'code', 'sample-default-vo-template.hbs'), templateContext),
-        [`${tableName}VO.java`]: await renderTemplate(path.join(this.context.extensionUri.fsPath, 'templates', 'code', 'sample-vo-template.hbs'), templateContext),
-        [`${tableName}ServiceImpl.java`]: await renderTemplate(path.join(this.context.extensionUri.fsPath, 'templates', 'code', 'sample-service-impl-template.hbs'), templateContext),
-        [`${tableName}Mapper.java`]: await renderTemplate(path.join(this.context.extensionUri.fsPath, 'templates', 'code', 'sample-mapper-interface-template.hbs'), templateContext),
-        [`${tableName}DAO.java`]: await renderTemplate(path.join(this.context.extensionUri.fsPath, 'templates', 'code', 'sample-dao-template.hbs'), templateContext)
+      // 렌더링된 템플릿 파일의 내용을 저장한다.
+      const fileContents = {
+        [`${tableName}_Mapper.xml`]: await renderTemplate(templateFilePaths.mapperTemplateFilePath, getTemplateContext(tableName, attributes, pkAttributes)),
+        [`${tableName}List.jsp`]: await renderTemplate(templateFilePaths.jspListTemplateFilePath, getTemplateContext(tableName, attributes, pkAttributes)),
+        [`${tableName}Register.jsp`]: await renderTemplate(templateFilePaths.jspRegisterTemplateFilePath, getTemplateContext(tableName, attributes, pkAttributes)),
+        [`${tableName}List.html`]: await renderTemplate(templateFilePaths.thymeleafListTemplateFilePath, getTemplateContext(tableName, attributes, pkAttributes)),
+        [`${tableName}Register.html`]: await renderTemplate(templateFilePaths.thymeleafRegisterTemplateFilePath, getTemplateContext(tableName, attributes, pkAttributes)),
+        [`${tableName}Controller.java`]: await renderTemplate(templateFilePaths.controllerTemplateFilePath, getTemplateContext(tableName, attributes, pkAttributes)),
+        [`${tableName}Service.java`]: await renderTemplate(templateFilePaths.serviceTemplateFilePath, getTemplateContext(tableName, attributes, pkAttributes)),
+        [`${tableName}DefaultVO.java`]: await renderTemplate(templateFilePaths.defaultVoTemplateFilePath, getTemplateContext(tableName, attributes, pkAttributes)),
+        [`${tableName}VO.java`]: await renderTemplate(templateFilePaths.voTemplateFilePath, getTemplateContext(tableName, attributes, pkAttributes)),
+        [`${tableName}ServiceImpl.java`]: await renderTemplate(templateFilePaths.serviceImplTemplateFilePath, getTemplateContext(tableName, attributes, pkAttributes)),
+        [`${tableName}Mapper.java`]: await renderTemplate(templateFilePaths.mapperInterfaceTemplateFilePath, getTemplateContext(tableName, attributes, pkAttributes)),
+        [`${tableName}DAO.java`]: await renderTemplate(templateFilePaths.daoTemplateFilePath, getTemplateContext(tableName, attributes, pkAttributes))
       };
 
-      for (const fileName in filesToGenerate) {
-        const filePath = getFilePathForOutput(folderPath, tableName, fileName);
-        await fs.outputFile(filePath, filesToGenerate[fileName]);
+      // 파일 생성을 선택하는 다이얼로그를 표시한다.
+      const filesToGenerate = Object.keys(fileContents).map(fileName => ({
+        filePath: getFilePathForOutput(folderPath, tableName, fileName),
+        content: fileContents[fileName],
+      }));
+
+      // 생성할 파일목록을 보여주고 선택한 파일을 반환한다.
+      const selectedFilePaths = await showFileList(filesToGenerate);
+
+      // 선택된 파일을 생성한다.
+      for (const file of filesToGenerate) {
+        if (selectedFilePaths.includes(file.filePath)) {
+          await fs.outputFile(file.filePath, file.content);
+        }
       }
 
       vscode.window.showInformationMessage('Selected files generated successfully.');
     } catch (error) {
-      if (error instanceof Error) {
-        vscode.window.showErrorMessage(`Error: ${error.message}`);
-      } else {
-        vscode.window.showErrorMessage('An unknown error occurred.');
-      }
+      vscode.window.showErrorMessage(`Error: ${error instanceof Error ? error.message : 'An unknown error occurred.'}`);
     }
   }
 
