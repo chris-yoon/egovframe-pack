@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import * as path from 'path';
 import * as fs from 'fs-extra';
 import * as Handlebars from 'handlebars';
+import { parseDDL } from './ddlParser';
 
 // 데이터베이스 컬럼의 정보를 담는 인터페이스
 export interface Column {
@@ -176,5 +177,124 @@ export function getTemplateContext(tableName: string, attributes: Column[], pkAt
         author: 'author',
         date: new Date().toISOString().split('T')[0],
         version: '1.0.0'
+    };
+}
+
+export async function generateCrudFromDDL(ddl: string, context: vscode.ExtensionContext): Promise<void> {
+    const selectedFolder = await vscode.window.showOpenDialog({
+        title: 'Select Folder to Save Generated Files',
+        canSelectFolders: true,
+        canSelectFiles: false,
+        canSelectMany: false,
+        openLabel: 'Select Folder'
+    });
+
+    if (!selectedFolder || selectedFolder.length === 0) {
+        vscode.window.showErrorMessage('No folder selected.');
+        return;
+    }
+
+    const folderPath = selectedFolder[0].fsPath;
+    const baseJavaPath = path.join(folderPath, 'src', 'main', 'java');
+    const defaultPackageName = vscode.workspace.getConfiguration('egovframeInitializr').get<string>('defaultPackageName', 'egovframework.example.sample');
+    const packagePath = defaultPackageName.replace(/\./g, path.sep);
+
+    const paths = await setupProjectPaths(folderPath, baseJavaPath, packagePath);
+    const templateFilePaths = getTemplateFilePaths(context);
+
+    try {
+        const { tableName, attributes, pkAttributes } = parseDDL(ddl);
+        const fileContents = await generateFileContents(tableName, attributes, pkAttributes, templateFilePaths);
+        const filesToGenerate = Object.keys(fileContents).map(fileName => ({
+            filePath: getFilePathForOutput(folderPath, tableName, fileName),
+            content: fileContents[fileName],
+        }));
+
+        const selectedFilePaths = await showFileList(filesToGenerate);
+
+        for (const file of filesToGenerate) {
+            if (selectedFilePaths.includes(file.filePath)) {
+                await fs.outputFile(file.filePath, file.content);
+            }
+        }
+
+        vscode.window.showInformationMessage('Selected files generated successfully.');
+    } catch (error) {
+        vscode.window.showErrorMessage(`Error: ${error instanceof Error ? error.message : 'An unknown error occurred.'}`);
+    }
+}
+
+async function setupProjectPaths(folderPath: string, baseJavaPath: string, packagePath: string) {
+    const paths = {
+        targetPackagePath: folderPath,
+        targetMapperPath: folderPath,
+        targetJspPath: folderPath,
+        targetThymeleafPath: folderPath,
+        targetControllerPath: folderPath,
+        targetServicePath: folderPath,
+        targetServiceImplPath: folderPath
+    };
+
+    if (await fs.pathExists(baseJavaPath)) {
+        paths.targetPackagePath = path.join(baseJavaPath, packagePath);
+        paths.targetMapperPath = path.join(folderPath, 'src', 'main', 'resources', 'mappers');
+        paths.targetJspPath = path.join(folderPath, 'src', 'main', 'webapp', 'views');
+        paths.targetThymeleafPath = path.join(folderPath, 'src', 'main', 'resources', 'templates', 'thymeleaf');
+        paths.targetControllerPath = path.join(baseJavaPath, packagePath, 'web');
+        paths.targetServicePath = path.join(baseJavaPath, packagePath, 'service');
+        paths.targetServiceImplPath = path.join(baseJavaPath, packagePath, 'service', 'impl');
+
+        await Promise.all([
+            fs.ensureDir(paths.targetPackagePath),
+            fs.ensureDir(paths.targetMapperPath),
+            fs.ensureDir(paths.targetJspPath),
+            fs.ensureDir(paths.targetThymeleafPath),
+            fs.ensureDir(paths.targetControllerPath),
+            fs.ensureDir(paths.targetServicePath),
+            fs.ensureDir(paths.targetServiceImplPath)
+        ]);
+    }
+
+    return paths;
+}
+
+function getTemplateFilePaths(context: vscode.ExtensionContext) {
+    return {
+        mapperTemplateFilePath: vscode.Uri.joinPath(context.extensionUri, 'templates', 'code', 'sample-mapper-template.hbs').fsPath,
+        jspListTemplateFilePath: vscode.Uri.joinPath(context.extensionUri, 'templates', 'code', 'sample-jsp-list.hbs').fsPath,
+        jspRegisterTemplateFilePath: vscode.Uri.joinPath(context.extensionUri, 'templates', 'code', 'sample-jsp-register.hbs').fsPath,
+        thymeleafListTemplateFilePath: vscode.Uri.joinPath(context.extensionUri, 'templates', 'code', 'sample-thymeleaf-list.hbs').fsPath,
+        thymeleafRegisterTemplateFilePath: vscode.Uri.joinPath(context.extensionUri, 'templates', 'code', 'sample-thymeleaf-register.hbs').fsPath,
+        controllerTemplateFilePath: vscode.Uri.joinPath(context.extensionUri, 'templates', 'code', 'sample-controller-template.hbs').fsPath,
+        serviceTemplateFilePath: vscode.Uri.joinPath(context.extensionUri, 'templates', 'code', 'sample-service-template.hbs').fsPath,
+        defaultVoTemplateFilePath: vscode.Uri.joinPath(context.extensionUri, 'templates', 'code', 'sample-default-vo-template.hbs').fsPath,
+        voTemplateFilePath: vscode.Uri.joinPath(context.extensionUri, 'templates', 'code', 'sample-vo-template.hbs').fsPath,
+        serviceImplTemplateFilePath: vscode.Uri.joinPath(context.extensionUri, 'templates', 'code', 'sample-service-impl-template.hbs').fsPath,
+        mapperInterfaceTemplateFilePath: vscode.Uri.joinPath(context.extensionUri, 'templates', 'code', 'sample-mapper-interface-template.hbs').fsPath,
+        daoTemplateFilePath: vscode.Uri.joinPath(context.extensionUri, 'templates', 'code', 'sample-dao-template.hbs').fsPath
+    };
+}
+
+async function generateFileContents(
+    tableName: string, 
+    attributes: Column[], 
+    pkAttributes: Column[], 
+    templateFilePaths: {[key: string]: string}
+): Promise<{[key: string]: string}> {
+    const context = getTemplateContext(tableName, attributes, pkAttributes);
+    
+    return {
+        [`${tableName}_Mapper.xml`]: await renderTemplate(templateFilePaths.mapperTemplateFilePath, context),
+        [`${tableName}List.jsp`]: await renderTemplate(templateFilePaths.jspListTemplateFilePath, context),
+        [`${tableName}Register.jsp`]: await renderTemplate(templateFilePaths.jspRegisterTemplateFilePath, context),
+        [`${tableName}List.html`]: await renderTemplate(templateFilePaths.thymeleafListTemplateFilePath, context),
+        [`${tableName}Register.html`]: await renderTemplate(templateFilePaths.thymeleafRegisterTemplateFilePath, context),
+        [`${tableName}Controller.java`]: await renderTemplate(templateFilePaths.controllerTemplateFilePath, context),
+        [`${tableName}Service.java`]: await renderTemplate(templateFilePaths.serviceTemplateFilePath, context),
+        [`DefaultVO.java`]: await renderTemplate(templateFilePaths.defaultVoTemplateFilePath, context),
+        [`${tableName}VO.java`]: await renderTemplate(templateFilePaths.voTemplateFilePath, context),
+        [`${tableName}ServiceImpl.java`]: await renderTemplate(templateFilePaths.serviceImplTemplateFilePath, context),
+        [`${tableName}Mapper.java`]: await renderTemplate(templateFilePaths.mapperInterfaceTemplateFilePath, context),
+        [`${tableName}DAO.java`]: await renderTemplate(templateFilePaths.daoTemplateFilePath, context)
     };
 }
