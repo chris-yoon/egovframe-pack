@@ -4,7 +4,10 @@
   "description": "Generate eGovFrame code from DDL and project from templates",
   "version": "0.1.0",
   "publisher": "egovframework",
-  "enabledApiProposals": ["contribViewContainerTitle"],
+  "enabledApiProposals": [
+    "contribViewContainerTitle",
+    "extensionRuntime"
+  ],
   "engines": {
     "vscode": "^1.75.0"
   },
@@ -184,12 +187,14 @@
     }
   },
   "scripts": {
+    "clean": "rimraf out .vscode-test",
     "vscode:prepublish": "npm run compile",
     "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./",
-    "pretest": "npm run compile && npm run lint",
+    "pretest": "npm run clean && npm run compile && npm run lint",
     "lint": "eslint src --ext ts",
-    "test": "vscode-test"
+    "test": "vscode-test --enable-proposed-api=egovframework.vscode-egovframe-initializr",
+    "test:coverage": "vscode-test --enable-proposed-api=egovframework.vscode-egovframe-initializr --coverage"
   },
   "devDependencies": {
     "@types/fs-extra": "^11.0.4",

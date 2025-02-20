@@ -7,7 +7,14 @@ import { activate as activateGenerateProjectByForm } from './generateProjectByFo
 import { activate as activategenerateCodeContainer } from './generateCodeContainer';
 import { activate as activategenerateProjectContainer } from './generateProjectContainer';
 
+let extensionContext: vscode.ExtensionContext;
+
 export function activate(context: vscode.ExtensionContext) {
+
+  // context를 모듈 변수에 저장
+  extensionContext = context;
+
+  // 각각의 기능을 활성화합니다.
   activateGenerateCode(context);
   activateGenerateProject(context);
   activategenerateConfig(context);
@@ -33,6 +40,11 @@ export function activate(context: vscode.ExtensionContext) {
       }
     })
   );
+
+}
+
+export function getExtensionContext(): vscode.ExtensionContext {
+  return extensionContext;
 }
 
 export function deactivate(): void {

@@ -12,6 +12,7 @@ build/
 # IDE and editor files
 .idea/
 .vscode/*
+.vscode-test/*
 !.vscode/extensions.json
 !.vscode/launch.json
 !.vscode/tasks.json
