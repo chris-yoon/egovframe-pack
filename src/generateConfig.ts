@@ -30,11 +30,11 @@ export function activate(context: vscode.ExtensionContext) {
                     context,
                     selectedOption.template.displayName,
                     selectedOption.template.webView,
-                    selectedOption.template.vmFolder,
-                    selectedOption.template.vmFile,
+                    selectedOption.template.templateFolder,
+                    selectedOption.template.templateFile,
                     uri?.fsPath,
                     selectedOption.template.fileNameProperty,
-                    selectedOption.template.javaConfigVmFile
+                    selectedOption.template.javaConfigTemplate
                 );
             }
         }
@@ -43,4 +43,8 @@ export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(generateConfig);
 }
 
-export function deactivate() {}
+export function deactivate(): void {
+    // Clean up resources and perform any necessary deactivation tasks
+    // Currently no cleanup is needed, but we explicitly declare return type
+    // to satisfy the linter and maintain good practices
+}

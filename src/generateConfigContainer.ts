@@ -4,7 +4,8 @@ import * as fs from "fs-extra";
 import { 
     GroupedTemplates, 
     groupTemplates, 
-    createConfigWebview 
+    createConfigWebview,
+    TemplateConfig
 } from "./utils/configGeneratorUtils";
 
 // Define a simple TreeItem for the Template Tree View
@@ -69,16 +70,6 @@ class TemplateTreeDataProvider implements vscode.TreeDataProvider<TemplateTreeIt
   }
 }
 
-// Template interface
-interface TemplateConfig {
-  displayName: string;
-  vmFolder: string;
-  vmFile: string;
-  webView: string;
-  fileNameProperty: string;
-  javaConfigVmFile?: string;
-}
-
 // Activation function
 export function activate(context: vscode.ExtensionContext) {
   const configFilePath = path.join(context.extensionPath, "templates-context-xml.json");
@@ -99,11 +90,11 @@ export function activate(context: vscode.ExtensionContext) {
         context,
         template.displayName,
         template.webView,
-        template.vmFolder,
-        template.vmFile,
+        template.templateFolder,
+        template.templateFile,
         undefined,
         template.fileNameProperty,
-        template.javaConfigVmFile
+        template.javaConfigTemplate
       );
     }
   );
@@ -111,4 +102,8 @@ export function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(generateConfig);
 }
 
-export function deactivate() {}
+export function deactivate(): void {
+  // Clean up resources and perform any necessary deactivation tasks
+  // Currently no cleanup is needed, but we explicitly declare return type
+  // to satisfy the linter and maintain good practices
+}

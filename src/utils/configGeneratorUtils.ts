@@ -3,6 +3,33 @@ import * as path from "path";
 import * as fs from "fs-extra";
 import * as Handlebars from "handlebars";
 
+// Register Handlebars helpers
+Handlebars.registerHelper('error', function(message) {
+    console.error(message);
+    return new Handlebars.SafeString(`<span class="error">${message}</span>`);
+});
+
+Handlebars.registerHelper('empty', function(value) {
+    return value === null || value === '';
+});
+
+Handlebars.registerHelper('eq', function(a, b) {
+    return a === b;
+});
+
+Handlebars.registerHelper('concat', function(...args) {
+    return args.slice(0, -1).join('');
+});
+
+Handlebars.registerHelper("setVar", function(varName, varValue, options) {
+    options.data.root[varName] = varValue;
+});
+
+Handlebars.registerHelper('lowercase', function(str) {
+    if (typeof str !== 'string') return '';
+    return str.toLowerCase();
+});
+
 // Define an interface for your template configuration
 // 각 템플릿의 설정을 정의하는 인터페이스
 export interface TemplateConfig {
@@ -47,7 +74,7 @@ export async function generateFile(
     data: any,
     context: vscode.ExtensionContext,
     templateFolder: string,
-    templateFileName: string,
+    templateFile: string,
     outputFolderPath: string,
     fileNameProperty: string,
     fileExtension: string
@@ -57,7 +84,7 @@ export async function generateFile(
         "templates",
         "config",
         templateFolder,
-        templateFileName
+        templateFile
     );
     
     const content = await renderTemplate(templatePath, data);
@@ -99,7 +126,7 @@ export async function createConfigWebview(
     title: string,
     htmlFileName: string,
     templateFolder: string,
-    templateFileName: string,
+    templateFile: string,
     initialPath: string | undefined,
     fileNameProperty: string,
     javaConfigTemplate?: string
@@ -140,9 +167,9 @@ export async function createConfigWebview(
                     }
 
                     if (message.command === "generateXml") {
-                        await generateFile(message.data, context, templateFolder, templateFileName, outputFolderPath, fileNameProperty, "xml");
+                        await generateFile(message.data, context, templateFolder, templateFile, outputFolderPath, fileNameProperty, "xml");
                     } else {
-                        await generateFile(message.data, context, templateFolder, templateFileName, outputFolderPath, fileNameProperty, "java");
+                        await generateFile(message.data, context, templateFolder, templateFile, outputFolderPath, fileNameProperty, "java");
                     }
                     panel.dispose();
                 }

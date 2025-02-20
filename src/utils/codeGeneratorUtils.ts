@@ -80,9 +80,12 @@ export function registerHandlebarsHelpers() {
     });
 
     Handlebars.registerHelper('hasError', function() {
-        // 에러가 있는지 확인하는 로직을 추가
-        // 이 예에서는 항상 false를 반환
         return false;
+    });
+
+    Handlebars.registerHelper('error', function(message) {
+        console.error(message);
+        return new Handlebars.SafeString(`<span class="error">${message}</span>`);
     });
 
     Handlebars.registerHelper("setVar", function(varName, varValue, options) {
@@ -91,6 +94,11 @@ export function registerHandlebarsHelpers() {
 
     Handlebars.registerHelper('concat', function(...args) {
         return args.slice(0, -1).join('');
+    });
+
+    Handlebars.registerHelper('lowercase', function(str) {
+        if (typeof str !== 'string') return '';
+        return str.toLowerCase();
     });
 }
 

@@ -35,4 +35,8 @@ export function activate(context: vscode.ExtensionContext) {
   );
 }
 
-export function deactivate() {}
+export function deactivate(): void {
+  // Clean up resources and perform any necessary deactivation tasks
+  // Currently no cleanup is needed, but we explicitly declare return type
+  // to satisfy the linter and maintain good practices
+}
