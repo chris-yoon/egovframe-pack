@@ -20,9 +20,17 @@ export interface GroupedTemplates {
 }
 
 export async function renderTemplate(templateFilePath: string, context: any): Promise<string> {
-    let template = await fs.readFile(templateFilePath, "utf-8");
+    // 기본 패키지명을 설정에서 가져옴
+    const defaultPackageName = vscode.workspace.getConfiguration('egovframeInitializr')
+        .get<string>('defaultPackageName', 'egovframework.example.sample');
 
-    // Handle #parse directive for included templates
+    // context에 defaultPackageName 추가
+    const enrichedContext = {
+        ...context,
+        defaultPackageName
+    };
+
+    let template = await fs.readFile(templateFilePath, "utf-8");
     const parseRegex = /#parse\("(.+)"\)/g;
     let match;
     while ((match = parseRegex.exec(template)) !== null) {
@@ -32,7 +40,7 @@ export async function renderTemplate(templateFilePath: string, context: any): Pr
     }
 
     const compiledTemplate = Handlebars.compile(template);
-    return compiledTemplate(context);
+    return compiledTemplate(enrichedContext);
 }
 
 export async function generateFile(

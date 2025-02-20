@@ -1,5 +1,5 @@
 {{#*inline "c3p0"}}
-package egovframework.example.config;
+package {{defaultPackageName}}.config;
 
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 import org.springframework.context.annotation.Bean;
@@ -33,7 +33,7 @@ public class {{txtFileName}} {
 }
 {{/inline}}
 {{#*inline "dbcp"}}
-package egovframework.example.config;
+package {{defaultPackageName}}.config;
 
 import org.apache.commons.dbcp.BasicDataSource;
 import org.springframework.context.annotation.Bean;
@@ -62,7 +62,7 @@ public class {{txtFileName}} {
 }
 {{/inline}}
 {{#*inline "jdbc"}}
-package egovframework.example.config;
+package {{defaultPackageName}}.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
