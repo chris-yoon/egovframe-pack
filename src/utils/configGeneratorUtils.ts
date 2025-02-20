@@ -7,11 +7,11 @@ import * as Handlebars from "handlebars";
 // 각 템플릿의 설정을 정의하는 인터페이스
 export interface TemplateConfig {
     displayName: string;
-    vmFolder: string;
-    vmFile: string;
+    templateFolder: string;
+    templateFile: string;
     webView: string;
     fileNameProperty: string;
-    javaConfigVmFile?: string;
+    javaConfigTemplate?: string;
 }
 
 export interface GroupedTemplates {
@@ -46,8 +46,8 @@ export async function renderTemplate(templateFilePath: string, context: any): Pr
 export async function generateFile(
     data: any,
     context: vscode.ExtensionContext,
-    vmFolder: string,
-    vmFileName: string,
+    templateFolder: string,
+    templateFileName: string,
     outputFolderPath: string,
     fileNameProperty: string,
     fileExtension: string
@@ -56,8 +56,8 @@ export async function generateFile(
         context.extensionPath,
         "templates",
         "config",
-        vmFolder,
-        vmFileName
+        templateFolder,
+        templateFileName
     );
     
     const content = await renderTemplate(templatePath, data);
@@ -98,11 +98,11 @@ export async function createConfigWebview(
     context: vscode.ExtensionContext,
     title: string,
     htmlFileName: string,
-    vmFolder: string,
-    vmFileName: string,
+    templateFolder: string,
+    templateFileName: string,
     initialPath: string | undefined,
     fileNameProperty: string,
-    javaConfigVmFileName?: string
+    javaConfigTemplate?: string
 ): Promise<void> {
     const panel = vscode.window.createWebviewPanel(
         "generateConfig",
@@ -140,9 +140,9 @@ export async function createConfigWebview(
                     }
 
                     if (message.command === "generateXml") {
-                        await generateFile(message.data, context, vmFolder, vmFileName, outputFolderPath, fileNameProperty, "xml");
+                        await generateFile(message.data, context, templateFolder, templateFileName, outputFolderPath, fileNameProperty, "xml");
                     } else {
-                        await generateFile(message.data, context, vmFolder, javaConfigVmFileName!, outputFolderPath, fileNameProperty, "java");
+                        await generateFile(message.data, context, templateFolder, templateFileName, outputFolderPath, fileNameProperty, "java");
                     }
                     panel.dispose();
                 }
