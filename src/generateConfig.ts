@@ -14,25 +14,6 @@ export function activate(context: vscode.ExtensionContext) {
     let generateConfig = vscode.commands.registerCommand(
         "extension.generateConfig",
         async (uri: vscode.Uri) => {
-            let selectedFolderPath: string;
-
-            if (uri) {
-                const stats = await fs.stat(uri.fsPath);
-                selectedFolderPath = stats.isFile() ? path.dirname(uri.fsPath) : uri.fsPath;
-            } else {
-                const folderUri = await vscode.window.showOpenDialog({
-                    canSelectFolders: true,
-                    canSelectFiles: false,
-                    openLabel: "Select folder to generate config",
-                });
-
-                if (!folderUri || folderUri.length === 0) {
-                    vscode.window.showWarningMessage('No folder selected. Please select a folder.');
-                    return;
-                }
-                selectedFolderPath = folderUri[0].fsPath;
-            }
-
             const options: TemplateQuickPickItem[] = templates.map((template) => ({
                 label: template.displayName,
                 template: template,
@@ -43,13 +24,15 @@ export function activate(context: vscode.ExtensionContext) {
             });
 
             if (selectedOption?.template) {
+                let selectedFolderPath: string | undefined;
+                
                 await createConfigWebview(
                     context,
                     selectedOption.template.displayName,
                     selectedOption.template.webView,
                     selectedOption.template.vmFolder,
                     selectedOption.template.vmFile,
-                    selectedFolderPath,
+                    uri?.fsPath,
                     selectedOption.template.fileNameProperty,
                     selectedOption.template.javaConfigVmFile
                 );

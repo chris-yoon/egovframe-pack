@@ -95,36 +95,20 @@ export function activate(context: vscode.ExtensionContext) {
   let generateConfig = vscode.commands.registerCommand(
     "extension.generateConfigContainer",
     async (template: TemplateConfig) => {
-      const uri = await vscode.window.showOpenDialog({
-        canSelectFolders: true,
-        canSelectFiles: false,
-        openLabel: "Select folder to generate config",
-      });
-
-      if (!uri || uri.length === 0) {
-        vscode.window.showWarningMessage("No folder selected. Please select a folder.");
-        return;
-      }
-
       await createConfigWebview(
         context,
         template.displayName,
         template.webView,
         template.vmFolder,
         template.vmFile,
-        uri[0].fsPath,
+        undefined,
         template.fileNameProperty,
         template.javaConfigVmFile
       );
     }
   );
 
-  // Register collapseAll command to collapse all nodes in the tree
-  let collapseAll = vscode.commands.registerCommand("extension.collapseAllConfigs", () => {
-    vscode.commands.executeCommand("workbench.actions.treeView.egovframeConfigView.collapseAll");
-  });
-
-  context.subscriptions.push(generateConfig, collapseAll);
+  context.subscriptions.push(generateConfig);
 }
 
 export function deactivate() {}

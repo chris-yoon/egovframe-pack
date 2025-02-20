@@ -92,7 +92,7 @@ export async function createConfigWebview(
     htmlFileName: string,
     vmFolder: string,
     vmFileName: string,
-    outputFolderPath: string,
+    initialPath: string | undefined,
     fileNameProperty: string,
     javaConfigVmFileName?: string
 ): Promise<void> {
@@ -111,22 +111,36 @@ export async function createConfigWebview(
     panel.webview.onDidReceiveMessage(
         async (message) => {
             try {
-                if (message.command === "generateXml") {
-                    await generateFile(message.data, context, vmFolder, vmFileName, outputFolderPath, fileNameProperty, "xml");
-                    panel.dispose();
-                } else if (message.command === "generateJavaConfigByForm") {
-                    if (javaConfigVmFileName) {
-                        await generateFile(message.data, context, vmFolder, javaConfigVmFileName, outputFolderPath, fileNameProperty, "java");
-                        panel.dispose();
+                if (message.command === "generateXml" || message.command === "generateJavaConfigByForm") {
+                    let outputFolderPath: string;
+                    
+                    if (initialPath) {
+                        const stats = await fs.stat(initialPath);
+                        outputFolderPath = stats.isFile() ? path.dirname(initialPath) : initialPath;
                     } else {
-                        vscode.window.showErrorMessage('JavaConfig template not defined for this generation type.');
+                        const folderUri = await vscode.window.showOpenDialog({
+                            canSelectFolders: true,
+                            canSelectFiles: false,
+                            openLabel: "Select folder to generate config",
+                        });
+
+                        if (!folderUri || folderUri.length === 0) {
+                            vscode.window.showWarningMessage('No folder selected. Please select a folder.');
+                            return;
+                        }
+                        outputFolderPath = folderUri[0].fsPath;
                     }
+
+                    if (message.command === "generateXml") {
+                        await generateFile(message.data, context, vmFolder, vmFileName, outputFolderPath, fileNameProperty, "xml");
+                    } else {
+                        await generateFile(message.data, context, vmFolder, javaConfigVmFileName!, outputFolderPath, fileNameProperty, "java");
+                    }
+                    panel.dispose();
                 }
             } catch (error) {
-                vscode.window.showErrorMessage(`Error generating file: ${error instanceof Error ? error.message : 'Unknown error'}`);
+                vscode.window.showErrorMessage(`Error generating config: ${error}`);
             }
-        },
-        undefined,
-        context.subscriptions
+        }
     );
 }
