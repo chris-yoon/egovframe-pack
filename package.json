@@ -122,7 +122,7 @@
         },
         {
           "command": "extension.openPackageSettings",
-          "when": "view == egovframeCodeView",
+          "when": "view == egovframeCodeView || view == egovframeConfigView",
           "group": "navigation"
         }
       ]
