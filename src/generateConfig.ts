@@ -28,13 +28,15 @@ export function activate(context: vscode.ExtensionContext) {
                 
                 await createConfigWebview(
                     context,
-                    selectedOption.template.displayName,
-                    selectedOption.template.webView,
-                    selectedOption.template.templateFolder,
-                    selectedOption.template.templateFile,
-                    uri?.fsPath,
-                    selectedOption.template.fileNameProperty,
-                    selectedOption.template.javaConfigTemplate
+                    {
+                        title: selectedOption.template.displayName,
+                        htmlFileName: selectedOption.template.webView,
+                        templateFolder: selectedOption.template.templateFolder,
+                        templateFile: selectedOption.template.templateFile,
+                        initialPath: uri?.fsPath,
+                        fileNameProperty: selectedOption.template.fileNameProperty,
+                        javaConfigTemplate: selectedOption.template.javaConfigTemplate
+                    }
                 );
             }
         }

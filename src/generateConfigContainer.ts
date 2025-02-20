@@ -88,13 +88,15 @@ export function activate(context: vscode.ExtensionContext) {
     async (template: TemplateConfig) => {
       await createConfigWebview(
         context,
-        template.displayName,
-        template.webView,
-        template.templateFolder,
-        template.templateFile,
-        undefined,
-        template.fileNameProperty,
-        template.javaConfigTemplate
+        {
+          title: template.displayName,
+          htmlFileName: template.webView,
+          templateFolder: template.templateFolder,
+          templateFile: template.templateFile,
+          initialPath: undefined,
+          fileNameProperty: template.fileNameProperty,
+          javaConfigTemplate: template.javaConfigTemplate
+        }
       );
     }
   );

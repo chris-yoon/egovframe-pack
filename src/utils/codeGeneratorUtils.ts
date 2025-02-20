@@ -37,7 +37,7 @@ export interface TemplateContext {
 
 // 데이터베이스의 다양한 데이터 타입을 Java의 데이터 타입으로 매핑하는 기능을 제공하는 클래스
 class DatabaseDefinition {
-    private predefinedDataTypes: { [key: string]: string };
+    private readonly predefinedDataTypes: { [key: string]: string };
 
     // 생성자에서 데이터베이스 데이터 타입과 Java 데이터 타입의 매핑을 정의한다.
     constructor() {
@@ -97,7 +97,9 @@ export function registerHandlebarsHelpers() {
     });
 
     Handlebars.registerHelper('lowercase', function(str) {
-        if (typeof str !== 'string') return '';
+        if (typeof str !== 'string') {
+            return '';
+        }
         return str.toLowerCase();
     });
 }
@@ -145,7 +147,7 @@ export function getFilePathForOutput(folderPath: string, tableName: string, file
 export async function showFileList(files: { filePath: string, content: string }[]) {
     const quickPickItems = files.map(file => ({
         label: path.basename(file.filePath),
-        description: file.filePath.replace(vscode.workspace.rootPath || '', ''),
+        description: file.filePath.replace(vscode.workspace.workspaceFolders?.[0]?.uri.fsPath ?? '', ''),
         filePath: file.filePath,
         picked: true
     }));

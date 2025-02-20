@@ -121,24 +121,28 @@ export function groupTemplates(templates: TemplateConfig[]): GroupedTemplates[] 
     return groupedTemplates;
 }
 
+interface ConfigWebviewOptions {
+    title: string;
+    htmlFileName: string;
+    templateFolder: string;
+    templateFile: string;
+    initialPath?: string;
+    fileNameProperty: string;
+    javaConfigTemplate?: string;
+}
+
 export async function createConfigWebview(
     context: vscode.ExtensionContext,
-    title: string,
-    htmlFileName: string,
-    templateFolder: string,
-    templateFile: string,
-    initialPath: string | undefined,
-    fileNameProperty: string,
-    javaConfigTemplate?: string
+    options: ConfigWebviewOptions
 ): Promise<void> {
     const panel = vscode.window.createWebviewPanel(
         "generateConfig",
-        title,
+        options.title,
         vscode.ViewColumn.One,
         { enableScripts: true }
     );
 
-    const htmlTemplatePath = path.join(context.extensionPath, "webviews", htmlFileName);
+    const htmlTemplatePath = path.join(context.extensionPath, "webviews", options.htmlFileName);
     const htmlContent = fs.readFileSync(htmlTemplatePath, "utf8");
 
     panel.webview.html = htmlContent;
@@ -149,9 +153,9 @@ export async function createConfigWebview(
                 if (message.command === "generateXml" || message.command === "generateJavaConfigByForm") {
                     let outputFolderPath: string;
                     
-                    if (initialPath) {
-                        const stats = await fs.stat(initialPath);
-                        outputFolderPath = stats.isFile() ? path.dirname(initialPath) : initialPath;
+                    if (options.initialPath) {
+                        const stats = await fs.stat(options.initialPath);
+                        outputFolderPath = stats.isFile() ? path.dirname(options.initialPath) : options.initialPath;
                     } else {
                         const folderUri = await vscode.window.showOpenDialog({
                             canSelectFolders: true,
@@ -167,9 +171,9 @@ export async function createConfigWebview(
                     }
 
                     if (message.command === "generateXml") {
-                        await generateFile(message.data, context, templateFolder, templateFile, outputFolderPath, fileNameProperty, "xml");
+                        await generateFile(message.data, context, options.templateFolder, options.templateFile, outputFolderPath, options.fileNameProperty, "xml");
                     } else {
-                        await generateFile(message.data, context, templateFolder, templateFile, outputFolderPath, fileNameProperty, "java");
+                        await generateFile(message.data, context, options.templateFolder, options.javaConfigTemplate!, outputFolderPath, options.fileNameProperty, "java");
                     }
                     panel.dispose();
                 }
