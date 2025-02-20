@@ -13,7 +13,7 @@ function convertToCamelCase(str: string): string {
 
 // camelCase를 PascalCase로 변환하는 함수
 function convertCamelcaseToPascalcase(name: string): string {
-    if (!name) return name;
+    if (!name) {return name;}
     return name.charAt(0).toUpperCase() + name.slice(1);
 }
 
@@ -23,14 +23,14 @@ export function parseDDL(ddl: string): ParsedDDL {
     ddl = ddl.replace(/\s+/g, ' ').trim();
 
     // 테이블 이름 추출
-    const tableNameMatch = ddl.match(/CREATE TABLE (\w+)/i);
+    const tableNameMatch = RegExp(/CREATE TABLE (\w+)/i).exec(ddl);
     if (!tableNameMatch) {
         throw new Error('Unable to parse table name from DDL');
     }
     const tableName = convertCamelcaseToPascalcase(tableNameMatch[1].toLowerCase());
 
     // 컬럼 정의 추출
-    const columnDefinitionsMatch = ddl.match(/\((.*)\)/s);
+    const columnDefinitionsMatch = RegExp(/\((.*)\)/s).exec(ddl);
     if (!columnDefinitionsMatch) {
         throw new Error('Unable to parse column definitions from DDL');
     }
@@ -38,7 +38,7 @@ export function parseDDL(ddl: string): ParsedDDL {
     // 컬럼 정의를 개별 컬럼으로 분리
     const columnDefinitions = columnDefinitionsMatch[1];
     const columnsArray = columnDefinitions
-        .split(/,(?![^\(]*\))/)
+        .split(/,(?![^(]*\))/)
         .map(column => column.trim())
         .filter(column => column && !column.startsWith('CONSTRAINT') && !column.startsWith('PRIMARY KEY'));
 
@@ -53,7 +53,7 @@ export function parseDDL(ddl: string): ParsedDDL {
         const rawDataType = parts[1].toUpperCase();
         
         // 데이터 타입에서 크기 정보 제거
-        const dataType = rawDataType.match(/^\w+/)?.[0] || rawDataType;
+        const dataType = RegExp(/^\w+/).exec(rawDataType)?.[0] ?? rawDataType;
         
         // PRIMARY KEY 확인
         const isPrimaryKey = columnDef.toUpperCase().includes('PRIMARY KEY');
@@ -78,7 +78,7 @@ export function parseDDL(ddl: string): ParsedDDL {
     });
 
     // PRIMARY KEY 제약조건이 별도로 정의된 경우 처리
-    const pkConstraintMatch = ddl.match(/PRIMARY KEY\s*\((.*?)\)/i);
+    const pkConstraintMatch = RegExp(/PRIMARY KEY\s*\((.*?)\)/i).exec(ddl);
     if (pkConstraintMatch) {
         const pkColumns = pkConstraintMatch[1]
             .split(',')
@@ -121,8 +121,9 @@ export function validateDDL(ddl: string): boolean {
     }
 
     // 최소한의 컬럼 정의 확인
-    const columnMatch = ddl.match(/\((.*)\)/s);
-    if (!columnMatch || !columnMatch[1].trim()) {
+    const columnRegex = /\((.*)\)/s;
+    const columnMatch = columnRegex.exec(ddl);
+    if (!columnMatch?.[1]?.trim()) {
         return false;
     }
 

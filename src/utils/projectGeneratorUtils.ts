@@ -26,13 +26,13 @@ export async function getProjectConfig(): Promise<ProjectConfig | undefined> {
     prompt: "Enter project name",
     placeHolder: "ProjectName",
   });
-  if (!projectName) return;
+  if (!projectName) {return;}
 
   const groupID = await vscode.window.showInputBox({
     prompt: "Enter group ID",
     placeHolder: "GroupID",
   });
-  if (!groupID) return;
+  if (!groupID) {return;}
 
   return { projectName, groupID };
 }
@@ -43,7 +43,7 @@ export async function generateProject(
   extensionPath: string
 ): Promise<void> {
   const zipFilePath = path.join(extensionPath, "examples", template.fileName);
-  const projectRoot = path.join(vscode.workspace.rootPath || "", config.projectName);
+  const projectRoot = path.join(vscode.workspace.workspaceFolders?.[0]?.uri.fsPath ?? "", config.projectName);
   
   await fs.ensureDir(projectRoot);
 
@@ -67,7 +67,7 @@ async function handleWebProject(
 ): Promise<void> {
   const items = await readZipFile(zipFilePath);
   const selectedItems = await selectFiles(items);
-  if (!selectedItems) return;
+  if (!selectedItems) {return;}
 
   for (const selectedItem of selectedItems) {
     const item = items.find(
@@ -102,7 +102,7 @@ async function generatePomFile(
   extensionPath: string,
   projectRoot: string
 ): Promise<void> {
-  if (template.pomFile === "") return;
+  if (template.pomFile === "") {return;}
 
   const templatePath = path.join(extensionPath, "templates", "project", template.pomFile);
   const outputPath = path.join(projectRoot, "pom.xml");
@@ -121,12 +121,12 @@ async function generatePomFile(
 export async function readZipFile(zipFilePath: string): Promise<SourceItem[]> {
   return new Promise((resolve, reject) => {
     yauzl.open(zipFilePath, { lazyEntries: true }, (err, zipFile) => {
-      if (err) return reject(err);
+      if (err) {return reject(err);}
 
       const items: SourceItem[] = [];
       zipFile.readEntry();
       zipFile.on("entry", (entry) => {
-        if (/\/$/.test(entry.fileName)) {
+        if (entry.fileName.endsWith('/')) {
           zipFile.readEntry();
         } else {
           const entryName = entry.fileName;
@@ -163,11 +163,11 @@ export async function extractFileFromZip(
   await fs.ensureDir(path.dirname(outputPath));
   return new Promise((resolve, reject) => {
     yauzl.open(zipPath, { lazyEntries: true }, (err, zipfile) => {
-      if (err) return reject(err);
+      if (err) {return reject(err);}
       zipfile.on("entry", (entry) => {
         if (entry.fileName === entryPath) {
           zipfile.openReadStream(entry, (err, readStream) => {
-            if (err) return reject(err);
+            if (err) {return reject(err);}
             const writeStream = fs.createWriteStream(outputPath);
             readStream.pipe(writeStream);
             writeStream.on("close", resolve);

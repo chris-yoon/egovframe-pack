@@ -209,7 +209,7 @@ export async function generateCrudFromDDL(ddl: string, context: vscode.Extension
     const defaultPackageName = vscode.workspace.getConfiguration('egovframeInitializr').get<string>('defaultPackageName', 'egovframework.example.sample');
     const packagePath = defaultPackageName.replace(/\./g, path.sep);
 
-    const paths = await setupProjectPaths(folderPath, baseJavaPath, packagePath);
+    await setupProjectPaths(folderPath, baseJavaPath, packagePath);
     const templateFilePaths = getTemplateFilePaths(context);
 
     try {
