@@ -11,9 +11,6 @@ let extensionContext: vscode.ExtensionContext;
 
 export function activate(context: vscode.ExtensionContext) {
 
-  // context를 모듈 변수에 저장
-  extensionContext = context;
-
   // 각각의 기능을 활성화합니다.
   activateGenerateCode(context);
   activateGenerateProject(context);
@@ -40,6 +37,12 @@ export function activate(context: vscode.ExtensionContext) {
       }
     })
   );
+
+  // 테스트를 위해 상태 저장
+  context.globalState.update('webviewCreated', true);
+
+  // context를 모듈 변수에 저장
+  extensionContext = context;
 
 }
 
