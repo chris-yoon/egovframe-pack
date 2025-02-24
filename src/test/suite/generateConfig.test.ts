@@ -5,6 +5,7 @@ import * as path from 'path';
 import * as fs from 'fs-extra';
 import * as sinon from 'sinon';
 import { getExtensionContext } from '../../extension';
+import * as configGeneratorUtils from '../../utils/configGeneratorUtils';
 
 // TemplateConfig 인터페이스 정의
 interface TemplateConfig {
@@ -164,9 +165,6 @@ suite('Generate Config Test Suite', () => {
                 label: mockTemplate.displayName,
                 template: mockTemplate
             } as TemplateQuickPickItem);
-
-            // configGeneratorUtils 모듈 가져오기
-            const configGeneratorUtils = require('../../utils/configGeneratorUtils');
             
             // createConfigWebview 함수 모의화
             sandbox.stub(configGeneratorUtils, 'createConfigWebview')
