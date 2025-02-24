@@ -35,14 +35,6 @@
         "title": "eGovFrame: Start > New Project"
       },
       {
-        "command": "extension.uploadTemplates",
-        "title": "eGovFrame: Custom Code Generator from DDL and VM templates"
-      },
-      {
-        "command": "extension.downloadTemplateContext",
-        "title": "eGovFrame: Download TemplateContext as JSON from DDL"
-      },
-      {
         "command": "extension.generateProjectByForm",
         "title": "eGovFrame: Start > New Project (Form)"
       },
