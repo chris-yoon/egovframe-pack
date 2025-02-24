@@ -27,10 +27,10 @@ export function activate(context: vscode.ExtensionContext) {
         canPickMany: false,
         placeHolder: "Select a template"
       });
-      if (!selected) return;
+      if (!selected) {return;}
 
       const config = await getProjectConfig();
-      if (!config) return;
+      if (!config) {return;}
 
       await generateProject(selected.template, config, extensionPath);
     } catch (error) {

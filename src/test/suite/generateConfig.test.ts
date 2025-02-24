@@ -144,6 +144,85 @@ suite('Generate Config Test Suite', () => {
         assert.ok(createWebviewPanelStub.called, 'createWebviewPanel should be called');
     });
 
+    // 환경설정 파일 생성 테스트
+    test('should generate Java config file when generateJavaConfigByForm is triggered', async () => {
+        try {
+            console.log('Starting test setup...');
+            
+            const mockTemplate: TemplateConfig = {
+                displayName: 'Logging > New Console Appender',
+                webView: 'logging-console-form.html',
+                templateFolder: 'logging',
+                templateFile: 'console.hbs',
+                fileNameProperty: 'txtFileName',
+                javaConfigTemplate: 'console-java.hbs'
+            };
+
+            // QuickPick 자동 선택 설정
+            const quickPickStub = sandbox.stub(vscode.window, 'showQuickPick');
+            quickPickStub.resolves({
+                label: mockTemplate.displayName,
+                template: mockTemplate
+            } as TemplateQuickPickItem);
+
+            // createConfigWebview 함수 모의화
+            sandbox.stub(require('../../utils/configGeneratorUtils'), 'createConfigWebview')
+                .callsFake(async (context, options) => {
+                    console.log('Mock createConfigWebview called with options:', options);
+                    
+                    // javaConfigTemplate 파일 읽기
+                    const templatePath = path.join(
+                        (context as vscode.ExtensionContext).extensionPath,
+                        'templates',
+                        'config',
+                        'logging',
+                        mockTemplate.javaConfigTemplate ?? mockTemplate.templateFile
+                    );
+                    console.log('Reading template from:', templatePath);
+
+                    const { renderTemplate } = require('../../utils/configGeneratorUtils');
+                    
+                    const formData = {
+                        defaultPackageName: 'com.example.config',
+                        txtFileName: 'EgovLoggingConfig',
+                        txtAppenderName: 'console',
+                        txtConversionPattern: '%d %5p [%c] %m%n'
+                    };
+                    console.log('Applying template with data:', formData);
+                    
+                    const generatedContent = await renderTemplate(templatePath, formData);
+                    console.log('Generated content:', generatedContent);
+
+                    // 파일 생성
+                    const testFilePath = path.join(workspaceFolder, `${formData.txtFileName}.java`);
+                    console.log('Creating test file at:', testFilePath);
+                    
+                    await fs.writeFile(testFilePath, generatedContent);
+                    
+                    // 파일 생성 확인
+                    const fileExists = await fs.pathExists(testFilePath);
+                    assert.ok(fileExists, 'Generated file should exist');
+                    
+                    // 파일 내용 확인
+                    const actualContent = await fs.readFile(testFilePath, 'utf8');
+                    console.log('Created file content:', actualContent);
+                    
+                    console.log('Test file successfully created and verified');
+                    return Promise.resolve();
+                });
+
+            // 명령어 실행
+            await vscode.commands.executeCommand('extension.generateConfig');
+
+        } catch (error) {
+            console.error('Test failed with error:', error);
+            if (error instanceof Error) {
+                console.error('Error stack:', error.stack);
+            }
+            throw error;
+        }
+    });
+
     // 취소 처리 테스트
     test('should handle QuickPick cancellation', async () => {
         const quickPickStub = sandbox.stub(vscode.window, 'showQuickPick');

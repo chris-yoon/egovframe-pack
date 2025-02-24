@@ -127,7 +127,7 @@ export function activate(context: vscode.ExtensionContext) {
         }
 
         const config = await getProjectConfig();
-        if (!config) return;
+        if (!config) {return;}
 
         await generateProject(template, config, extensionPath);
       } catch (error) {

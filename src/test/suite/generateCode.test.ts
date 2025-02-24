@@ -116,7 +116,7 @@ suite('Generate Code Test Suite', () => {
             webviewPanel = panels.find(
                 (panel: vscode.WebviewPanel) => panel.viewType === 'egovframeCodeView'
             );
-            if (webviewPanel) break;
+            if (webviewPanel) {break;}
         }
     
         // Webview가 생성되었는지 확인
