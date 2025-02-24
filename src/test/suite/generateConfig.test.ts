@@ -165,12 +165,14 @@ suite('Generate Config Test Suite', () => {
                 template: mockTemplate
             } as TemplateQuickPickItem);
 
+            // configGeneratorUtils 모듈 가져오기
+            const configGeneratorUtils = require('../../utils/configGeneratorUtils');
+            
             // createConfigWebview 함수 모의화
-            sandbox.stub(require('../../utils/configGeneratorUtils'), 'createConfigWebview')
+            sandbox.stub(configGeneratorUtils, 'createConfigWebview')
                 .callsFake(async (context, options) => {
                     console.log('Mock createConfigWebview called with options:', options);
                     
-                    // javaConfigTemplate 파일 읽기
                     const templatePath = path.join(
                         (context as vscode.ExtensionContext).extensionPath,
                         'templates',
@@ -179,8 +181,6 @@ suite('Generate Config Test Suite', () => {
                         mockTemplate.javaConfigTemplate ?? mockTemplate.templateFile
                     );
                     console.log('Reading template from:', templatePath);
-
-                    const { renderTemplate } = require('../../utils/configGeneratorUtils');
                     
                     const formData = {
                         defaultPackageName: 'com.example.config',
@@ -190,7 +190,8 @@ suite('Generate Config Test Suite', () => {
                     };
                     console.log('Applying template with data:', formData);
                     
-                    const generatedContent = await renderTemplate(templatePath, formData);
+                    // 동일한 모듈의 renderTemplate 사용
+                    const generatedContent = await configGeneratorUtils.renderTemplate(templatePath, formData);
                     console.log('Generated content:', generatedContent);
 
                     // 파일 생성
