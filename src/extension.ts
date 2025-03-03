@@ -6,6 +6,9 @@ import { activate as activategenerateConfigContainer } from './generateConfigCon
 import { activate as activateGenerateProjectByForm } from './generateProjectByForm';
 import { activate as activategenerateCodeContainer } from './generateCodeContainer';
 import { activate as activategenerateProjectContainer } from './generateProjectContainer';
+import { registerSnippetProvider } from './snippets/snippetProvider';
+import { registerSnippetCommand } from './snippets/snippetCommand';
+import { registerSnippetExplorer } from './snippets/snippetExplorer';
 
 let extensionContext: vscode.ExtensionContext;
 
@@ -19,6 +22,11 @@ export function activate(context: vscode.ExtensionContext) {
   activateGenerateProjectByForm(context);
   activategenerateCodeContainer(context);
   activategenerateProjectContainer(context);
+  
+  // Register the snippet features
+  registerSnippetProvider(context);
+  registerSnippetCommand(context);
+  registerSnippetExplorer(context);
 
   context.subscriptions.push(
     vscode.commands.registerCommand('extension.openPackageSettings', async () => {

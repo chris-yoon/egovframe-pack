@@ -25,6 +25,16 @@
   "main": "./out/extension.js",
   "readme": "README.md",
   "contributes": {
+    "snippets": [
+      {
+        "language": "java",
+        "path": "./snippets/java-snippets.json"
+      },
+      {
+        "language": "xml",
+        "path": "./snippets/xml-snippets.json"
+      }
+    ],
     "commands": [
       {
         "command": "extension.generateCode",
@@ -61,6 +71,15 @@
         "command": "extension.openPackageSettings",
         "title": "Package Settings",
         "icon": "$(gear)"
+      },
+      {
+        "command": "extension.insertEgovSnippet",
+        "title": "eGovFrame: Insert Snippet"
+      },
+      {
+        "command": "extension.refreshSnippets",
+        "title": "Refresh Snippets",
+        "icon": "$(refresh)"
       }
     ],
     "menus": {
@@ -119,6 +138,11 @@
           "command": "extension.openPackageSettings",
           "when": "view == egovframeCodeView || view == egovframeConfigView",
           "group": "navigation"
+        },
+        {
+          "command": "extension.insertEgovSnippet",
+          "when": "view == egovframeSnippetsView",
+          "group": "navigation"
         }
       ]
     },
@@ -174,6 +198,10 @@
         {
           "id": "egovframeConfigView",
           "name": "Generate Configurations"
+        },
+        {
+          "id": "egovframeSnippetsView",
+          "name": "Snippets"
         }
       ]
     }
@@ -183,10 +211,11 @@
     "vscode:prepublish": "npm run compile",
     "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./",
-    "pretest": "npm run clean && npm run compile && npm run lint",
+    "pretest": "npm run compile && npm run lint",
     "lint": "eslint src --ext ts",
-    "test": "vscode-test --enable-proposed-api=egovframework.vscode-egovframe-initializr",
-    "test:coverage": "vscode-test --enable-proposed-api=egovframework.vscode-egovframe-initializr --coverage"
+    "test": "node ./scripts/simpleTest.js",
+    "test:vscode": "node ./scripts/runTests.js",
+    "test:coverage": "node ./scripts/runTests.js --coverage"
   },
   "devDependencies": {
     "@types/fs-extra": "^11.0.4",
