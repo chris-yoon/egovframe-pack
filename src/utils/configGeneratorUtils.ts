@@ -2,33 +2,10 @@ import * as vscode from "vscode";
 import * as path from "path";
 import * as fs from "fs-extra";
 import * as Handlebars from "handlebars";
+import { registerHandlebarsHelpers } from "./handlebarHelpers";
 
-// Register Handlebars helpers
-Handlebars.registerHelper('error', function(message) {
-    console.error(message);
-    return new Handlebars.SafeString(`<span class="error">${message}</span>`);
-});
-
-Handlebars.registerHelper('empty', function(value) {
-    return value === null || value === '';
-});
-
-Handlebars.registerHelper('eq', function(a, b) {
-    return a === b;
-});
-
-Handlebars.registerHelper('concat', function(...args) {
-    return args.slice(0, -1).join('');
-});
-
-Handlebars.registerHelper("setVar", function(varName, varValue, options) {
-    options.data.root[varName] = varValue;
-});
-
-Handlebars.registerHelper('lowercase', function(str) {
-    if (typeof str !== 'string') {return '';}
-    return str.toLowerCase();
-});
+// Register common Handlebars helpers
+registerHandlebarsHelpers();
 
 // Define an interface for your template configuration
 // 각 템플릿의 설정을 정의하는 인터페이스

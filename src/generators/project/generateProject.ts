@@ -1,9 +1,9 @@
 import * as vscode from "vscode";
 import * as path from "path";
 import * as fs from "fs-extra";
-import { Template, generateProject, getProjectConfig } from "./utils/projectGeneratorUtils";
+import { Template, generateProject, getProjectConfig } from "../../utils/projectGeneratorUtils";
 
-export function activate(context: vscode.ExtensionContext) {
+export function registerGenerateProjectCommand(context: vscode.ExtensionContext) {
   let disposable = vscode.commands.registerCommand("extension.generateProject", async () => {
     const extensionPath = vscode.extensions.getExtension(
       "egovframework.vscode-egovframe-initializr"

@@ -1,11 +1,11 @@
 import * as vscode from 'vscode';
 import { 
-  generateCrudFromDDL,
-  registerHandlebarsHelpers
-} from './utils/codeGeneratorUtils';
+  generateCrudFromDDL
+} from '../../utils/codeGeneratorUtils';
+import { registerHandlebarsHelpers } from '../../utils/handlebarHelpers';
 
 // 이 함수는 VSCode 확장이 활성화될 때 호출된다.
-export function activate(context: vscode.ExtensionContext) {
+export function registerGenerateCodeCommand(context: vscode.ExtensionContext) {
   registerHandlebarsHelpers();
   // generateCode 명령: 사용자가 DDL을 입력하면, 이를 파싱하여 템플릿 파일을 렌더링하고 파일을 생성한다.
   let generateCodeDisposable = vscode.commands.registerCommand('extension.generateCode', async () => {

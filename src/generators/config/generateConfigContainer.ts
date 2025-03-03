@@ -6,7 +6,7 @@ import {
     groupTemplates, 
     createConfigWebview,
     TemplateConfig
-} from "./utils/configGeneratorUtils";
+} from "../../utils/configGeneratorUtils";
 
 // Define a simple TreeItem for the Template Tree View
 class TemplateTreeItem extends vscode.TreeItem {
@@ -71,7 +71,7 @@ class TemplateTreeDataProvider implements vscode.TreeDataProvider<TemplateTreeIt
 }
 
 // Activation function
-export function activate(context: vscode.ExtensionContext) {
+export function registerGenerateConfigContainerCommand(context: vscode.ExtensionContext) {
   const configFilePath = path.join(context.extensionPath, "templates-context-xml.json");
   const templates: TemplateConfig[] = JSON.parse(fs.readFileSync(configFilePath, "utf8"));
 

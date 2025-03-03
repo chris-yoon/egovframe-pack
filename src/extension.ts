@@ -1,11 +1,12 @@
 import * as vscode from 'vscode';
-import { activate as activateGenerateCode } from './generateCode';
-import { activate as activateGenerateProject } from './generateProject';
-import { activate as activategenerateConfig } from './generateConfig';
-import { activate as activategenerateConfigContainer } from './generateConfigContainer';
-import { activate as activateGenerateProjectByForm } from './generateProjectByForm';
-import { activate as activategenerateCodeContainer } from './generateCodeContainer';
-import { activate as activategenerateProjectContainer } from './generateProjectContainer';
+import { registerHandlebarsHelpers } from './utils/handlebarHelpers';
+import { registerGenerateCodeCommand } from './generators/code/generateCode';
+import { registerGenerateProjectCommand } from './generators/project/generateProject';
+import { registerGenerateConfigCommand } from './generators/config/generateConfig';
+import { registerGenerateConfigContainerCommand } from './generators/config/generateConfigContainer';
+import { registerGenerateProjectByFormCommand } from './generators/project/generateProjectByForm';
+import { registerGenerateCodeContainerCommand } from './generators/code/generateCodeContainer';
+import { registerGenerateProjectContainerCommand } from './generators/project/generateProjectContainer';
 import { registerSnippetProvider } from './snippets/snippetProvider';
 import { registerSnippetCommand } from './snippets/snippetCommand';
 import { registerSnippetExplorer } from './snippets/snippetExplorer';
@@ -13,15 +14,17 @@ import { registerSnippetExplorer } from './snippets/snippetExplorer';
 let extensionContext: vscode.ExtensionContext;
 
 export function activate(context: vscode.ExtensionContext) {
+  // Register Handlebars helpers once at activation
+  registerHandlebarsHelpers();
 
   // 각각의 기능을 활성화합니다.
-  activateGenerateCode(context);
-  activateGenerateProject(context);
-  activategenerateConfig(context);
-  activategenerateConfigContainer(context);
-  activateGenerateProjectByForm(context);
-  activategenerateCodeContainer(context);
-  activategenerateProjectContainer(context);
+  registerGenerateCodeCommand(context);
+  registerGenerateProjectCommand(context);
+  registerGenerateConfigCommand(context);
+  registerGenerateConfigContainerCommand(context);
+  registerGenerateProjectByFormCommand(context);
+  registerGenerateCodeContainerCommand(context);
+  registerGenerateProjectContainerCommand(context);
   
   // Register the snippet features
   registerSnippetProvider(context);

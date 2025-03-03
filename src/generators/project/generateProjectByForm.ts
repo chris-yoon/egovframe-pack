@@ -1,9 +1,9 @@
 import * as vscode from "vscode";
 import * as path from "path";
 import * as fs from "fs-extra";
-import { Template, generateProject } from "./utils/projectGeneratorUtils";
+import { Template, generateProject } from "../../utils/projectGeneratorUtils";
 
-export function activate(context: vscode.ExtensionContext) {
+export function registerGenerateProjectByFormCommand(context: vscode.ExtensionContext) {
   let disposable = vscode.commands.registerCommand("extension.generateProjectByForm", () => {
     createWebview(context);
   });

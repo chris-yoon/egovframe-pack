@@ -1,7 +1,7 @@
 import * as vscode from "vscode";
 import * as path from "path";
 import * as fs from "fs-extra";
-import { Template, generateProject, getProjectConfig } from "./utils/projectGeneratorUtils";
+import { Template, generateProject, getProjectConfig } from "../../utils/projectGeneratorUtils";
 
 interface GroupedTemplates {
   groupName: string | null;
@@ -102,7 +102,7 @@ function groupTemplates(templates: Template[]): GroupedTemplates[] {
   return groupedTemplates;
 }
 
-export function activate(context: vscode.ExtensionContext) {
+export function registerGenerateProjectContainerCommand(context: vscode.ExtensionContext) {
   const configFilePath = path.join(context.extensionPath, "templates-projects.json");
   const templates: Template[] = JSON.parse(fs.readFileSync(configFilePath, "utf8"));
   const groupedTemplates: GroupedTemplates[] = groupTemplates(templates);

@@ -2,7 +2,11 @@ import * as vscode from 'vscode';
 import * as path from 'path';
 import * as fs from 'fs-extra';
 import * as Handlebars from 'handlebars';
+import { registerHandlebarsHelpers } from "./handlebarHelpers";
 import { parseDDL } from './ddlParser';
+
+// Register common Handlebars helpers
+registerHandlebarsHelpers();
 
 // 데이터베이스 컬럼의 정보를 담는 인터페이스
 export interface Column {
@@ -67,41 +71,6 @@ class DatabaseDefinition {
     public getPredefinedDataTypeDefinition(dataType: string): string {
         return this.predefinedDataTypes[dataType.toUpperCase()] || 'java.lang.Object';
     }
-}
-
-// Handlebars 헬퍼 등록
-export function registerHandlebarsHelpers() {
-    Handlebars.registerHelper('empty', function(value) {
-        return value === null || value === '';
-    });
-
-    Handlebars.registerHelper('eq', function(a, b) {
-        return a === b;
-    });
-
-    Handlebars.registerHelper('hasError', function() {
-        return false;
-    });
-
-    Handlebars.registerHelper('error', function(message) {
-        console.error(message);
-        return new Handlebars.SafeString(`<span class="error">${message}</span>`);
-    });
-
-    Handlebars.registerHelper("setVar", function(varName, varValue, options) {
-        options.data.root[varName] = varValue;
-    });
-
-    Handlebars.registerHelper('concat', function(...args) {
-        return args.slice(0, -1).join('');
-    });
-
-    Handlebars.registerHelper('lowercase', function(str) {
-        if (typeof str !== 'string') {
-            return '';
-        }
-        return str.toLowerCase();
-    });
 }
 
 // renderTemplate 함수는 Handlebars를 사용하여 템플릿을 렌더링한다.

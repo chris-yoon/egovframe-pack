@@ -4,12 +4,12 @@ import * as path from 'path';
 import { 
   getTemplateContext,
   renderTemplate,
-  registerHandlebarsHelpers,
   generateCrudFromDDL
-} from './utils/codeGeneratorUtils';
-import { parseDDL } from './utils/ddlParser';
+} from '../../utils/codeGeneratorUtils';
+import { parseDDL } from '../../utils/ddlParser';
+import { registerHandlebarsHelpers } from '../../utils/handlebarHelpers';
 
-export function activate(context: vscode.ExtensionContext) {
+export function registerGenerateCodeContainerCommand(context: vscode.ExtensionContext) {
   registerHandlebarsHelpers();
 
   // 웹뷰를 생성하고 등록한다.
