@@ -9,10 +9,10 @@
 		http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-4.0.xsd">
 	
 	<jee:jndi-lookup id="{{txtDatasourceName}}" jndi-name="{{txtJndiName}}" resource-ref="true">
-	     <jee:environment>
+	  <jee:environment>
 		  java.naming.factory.initial={{txtFactoryInitial}}
 		  java.naming.provider.url={{txtProviderUrl}}
-	    </jee:environment>
+	  </jee:environment>
 	</jee:jndi-lookup>
 
 </beans>

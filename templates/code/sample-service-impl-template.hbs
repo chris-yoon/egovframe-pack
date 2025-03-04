@@ -55,16 +55,16 @@ import {{mapperPackage}}.{{mapperClassName}};
 
 @Service("{{serviceName}}")
 public class {{serviceImplClassName}} extends EgovAbstractServiceImpl implements
-        {{serviceClassName}} {
+	{{serviceClassName}} {
         
-    private static final Logger LOGGER = LoggerFactory.getLogger({{serviceImplClassName}}.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger({{serviceImplClassName}}.class);
 
-    @Resource(name="{{mapperName}}")
-    private {{mapperClassName}} {{daoInstanceName}};
-    
-    /** ID Generation */
-    //@Resource(name="{{idGnrService}}")    
-    //private EgovIdGnrService egovIdGnrService;
+	@Resource(name="{{mapperName}}")
+	private {{mapperClassName}} {{daoInstanceName}};
+
+	/** ID Generation */
+	//@Resource(name="{{idGnrService}}")    
+	//private EgovIdGnrService egovIdGnrService;
 
 	/**
 	 * {{tableName}}을 등록한다.
@@ -72,69 +72,68 @@ public class {{serviceImplClassName}} extends EgovAbstractServiceImpl implements
 	 * @return 등록 결과
 	 * @exception Exception
 	 */
-    public String {{insertMethodName}}({{voClassName}} vo) throws Exception {
-    	LOGGER.debug(vo.toString());
-    	
-    	/** ID Generation Service */
-    	//String id = egovIdGnrService.getNextStringId();
-    	//vo.setId(id);
-    	
-    	{{daoInstanceName}}.{{insertMethodName}}(vo);
-    	
-        return null;
-    }
+	public String {{insertMethodName}}({{voClassName}} vo) throws Exception {
+		LOGGER.debug(vo.toString());
 
-    /**
+		/** ID Generation Service */
+		//String id = egovIdGnrService.getNextStringId();
+		//vo.setId(id);
+
+		{{daoInstanceName}}.{{insertMethodName}}(vo);
+
+		return null;
+	}
+
+	/**
 	 * {{tableName}}을 수정한다.
 	 * @param vo - 수정할 정보가 담긴 {{voClassName}}
 	 * @return void형
 	 * @exception Exception
 	 */
-    public void {{updateMethodName}}({{voClassName}} vo) throws Exception {
-        {{daoInstanceName}}.{{updateMethodName}}(vo);
-    }
+	public void {{updateMethodName}}({{voClassName}} vo) throws Exception {
+    {{daoInstanceName}}.{{updateMethodName}}(vo);
+	}
 
-    /**
+  /**
 	 * {{tableName}}을 삭제한다.
 	 * @param vo - 삭제할 정보가 담긴 {{voClassName}}
 	 * @return void형 
 	 * @exception Exception
 	 */
-    public void {{deleteMethodName}}({{voClassName}} vo) throws Exception {
-        {{daoInstanceName}}.{{deleteMethodName}}(vo);
-    }
+  public void {{deleteMethodName}}({{voClassName}} vo) throws Exception {
+    {{daoInstanceName}}.{{deleteMethodName}}(vo);
+  }
 
-    /**
+  /**
 	 * {{tableName}}을 조회한다.
 	 * @param vo - 조회할 정보가 담긴 {{voClassName}}
 	 * @return 조회한 {{tableName}}
 	 * @exception Exception
 	 */
-    public {{voClassName}} {{selectMethodName}}({{voClassName}} vo) throws Exception {
-        {{voClassName}} resultVO = {{daoInstanceName}}.{{selectMethodName}}(vo);
-        if (resultVO == null)
-            throw processException("info.nodata.msg");
-        return resultVO;
-    }
+  public {{voClassName}} {{selectMethodName}}({{voClassName}} vo) throws Exception {
+		{{voClassName}} resultVO = {{daoInstanceName}}.{{selectMethodName}}(vo);
+		if (resultVO == null)
+			throw processException("info.nodata.msg");
+		return resultVO;
+  }
 
-    /**
+  /**
 	 * {{tableName}} 목록을 조회한다.
 	 * @param searchVO - 조회할 정보가 담긴 VO
 	 * @return {{tableName}} 목록
 	 * @exception Exception
 	 */
-    public List<?> {{selectListMethodName}}({{defaultVoClassName}} searchVO) throws Exception {
-        return {{daoInstanceName}}.{{selectListMethodName}}(searchVO);
-    }
+  public List<?> {{selectListMethodName}}({{defaultVoClassName}} searchVO) throws Exception {
+    return {{daoInstanceName}}.{{selectListMethodName}}(searchVO);
+  }
 
-    /**
+  /**
 	 * {{tableName}} 총 갯수를 조회한다.
 	 * @param searchVO - 조회할 정보가 담긴 VO
 	 * @return {{tableName}} 총 갯수
 	 * @exception
 	 */
-    public int {{selectListTotCntMethodName}}({{defaultVoClassName}} searchVO) {
+  public int {{selectListTotCntMethodName}}({{defaultVoClassName}} searchVO) {
 		return {{daoInstanceName}}.{{selectListTotCntMethodName}}(searchVO);
 	}
-    
 }

@@ -9,42 +9,42 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class {{txtFileName}} {
 
-    @Bean(name = "{{txtAppenderName}}")
-    public DBAppender {{txtAppenderName}}() {
-        DBAppender dbAppender = new DBAppender();
+  @Bean(name = "{{txtAppenderName}}")
+  public DBAppender {{txtAppenderName}}() {
+    DBAppender dbAppender = new DBAppender();
 
-        // Set location info
-        dbAppender.setLocationInfo({{chkLocationInfo}});
+    // Set location info
+    dbAppender.setLocationInfo({{chkLocationInfo}});
 
-        // Set useSupportsGetGeneratedKeys
-        dbAppender.setUseSupportsGetGeneratedKeys({{chkSupportsGetGeneratedKeys}});
+    // Set useSupportsGetGeneratedKeys
+    dbAppender.setUseSupportsGetGeneratedKeys({{chkSupportsGetGeneratedKeys}});
 
-        // Configure the connection source
-        DriverManagerConnectionSource connectionSource = new DriverManagerConnectionSource();
-        connectionSource.setDriverClass("{{txtDriver}}");
-        connectionSource.setUrl("{{txtUrl}}");
-        connectionSource.setUser("{{txtUser}}");
-        connectionSource.setPassword("{{txtPasswd}}");
+    // Configure the connection source
+    DriverManagerConnectionSource connectionSource = new DriverManagerConnectionSource();
+    connectionSource.setDriverClass("{{txtDriver}}");
+    connectionSource.setUrl("{{txtUrl}}");
+    connectionSource.setUser("{{txtUser}}");
+    connectionSource.setPassword("{{txtPasswd}}");
 
-        dbAppender.setConnectionSource(connectionSource);
+    dbAppender.setConnectionSource(connectionSource);
 
-        return dbAppender;
-    }
+    return dbAppender;
+  }
 
-    @Bean
-    public Logger springLogger() {
-        Logger logger = Logger.getLogger("org.springframework");
-        logger.setAdditivity(false);
-        logger.setLevel(org.apache.log4j.Level.DEBUG);
-        logger.addAppender({{txtAppenderName}}());
-        return logger;
-    }
+  @Bean
+  public Logger springLogger() {
+    Logger logger = Logger.getLogger("org.springframework");
+    logger.setAdditivity(false);
+    logger.setLevel(org.apache.log4j.Level.DEBUG);
+    logger.addAppender({{txtAppenderName}}());
+    return logger;
+  }
 
-    @Bean
-    public Logger rootLogger() {
-        Logger rootLogger = Logger.getRootLogger();
-        rootLogger.setLevel(org.apache.log4j.Level.OFF);
-        rootLogger.addAppender({{txtAppenderName}}());
-        return rootLogger;
-    }
+  @Bean
+  public Logger rootLogger() {
+    Logger rootLogger = Logger.getRootLogger();
+    rootLogger.setLevel(org.apache.log4j.Level.OFF);
+    rootLogger.addAppender({{txtAppenderName}}());
+    return rootLogger;
+  }
 }

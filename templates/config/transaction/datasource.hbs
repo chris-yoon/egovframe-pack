@@ -8,13 +8,13 @@
 		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.0.xsd">
 
 	<bean id="{{txtTransactionName}}" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
-	   <property name="dataSource" ref="{{txtDatasourceName}}"/>
+		<property name="dataSource" ref="{{txtDatasourceName}}"/>
 	</bean>
 	
 	{{#if chkTransactionTemplate}}
-    <bean id="{{txtTransactionTemplateName}}" class="org.springframework.transaction.support.TransactionTemplate">
-        <property name="transactionManager" ref="{{txtTransactionName}}"/>
-    </bean> 
+	<bean id="{{txtTransactionTemplateName}}" class="org.springframework.transaction.support.TransactionTemplate">
+		<property name="transactionManager" ref="{{txtTransactionName}}"/>
+	</bean> 
 	{{/if}}
 	
 	{{#if chkAnnotationTransactionManagement}}

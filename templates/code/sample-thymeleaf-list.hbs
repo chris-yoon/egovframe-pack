@@ -16,37 +16,37 @@
 <!DOCTYPE html>
 <html xmlns="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8">
-    <title>목록</title>
-    <link rel="stylesheet" href="/css/egovframework/sample.css" />
-    <script type="text/javascript">
-        /* 글 수정 화면 function */
+  <meta charset="UTF-8">
+  <title>목록</title>
+  <link rel="stylesheet" href="/css/egovframework/sample.css" />
+  <script type="text/javascript">
+    /* 글 수정 화면 function */
 
-        function fn_egov_select({{#if pkAttributes.length}}{{#each pkAttributes}}{{this.ccName}}{{#if @last}}{{else}},{{/if}}{{/each}}{{else}}{{attributes.[0].ccName}}{{/if}}) {
-            {{#if pkAttributes.length}}
-                {{#each pkAttributes}}
-                document.getElementById("listForm").{{this.ccName}}.value = {{this.ccName}};
-                {{/each}}
-            {{else}}
-                document.getElementById("listForm").{{attributes.[0].ccName}}.value = {{attributes.[0].ccName}};
-            {{/if}}
-            document.getElementById("listForm").action = "{{updateViewPath}}";
-            document.getElementById("listForm").submit();
-        }
+    function fn_egov_select({{#if pkAttributes.length}}{{#each pkAttributes}}{{this.ccName}}{{#if @last}}{{else}},{{/if}}{{/each}}{{else}}{{attributes.[0].ccName}}{{/if}}) {
+      {{#if pkAttributes.length}}
+          {{#each pkAttributes}}
+          document.getElementById("listForm").{{this.ccName}}.value = {{this.ccName}};
+          {{/each}}
+      {{else}}
+          document.getElementById("listForm").{{attributes.[0].ccName}}.value = {{attributes.[0].ccName}};
+      {{/if}}
+      document.getElementById("listForm").action = "{{updateViewPath}}";
+      document.getElementById("listForm").submit();
+    }
 
-        /* 글 등록 화면 function */
-        function fn_egov_addView() {
-            document.getElementById("listForm").action = "{{addViewPath}}";
-            document.getElementById("listForm").submit();
-        }
+    /* 글 등록 화면 function */
+    function fn_egov_addView() {
+      document.getElementById("listForm").action = "{{addViewPath}}";
+      document.getElementById("listForm").submit();
+    }
 
-        /* pagination 페이지 링크 function */
-        function fn_egov_link_page(pageNo){
-            document.getElementById("listForm").pageIndex.value = pageNo;
-            document.getElementById("listForm").action = '{{listPath}}';
-            document.getElementById("listForm").submit();
-        }
-    </script>
+    /* pagination 페이지 링크 function */
+    function fn_egov_link_page(pageNo){
+      document.getElementById("listForm").pageIndex.value = pageNo;
+      document.getElementById("listForm").action = '{{listPath}}';
+      document.getElementById("listForm").submit();
+    }
+  </script>
 </head>
 <body>
 <form id="listForm" method="post">

@@ -12,25 +12,25 @@ import java.util.Properties;
 @Configuration
 public class {{txtFileName}} {
 
-    @Bean
-    public PlatformTransactionManager transactionManager() {
-        return new JtaTransactionManager();
-    }
+  @Bean
+  public PlatformTransactionManager transactionManager() {
+    return new JtaTransactionManager();
+  }
 
-    @Bean(name = "{{txtDatasourceName}}")
-    public DataSource dataSource() {
-        JndiObjectFactoryBean jndiObjectFactoryBean = new JndiObjectFactoryBean();
-        jndiObjectFactoryBean.setJndiName("{{txtJndiName}}");
-        jndiObjectFactoryBean.setResourceRef({{cboResourceRef}});
-        
-        // Setting up the environment properties for JNDI lookup
-        Properties env = new Properties();
-        env.put("java.naming.factory.initial", "{{txtInitialFactory}}");
-        env.put("java.naming.provider.url", "{{txtProviderUrl}}");
-        jndiObjectFactoryBean.setJndiEnvironment(env);
-        
-        jndiObjectFactoryBean.setProxyInterface(DataSource.class);
-        jndiObjectFactoryBean.afterPropertiesSet(); // Ensure the factory bean initializes correctly
-        return (DataSource) jndiObjectFactoryBean.getObject();
-    }
+  @Bean(name = "{{txtDatasourceName}}")
+  public DataSource dataSource() {
+    JndiObjectFactoryBean jndiObjectFactoryBean = new JndiObjectFactoryBean();
+    jndiObjectFactoryBean.setJndiName("{{txtJndiName}}");
+    jndiObjectFactoryBean.setResourceRef({{cboResourceRef}});
+    
+    // Setting up the environment properties for JNDI lookup
+    Properties env = new Properties();
+    env.put("java.naming.factory.initial", "{{txtInitialFactory}}");
+    env.put("java.naming.provider.url", "{{txtProviderUrl}}");
+    jndiObjectFactoryBean.setJndiEnvironment(env);
+    
+    jndiObjectFactoryBean.setProxyInterface(DataSource.class);
+    jndiObjectFactoryBean.afterPropertiesSet(); // Ensure the factory bean initializes correctly
+    return (DataSource) jndiObjectFactoryBean.getObject();
+  }
 }

@@ -7,12 +7,12 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class {{txtFileName}} {
 
-    @Bean(name = "{{txtIdServiceName}}")
-    public EgovUUIdGnrService {{txtIdServiceName}}() {
-        EgovUUIdGnrService uuidGnrService = new EgovUUIdGnrService();
-        {{#if (eq rdoType "Address")}}
-        uuidGnrService.setAddress("{{txtAddress}}");
-        {{/if}}
-        return uuidGnrService;
-    }
+  @Bean(name = "{{txtIdServiceName}}")
+  public EgovUUIdGnrService {{txtIdServiceName}}() {
+    EgovUUIdGnrService uuidGnrService = new EgovUUIdGnrService();
+    {{#if (eq rdoType "Address")}}
+    uuidGnrService.setAddress("{{txtAddress}}");
+    {{/if}}
+    return uuidGnrService;
+  }
 }

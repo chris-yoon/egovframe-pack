@@ -22,67 +22,67 @@ import java.util.Map;
 {{/if}}
 public class {{txtFileName}} {
 
-    private final DataSource dataSource;
+  private final DataSource dataSource;
 
-    public {{txtFileName}}(DataSource dataSource) {
-        this.dataSource = dataSource;
-    }
+  public {{txtFileName}}(DataSource dataSource) {
+    this.dataSource = dataSource;
+  }
 
-    @Bean(name = "{{txtTransactionName}}")
-    public PlatformTransactionManager transactionManager() {
-        return new DataSourceTransactionManager(dataSource);
-    }
+  @Bean(name = "{{txtTransactionName}}")
+  public PlatformTransactionManager transactionManager() {
+    return new DataSourceTransactionManager(dataSource);
+  }
 
-    {{#if chkTransactionTemplate}}
-    @Bean(name = "{{txtTransactionTemplateName}}")
-    public TransactionTemplate transactionTemplate() {
-        return new TransactionTemplate(transactionManager());
-    }
+  {{#if chkTransactionTemplate}}
+  @Bean(name = "{{txtTransactionTemplateName}}")
+  public TransactionTemplate transactionTemplate() {
+    return new TransactionTemplate(transactionManager());
+  }
+  {{/if}}
+
+  {{#if chkConfigurationalTransactionManagement}}
+  @Bean
+  public DefaultAdvisorAutoProxyCreator advisorAutoProxyCreator() {
+    return new DefaultAdvisorAutoProxyCreator();
+  }
+
+  @Bean(name = "{{txtPointCutName}}")
+  public AnnotationMatchingPointcut pointcut() {
+    return new AnnotationMatchingPointcut(null, {{txtPointCutExpression}}.class);
+  }
+
+  @Bean(name = "{{txtAdviceName}}")
+  public TransactionInterceptor transactionInterceptor() {
+    TransactionInterceptor interceptor = new TransactionInterceptor();
+    interceptor.setTransactionManager(transactionManager());
+    
+    MatchAlwaysTransactionAttributeSource source = new MatchAlwaysTransactionAttributeSource();
+    RuleBasedTransactionAttribute transactionAttribute = new RuleBasedTransactionAttribute();
+    transactionAttribute.setName("{{txtMethodName}}");
+    transactionAttribute.setReadOnly({{chkReadOnly}});
+    
+    {{#if chkTimeout}}
+    transactionAttribute.setTimeout({{txtTimeout}});
+    {{/if}}
+    transactionAttribute.setPropagationBehaviorName("PROPAGATION_{{cmbPropagation}}");
+    transactionAttribute.setIsolationLevelName("ISOLATION_{{cmbIsolation}}");
+    
+    {{#if chkRollbackFor}}
+    transactionAttribute.setRollbackRules(Collections.singletonList(new RollbackRuleAttribute({{txtRollbackFor}}.class)));
+    {{/if}}
+    {{#if chkNoRollbackFor}}
+    transactionAttribute.setNoRollbackRules(Collections.singletonList(new NoRollbackRuleAttribute({{txtNoRollbackFor}}.class)));
     {{/if}}
 
-    {{#if chkConfigurationalTransactionManagement}}
-    @Bean
-    public DefaultAdvisorAutoProxyCreator advisorAutoProxyCreator() {
-        return new DefaultAdvisorAutoProxyCreator();
-    }
+    source.setTransactionAttribute(transactionAttribute);
+    interceptor.setTransactionAttributeSource(source);
+    
+    return interceptor;
+  }
 
-    @Bean(name = "{{txtPointCutName}}")
-    public AnnotationMatchingPointcut pointcut() {
-        return new AnnotationMatchingPointcut(null, {{txtPointCutExpression}}.class);
-    }
-
-    @Bean(name = "{{txtAdviceName}}")
-    public TransactionInterceptor transactionInterceptor() {
-        TransactionInterceptor interceptor = new TransactionInterceptor();
-        interceptor.setTransactionManager(transactionManager());
-        
-        MatchAlwaysTransactionAttributeSource source = new MatchAlwaysTransactionAttributeSource();
-        RuleBasedTransactionAttribute transactionAttribute = new RuleBasedTransactionAttribute();
-        transactionAttribute.setName("{{txtMethodName}}");
-        transactionAttribute.setReadOnly({{chkReadOnly}});
-        
-        {{#if chkTimeout}}
-        transactionAttribute.setTimeout({{txtTimeout}});
-        {{/if}}
-        transactionAttribute.setPropagationBehaviorName("PROPAGATION_{{cmbPropagation}}");
-        transactionAttribute.setIsolationLevelName("ISOLATION_{{cmbIsolation}}");
-        
-        {{#if chkRollbackFor}}
-        transactionAttribute.setRollbackRules(Collections.singletonList(new RollbackRuleAttribute({{txtRollbackFor}}.class)));
-        {{/if}}
-        {{#if chkNoRollbackFor}}
-        transactionAttribute.setNoRollbackRules(Collections.singletonList(new NoRollbackRuleAttribute({{txtNoRollbackFor}}.class)));
-        {{/if}}
-
-        source.setTransactionAttribute(transactionAttribute);
-        interceptor.setTransactionAttributeSource(source);
-        
-        return interceptor;
-    }
-
-    @Bean
-    public DefaultPointcutAdvisor defaultPointcutAdvisor() {
-        return new DefaultPointcutAdvisor(pointcut(), transactionInterceptor());
-    }
-    {{/if}}
+  @Bean
+  public DefaultPointcutAdvisor defaultPointcutAdvisor() {
+    return new DefaultPointcutAdvisor(pointcut(), transactionInterceptor());
+  }
+  {{/if}}
 }

@@ -8,11 +8,11 @@ import org.springframework.scheduling.quartz.JobDetailFactoryBean;
 @Configuration
 public class {{txtFileName}} {
 
-    @Bean(name = "{{txtTriggerName}}")
-    public CronTriggerFactoryBean cronTrigger(JobDetailFactoryBean jobDetail) {
-        CronTriggerFactoryBean cronTriggerFactoryBean = new CronTriggerFactoryBean();
-        cronTriggerFactoryBean.setJobDetail(jobDetail.getObject());
-        cronTriggerFactoryBean.setCronExpression("{{txtExpression}}");
-        return cronTriggerFactoryBean;
-    }
+  @Bean(name = "{{txtTriggerName}}")
+  public CronTriggerFactoryBean cronTrigger(JobDetailFactoryBean jobDetail) {
+    CronTriggerFactoryBean cronTriggerFactoryBean = new CronTriggerFactoryBean();
+    cronTriggerFactoryBean.setJobDetail(jobDetail.getObject());
+    cronTriggerFactoryBean.setCronExpression("{{txtExpression}}");
+    return cronTriggerFactoryBean;
+  }
 }

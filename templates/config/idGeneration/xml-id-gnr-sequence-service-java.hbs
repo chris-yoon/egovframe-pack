@@ -8,20 +8,20 @@ import javax.sql.DataSource;
 @Configuration
 public class {{txtFileName}} {
 
-    private final DataSource dataSource;
+  private final DataSource dataSource;
 
-    public {{txtFileName}}(DataSource dataSource) {
-        this.dataSource = dataSource;
-    }
+  public {{txtFileName}}(DataSource dataSource) {
+    this.dataSource = dataSource;
+  }
 
-    @Bean(name = "{{txtIdServiceName}}")
-    public EgovSequenceIdGnrService {{txtIdServiceName}}() {
-        EgovSequenceIdGnrService sequenceIdGnrService = new EgovSequenceIdGnrService();
-        sequenceIdGnrService.setDataSource(dataSource);
-        sequenceIdGnrService.setQuery("{{txtQuery}}");
-        {{#if (eq rdoType "BigDecimal")}}
-        sequenceIdGnrService.setUseBigDecimals(true);
-        {{/if}}
-        return sequenceIdGnrService;
-    }
+  @Bean(name = "{{txtIdServiceName}}")
+  public EgovSequenceIdGnrService {{txtIdServiceName}}() {
+    EgovSequenceIdGnrService sequenceIdGnrService = new EgovSequenceIdGnrService();
+    sequenceIdGnrService.setDataSource(dataSource);
+    sequenceIdGnrService.setQuery("{{txtQuery}}");
+    {{#if (eq rdoType "BigDecimal")}}
+    sequenceIdGnrService.setUseBigDecimals(true);
+    {{/if}}
+    return sequenceIdGnrService;
+  }
 }

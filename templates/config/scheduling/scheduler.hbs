@@ -6,7 +6,7 @@
 	<bean id="{{txtSchedulerName}}" class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
 		<property name="triggers">
 			<list>
-			    <ref bean="{{txtTriggerName}}" />
+				<ref bean="{{txtTriggerName}}" />
 			</list>
 		</property>
 	</bean>

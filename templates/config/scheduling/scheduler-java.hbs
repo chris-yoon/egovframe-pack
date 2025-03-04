@@ -8,10 +8,10 @@ import org.springframework.scheduling.quartz.CronTriggerBean;
 @Configuration
 public class {{txtFileName}} {
 
-    @Bean(name = "{{txtSchedulerName}}")
-    public SchedulerFactoryBean {{txtSchedulerName}}(CronTriggerBean {{txtTriggerName}}) {
-        SchedulerFactoryBean schedulerFactoryBean = new SchedulerFactoryBean();
-        schedulerFactoryBean.setTriggers({{txtTriggerName}});
-        return schedulerFactoryBean;
-    }
+  @Bean(name = "{{txtSchedulerName}}")
+  public SchedulerFactoryBean {{txtSchedulerName}}(CronTriggerBean {{txtTriggerName}}) {
+    SchedulerFactoryBean schedulerFactoryBean = new SchedulerFactoryBean();
+    schedulerFactoryBean.setTriggers({{txtTriggerName}});
+    return schedulerFactoryBean;
+  }
 }

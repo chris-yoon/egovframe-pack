@@ -12,27 +12,27 @@ import java.util.Collections;
 @Configuration
 public class {{txtFileName}} {
 
-    @Bean(name = "{{txtPropertyServiceName}}")
-    public EgovPropertyServiceImpl {{txtPropertyServiceName}}() {
-        EgovPropertyServiceImpl propertyService = new EgovPropertyServiceImpl();
-        
-        {{#if (eq rdoType "Internal Properties")}}
-        // Internal Properties
-        Map<String, String> properties = new HashMap<>();
-        properties.put("{{txtKey}}", "{{txtValue}}");
-        propertyService.setProperties(properties);
-        {{/if}}
+  @Bean(name = "{{txtPropertyServiceName}}")
+  public EgovPropertyServiceImpl {{txtPropertyServiceName}}() {
+    EgovPropertyServiceImpl propertyService = new EgovPropertyServiceImpl();
+    
+    {{#if (eq rdoType "Internal Properties")}}
+    // Internal Properties
+    Map<String, String> properties = new HashMap<>();
+    properties.put("{{txtKey}}", "{{txtValue}}");
+    propertyService.setProperties(properties);
+    {{/if}}
 
-        {{#if (eq rdoType "External File")}}
-        // External Property File
-        Map<String, String> extFileMap = new HashMap<>();
-        extFileMap.put("encoding", "{{cboEncoding}}");
-        extFileMap.put("filename", "{{txtPropertyFile}}");
+    {{#if (eq rdoType "External File")}}
+    // External Property File
+    Map<String, String> extFileMap = new HashMap<>();
+    extFileMap.put("encoding", "{{cboEncoding}}");
+    extFileMap.put("filename", "{{txtPropertyFile}}");
 
-        Set<Map<String, String>> extFileSet = Collections.singleton(extFileMap);
-        propertyService.setExtFileName(extFileSet);
-        {{/if}}
-        
-        return propertyService;
-    }
+    Set<Map<String, String>> extFileSet = Collections.singleton(extFileMap);
+    propertyService.setExtFileName(extFileSet);
+    {{/if}}
+    
+    return propertyService;
+  }
 }

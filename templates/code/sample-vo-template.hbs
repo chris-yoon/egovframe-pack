@@ -17,20 +17,20 @@ package {{packageName}}.service;
  *  Copyright (C)  All right reserved.
  */
 public class {{className}}VO extends {{className}}DefaultVO {
-    private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = 1L;
     
-    {{#each attributes}}
-    /** {{this.columnName}} */
-    private {{this.javaType}} {{this.ccName}};
-    {{/each}}
+  {{#each attributes}}
+  /** {{this.columnName}} */
+  private {{this.javaType}} {{this.ccName}};
+  {{/each}}
 
-    {{#each attributes}}
-    public {{this.javaType}} get{{this.pcName}}() {
-        return this.{{this.ccName}};
-    }
-    
-    public void set{{this.pcName}}({{this.javaType}} {{this.ccName}}) {
-        this.{{this.ccName}} = {{this.ccName}};
-    }
-    {{/each}}
+  {{#each attributes}}
+  public {{this.javaType}} get{{this.pcName}}() {
+    return this.{{this.ccName}};
+  }
+
+  public void set{{this.pcName}}({{this.javaType}} {{this.ccName}}) {
+    this.{{this.ccName}} = {{this.ccName}};
+  }
+  {{/each}}
 }

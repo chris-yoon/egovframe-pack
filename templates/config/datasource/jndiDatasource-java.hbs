@@ -11,22 +11,22 @@ import java.util.Properties;
 @Configuration
 public class {{txtFileName}} {
 
-    @Bean(name = "{{txtDatasourceName}}")
-    public DataSource {{txtDatasourceName}}() {
-        JndiObjectFactoryBean jndiObjectFactoryBean = new JndiObjectFactoryBean();
-        jndiObjectFactoryBean.setJndiName("{{txtJndiName}}");
-        jndiObjectFactoryBean.setResourceRef(true);
+  @Bean(name = "{{txtDatasourceName}}")
+  public DataSource {{txtDatasourceName}}() {
+    JndiObjectFactoryBean jndiObjectFactoryBean = new JndiObjectFactoryBean();
+    jndiObjectFactoryBean.setJndiName("{{txtJndiName}}");
+    jndiObjectFactoryBean.setResourceRef(true);
 
-        // Setting up the environment properties for JNDI lookup
-        Properties env = new Properties();
-        env.put("java.naming.factory.initial", "{{txtFactoryInitial}}");
-        env.put("java.naming.provider.url", "{{txtProviderUrl}}");
-        jndiObjectFactoryBean.setJndiEnvironment(env);
+    // Setting up the environment properties for JNDI lookup
+    Properties env = new Properties();
+    env.put("java.naming.factory.initial", "{{txtFactoryInitial}}");
+    env.put("java.naming.provider.url", "{{txtProviderUrl}}");
+    jndiObjectFactoryBean.setJndiEnvironment(env);
 
-        jndiObjectFactoryBean.setProxyInterface(DataSource.class);
-        jndiObjectFactoryBean.afterPropertiesSet(); // Ensure the factory bean initializes correctly
-        return (DataSource) jndiObjectFactoryBean.getObject();
-    }
+    jndiObjectFactoryBean.setProxyInterface(DataSource.class);
+    jndiObjectFactoryBean.afterPropertiesSet(); // Ensure the factory bean initializes correctly
+    return (DataSource) jndiObjectFactoryBean.getObject();
+  }
 }
 {{/inline}}
 {{#*inline "weblogic"}}
@@ -44,29 +44,29 @@ import java.util.Properties;
 @Configuration
 public class {{txtFileName}} {
 
-    @Bean
-    public static PropertySourcesPlaceholderConfigurer properties() {
-        PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer = new PropertySourcesPlaceholderConfigurer();
-        propertySourcesPlaceholderConfigurer.setLocation(new ClassPathResource("{{txtPropertiesLocation}}"));
-        return propertySourcesPlaceholderConfigurer;
-    }
+  @Bean
+  public static PropertySourcesPlaceholderConfigurer properties() {
+    PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer = new PropertySourcesPlaceholderConfigurer();
+    propertySourcesPlaceholderConfigurer.setLocation(new ClassPathResource("{{txtPropertiesLocation}}"));
+    return propertySourcesPlaceholderConfigurer;
+  }
 
-    @Bean(name = "{{txtDatasourceName}}")
-    public DataSource {{txtDatasourceName}}() {
-        JndiObjectFactoryBean jndiObjectFactoryBean = new JndiObjectFactoryBean();
-        jndiObjectFactoryBean.setJndiName("{{txtJndiName}}");
-        jndiObjectFactoryBean.setResourceRef(true);
+  @Bean(name = "{{txtDatasourceName}}")
+  public DataSource {{txtDatasourceName}}() {
+    JndiObjectFactoryBean jndiObjectFactoryBean = new JndiObjectFactoryBean();
+    jndiObjectFactoryBean.setJndiName("{{txtJndiName}}");
+    jndiObjectFactoryBean.setResourceRef(true);
 
-        // Load properties from external file
-        Properties env = new Properties();
-        env.setProperty("java.naming.factory.initial", "${java.naming.factory.initial}");
-        env.setProperty("java.naming.provider.url", "${java.naming.provider.url}");
-        jndiObjectFactoryBean.setJndiEnvironment(env);
+    // Load properties from external file
+    Properties env = new Properties();
+    env.setProperty("java.naming.factory.initial", "${java.naming.factory.initial}");
+    env.setProperty("java.naming.provider.url", "${java.naming.provider.url}");
+    jndiObjectFactoryBean.setJndiEnvironment(env);
 
-        jndiObjectFactoryBean.setProxyInterface(DataSource.class);
-        jndiObjectFactoryBean.afterPropertiesSet(); // Ensure the factory bean initializes correctly
-        return (DataSource) jndiObjectFactoryBean.getObject();
-    }
+    jndiObjectFactoryBean.setProxyInterface(DataSource.class);
+    jndiObjectFactoryBean.afterPropertiesSet(); // Ensure the factory bean initializes correctly
+    return (DataSource) jndiObjectFactoryBean.getObject();
+  }
 }
 {{/inline}}
 {{#if (eq rdoType "Jeus")}}

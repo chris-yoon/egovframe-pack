@@ -9,18 +9,18 @@ import java.util.Map;
 @Configuration
 public class {{txtFileName}} {
 
-    @Bean(name = "{{txtJobName}}")
-    public JobDetailFactoryBean jobDetail() {
-        JobDetailFactoryBean jobDetailFactoryBean = new JobDetailFactoryBean();
-        jobDetailFactoryBean.setJobClass({{txtServiceClass}}.class);
+  @Bean(name = "{{txtJobName}}")
+  public JobDetailFactoryBean jobDetail() {
+    JobDetailFactoryBean jobDetailFactoryBean = new JobDetailFactoryBean();
+    jobDetailFactoryBean.setJobClass({{txtServiceClass}}.class);
 
-        {{#if chkProperty}}
-        // Setting job data map with properties if present
-        Map<String, Object> jobDataMap = new HashMap<>();
-        jobDataMap.put("{{txtPropertyName}}", "{{txtPropertyValue}}");
-        jobDetailFactoryBean.setJobDataAsMap(jobDataMap);
-        {{/if}}
+    {{#if chkProperty}}
+    // Setting job data map with properties if present
+    Map<String, Object> jobDataMap = new HashMap<>();
+    jobDataMap.put("{{txtPropertyName}}", "{{txtPropertyValue}}");
+    jobDetailFactoryBean.setJobDataAsMap(jobDataMap);
+    {{/if}}
 
-        return jobDetailFactoryBean;
-    }
+    return jobDetailFactoryBean;
+  }
 }

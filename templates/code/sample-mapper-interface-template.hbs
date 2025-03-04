@@ -46,52 +46,51 @@ import org.egovframe.rte.psl.dataaccess.mapper.Mapper;
 @Mapper("{{mapperName}}")
 public interface {{mapperClassName}} {
 
+  /**
+   * {{tableName}}을 등록한다.
+   * @param vo - 등록할 정보가 담긴 {{voClassName}}
+   * @return 등록 결과
+   * @exception Exception
+   */
+  public void {{insertMethodName}}({{voClassName}} vo) throws Exception;
+
+  /**
+   * {{tableName}}을 수정한다.
+   * @param vo - 수정할 정보가 담긴 {{voClassName}}
+   * @return void형
+   * @exception Exception
+   */
+  public void {{updateMethodName}}({{voClassName}} vo) throws Exception;
+
+  /**
+   * {{tableName}}을 삭제한다.
+   * @param vo - 삭제할 정보가 담긴 {{voClassName}}
+   * @return void형 
+   * @exception Exception
+   */
+  public void {{deleteMethodName}}({{voClassName}} vo) throws Exception;
+
+  /**
+   * {{tableName}}을 조회한다.
+   * @param vo - 조회할 정보가 담긴 {{voClassName}}
+   * @return 조회한 {{tableName}}
+   * @exception Exception
+	 */
+	public {{voClassName}} {{selectMethodName}}({{voClassName}} vo) throws Exception;
+
 	/**
-	 * {{tableName}}을 등록한다.
-	 * @param vo - 등록할 정보가 담긴 {{voClassName}}
-	 * @return 등록 결과
-	 * @exception Exception
-	 */
-    public void {{insertMethodName}}({{voClassName}} vo) throws Exception;
-
-    /**
-	 * {{tableName}}을 수정한다.
-	 * @param vo - 수정할 정보가 담긴 {{voClassName}}
-	 * @return void형
-	 * @exception Exception
-	 */
-    public void {{updateMethodName}}({{voClassName}} vo) throws Exception;
-
-    /**
-	 * {{tableName}}을 삭제한다.
-	 * @param vo - 삭제할 정보가 담긴 {{voClassName}}
-	 * @return void형 
-	 * @exception Exception
-	 */
-    public void {{deleteMethodName}}({{voClassName}} vo) throws Exception;
-
-    /**
-	 * {{tableName}}을 조회한다.
-	 * @param vo - 조회할 정보가 담긴 {{voClassName}}
-	 * @return 조회한 {{tableName}}
-	 * @exception Exception
-	 */
-    public {{voClassName}} {{selectMethodName}}({{voClassName}} vo) throws Exception;
-
-    /**
 	 * {{tableName}} 목록을 조회한다.
 	 * @param searchVO - 조회할 정보가 담긴 {{defaultVoClassName}}
 	 * @return {{tableName}} 목록
 	 * @exception Exception
 	 */
-    public List<?> {{selectListMethodName}}({{defaultVoClassName}} searchVO) throws Exception;
+	public List<?> {{selectListMethodName}}({{defaultVoClassName}} searchVO) throws Exception;
 
-    /**
+	/**
 	 * {{tableName}} 총 갯수를 조회한다.
 	 * @param searchVO - 조회할 정보가 담긴 {{defaultVoClassName}}
 	 * @return {{tableName}} 총 갯수
 	 * @exception
 	 */
-    public int {{selectListTotCntMethodName}}({{defaultVoClassName}} searchVO);
-
+	public int {{selectListTotCntMethodName}}({{defaultVoClassName}} searchVO);
 }

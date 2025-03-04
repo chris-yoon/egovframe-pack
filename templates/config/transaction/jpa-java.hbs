@@ -12,25 +12,25 @@ import javax.sql.DataSource;
 @Configuration
 public class {{txtFileName}} {
 
-    private final DataSource dataSource;
+  private final DataSource dataSource;
 
-    public {{txtFileName}}(DataSource dataSource) {
-        this.dataSource = dataSource;
-    }
+  public {{txtFileName}}(DataSource dataSource) {
+    this.dataSource = dataSource;
+  }
 
-    @Bean(name = "{{txtTransactionName}}")
-    public PlatformTransactionManager transactionManager(EntityManagerFactory entityManagerFactory) {
-        JpaTransactionManager transactionManager = new JpaTransactionManager();
-        transactionManager.setEntityManagerFactory(entityManagerFactory);
-        return transactionManager;
-    }
+  @Bean(name = "{{txtTransactionName}}")
+  public PlatformTransactionManager transactionManager(EntityManagerFactory entityManagerFactory) {
+    JpaTransactionManager transactionManager = new JpaTransactionManager();
+    transactionManager.setEntityManagerFactory(entityManagerFactory);
+    return transactionManager;
+  }
 
-    @Bean(name = "{{txtEttMgrFactory}}")
-    public LocalContainerEntityManagerFactoryBean entityManagerFactory() {
-        LocalContainerEntityManagerFactoryBean factoryBean = new LocalContainerEntityManagerFactoryBean();
-        factoryBean.setPersistenceUnitName("{{txtPstUnitName}}");
-        factoryBean.setPersistenceXmlLocation("{{txtPstXMLLoc}}");
-        factoryBean.setDataSource(dataSource);
-        return factoryBean;
-    }
+  @Bean(name = "{{txtEttMgrFactory}}")
+  public LocalContainerEntityManagerFactoryBean entityManagerFactory() {
+    LocalContainerEntityManagerFactoryBean factoryBean = new LocalContainerEntityManagerFactoryBean();
+    factoryBean.setPersistenceUnitName("{{txtPstUnitName}}");
+    factoryBean.setPersistenceXmlLocation("{{txtPstXMLLoc}}");
+    factoryBean.setDataSource(dataSource);
+    return factoryBean;
+  }
 }

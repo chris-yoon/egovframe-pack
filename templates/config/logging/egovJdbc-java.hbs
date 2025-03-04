@@ -8,46 +8,46 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class {{txtFileName}} {
 
-    @Bean(name = "{{txtAppenderName}}")
-    public EgovJDBCAppender {{txtAppenderName}}() {
-        EgovJDBCAppender jdbcAppender = new EgovJDBCAppender();
+  @Bean(name = "{{txtAppenderName}}")
+  public EgovJDBCAppender {{txtAppenderName}}() {
+    EgovJDBCAppender jdbcAppender = new EgovJDBCAppender();
 
-        // Set location info
-        jdbcAppender.setLocationInfo({{chkLocationInfo}});
+    // Set location info
+    jdbcAppender.setLocationInfo({{chkLocationInfo}});
 
-        // Set the SQL for the JDBC appender
-        jdbcAppender.setSql(
-            "INSERT INTO logging_event (" +
-            "sequence_number, timestamp, rendered_message, " +
-            "logger_name, level_string, ndc, " +
-            "thread_name, reference_flag, " +
-            "caller_filename, caller_class, " +
-            "caller_method, caller_line) " +
-            "VALUES (" +
-            "'%X{sequence_number}', '%X{timestamp}', '%X{rendered_message}', " +
-            "'%X{logger_name}', '%X{level_string}', '%X{ndc}', " +
-            "'%X{thread_name}', '%X{reference_flag}', " +
-            "'%X{caller_filename}', '%X{caller_class}', " +
-            "'%X{caller_method}', '%X{caller_line}')"
-        );
+    // Set the SQL for the JDBC appender
+    jdbcAppender.setSql(
+      "INSERT INTO logging_event (" +
+      "sequence_number, timestamp, rendered_message, " +
+      "logger_name, level_string, ndc, " +
+      "thread_name, reference_flag, " +
+      "caller_filename, caller_class, " +
+      "caller_method, caller_line) " +
+      "VALUES (" +
+      "'%X{sequence_number}', '%X{timestamp}', '%X{rendered_message}', " +
+      "'%X{logger_name}', '%X{level_string}', '%X{ndc}', " +
+      "'%X{thread_name}', '%X{reference_flag}', " +
+      "'%X{caller_filename}', '%X{caller_class}', " +
+      "'%X{caller_method}', '%X{caller_line}')"
+    );
 
-        return jdbcAppender;
-    }
+    return jdbcAppender;
+  }
 
-    @Bean
-    public Logger springLogger() {
-        Logger logger = Logger.getLogger("org.springframework");
-        logger.setAdditivity(false);
-        logger.setLevel(org.apache.log4j.Level.DEBUG);
-        logger.addAppender({{txtAppenderName}}());
-        return logger;
-    }
+  @Bean
+  public Logger springLogger() {
+    Logger logger = Logger.getLogger("org.springframework");
+    logger.setAdditivity(false);
+    logger.setLevel(org.apache.log4j.Level.DEBUG);
+    logger.addAppender({{txtAppenderName}}());
+    return logger;
+  }
 
-    @Bean
-    public Logger rootLogger() {
-        Logger rootLogger = Logger.getRootLogger();
-        rootLogger.setLevel(org.apache.log4j.Level.OFF);
-        rootLogger.addAppender({{txtAppenderName}}());
-        return rootLogger;
-    }
+  @Bean
+  public Logger rootLogger() {
+    Logger rootLogger = Logger.getRootLogger();
+    rootLogger.setLevel(org.apache.log4j.Level.OFF);
+    rootLogger.addAppender({{txtAppenderName}}());
+    return rootLogger;
+  }
 }

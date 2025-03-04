@@ -8,28 +8,28 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class {{txtFileName}} {
 
-    @Bean(name = "{{txtDatasourceName}}")
-    public ComboPooledDataSource {{txtDatasourceName}}() {
-        ComboPooledDataSource dataSource = new ComboPooledDataSource();
-        
-        dataSource.setDriverClass("{{txtDriver}}");
-        dataSource.setJdbcUrl("{{txtUrl}}");
-        dataSource.setUser("{{txtUser}}");
-        
-        {{#if txtPasswd}}
-        dataSource.setPassword("{{txtPasswd}}");
-        {{/if}}
-        
-        dataSource.setInitialPoolSize(3);
-        dataSource.setMinPoolSize(3);
-        dataSource.setMaxPoolSize(50);
-        dataSource.setIdleConnectionTestPeriod(200);
-        dataSource.setAcquireIncrement(1);
-        dataSource.setMaxStatements(0);  // 0 means: statement caching is turned off
-        dataSource.setNumHelperThreads(3);  // Default is 3
+  @Bean(name = "{{txtDatasourceName}}")
+  public ComboPooledDataSource {{txtDatasourceName}}() {
+    ComboPooledDataSource dataSource = new ComboPooledDataSource();
 
-        return dataSource;
-    }
+    dataSource.setDriverClass("{{txtDriver}}");
+    dataSource.setJdbcUrl("{{txtUrl}}");
+    dataSource.setUser("{{txtUser}}");
+
+    {{#if txtPasswd}}
+    dataSource.setPassword("{{txtPasswd}}");
+    {{/if}}
+
+    dataSource.setInitialPoolSize(3);
+    dataSource.setMinPoolSize(3);
+    dataSource.setMaxPoolSize(50);
+    dataSource.setIdleConnectionTestPeriod(200);
+    dataSource.setAcquireIncrement(1);
+    dataSource.setMaxStatements(0);  // 0 means: statement caching is turned off
+    dataSource.setNumHelperThreads(3);  // Default is 3
+
+    return dataSource;
+  }
 }
 {{/inline}}
 {{#*inline "dbcp"}}
@@ -42,23 +42,23 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class {{txtFileName}} {
 
-    @Bean(name = "{{txtDatasourceName}}")
-    public BasicDataSource {{txtDatasourceName}}() {
-        BasicDataSource dataSource = new BasicDataSource();
-        
-        dataSource.setDriverClassName("{{txtDriver}}");
-        dataSource.setUrl("{{txtUrl}}");
-        dataSource.setUsername("{{txtUser}}");
-        
-        {{#if txtPasswd}}
-        dataSource.setPassword("{{txtPasswd}}");
-        {{/if}}
+  @Bean(name = "{{txtDatasourceName}}")
+  public BasicDataSource {{txtDatasourceName}}() {
+    BasicDataSource dataSource = new BasicDataSource();
+    
+    dataSource.setDriverClassName("{{txtDriver}}");
+    dataSource.setUrl("{{txtUrl}}");
+    dataSource.setUsername("{{txtUser}}");
+    
+    {{#if txtPasswd}}
+    dataSource.setPassword("{{txtPasswd}}");
+    {{/if}}
 
-        dataSource.setDefaultAutoCommit(false);
-        dataSource.setPoolPreparedStatements(true);
-        
-        return dataSource;
-    }
+    dataSource.setDefaultAutoCommit(false);
+    dataSource.setPoolPreparedStatements(true);
+    
+    return dataSource;
+  }
 }
 {{/inline}}
 {{#*inline "jdbc"}}
@@ -71,20 +71,20 @@ import org.springframework.jdbc.datasource.DriverManagerDataSource;
 @Configuration
 public class {{txtFileName}} {
 
-    @Bean(name = "{{txtDatasourceName}}")
-    public DriverManagerDataSource {{txtDatasourceName}}() {
-        DriverManagerDataSource dataSource = new DriverManagerDataSource();
-        
-        dataSource.setDriverClassName("{{txtDriver}}");
-        dataSource.setUrl("{{txtUrl}}");
-        dataSource.setUsername("{{txtUser}}");
-        
-        {{#if txtPasswd}}
-        dataSource.setPassword("{{txtPasswd}}");
-        {{/if}}
+  @Bean(name = "{{txtDatasourceName}}")
+  public DriverManagerDataSource {{txtDatasourceName}}() {
+    DriverManagerDataSource dataSource = new DriverManagerDataSource();
+    
+    dataSource.setDriverClassName("{{txtDriver}}");
+    dataSource.setUrl("{{txtUrl}}");
+    dataSource.setUsername("{{txtUser}}");
+    
+    {{#if txtPasswd}}
+    dataSource.setPassword("{{txtPasswd}}");
+    {{/if}}
 
-        return dataSource;
-    }
+    return dataSource;
+  }
 }
 {{/inline}}
 {{#if (eq rdoType "C3P0")}}
