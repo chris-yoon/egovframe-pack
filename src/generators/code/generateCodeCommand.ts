@@ -8,7 +8,7 @@ import { registerHandlebarsHelpers } from '../../utils/handlebarHelpers';
 export function registerGenerateCodeCommand(context: vscode.ExtensionContext) {
   registerHandlebarsHelpers();
   // generateCode 명령: 사용자가 DDL을 입력하면, 이를 파싱하여 템플릿 파일을 렌더링하고 파일을 생성한다.
-  let generateCodeDisposable = vscode.commands.registerCommand('extension.generateCode', async () => {
+  let generateCodeDisposable = vscode.commands.registerCommand('extension.generateCodeCommand', async () => {
     // 현재 활성화된 텍스트 에디터를 가져온다.
     const editor = vscode.window.activeTextEditor;
     // 선택된 텍스트를 DDL로 사용한다.

@@ -56,11 +56,11 @@ suite('Generate Project Test Suite', () => {
     });
 
     // generateProject 명령어 등록 확인
-    test('generateProject command should be registered', async () => {
+    test('generateProjectCommand should be registered', async () => {
         const commands = await vscode.commands.getCommands(true);
         assert.ok(
-            commands.includes('extension.generateProject'),
-            'extension.generateProject command should be registered'
+            commands.includes('extension.generateProjectCommand'),
+            'extension.generateProjectCommand should be registered'
         );
     });
 
@@ -105,7 +105,7 @@ suite('Generate Project Test Suite', () => {
         inputBoxStub.onSecondCall().resolves(testGroupId);
 
         // generateProject 명령 실행
-        await vscode.commands.executeCommand('extension.generateProject');
+        await vscode.commands.executeCommand('extension.generateProjectCommand');
 
         // 생성된 프로젝트 확인
         const projectPath = path.join(workspaceFolder, testProjectName);
@@ -121,7 +121,7 @@ suite('Generate Project Test Suite', () => {
         const quickPickStub = sandbox.stub(vscode.window, 'showQuickPick');
         quickPickStub.resolves(undefined);
 
-        await vscode.commands.executeCommand('extension.generateProject');
+        await vscode.commands.executeCommand('extension.generateProjectCommand');
 
         const files = await fs.readdir(workspaceFolder);
         assert.strictEqual(files.length, 0, 'No files should be created when cancelled');
@@ -146,7 +146,7 @@ suite('Generate Project Test Suite', () => {
         inputBoxStub.onFirstCall().resolves('error-test-project');
         inputBoxStub.onSecondCall().resolves('com.error.test');
 
-        await vscode.commands.executeCommand('extension.generateProject');
+        await vscode.commands.executeCommand('extension.generateProjectCommand');
 
         assert.ok(errorMessageStub.called, 'Error message should be shown');
     });

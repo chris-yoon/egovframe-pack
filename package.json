@@ -37,19 +37,19 @@
     ],
     "commands": [
       {
-        "command": "extension.generateCode",
+        "command": "extension.generateCodeCommand",
         "title": "eGovFrame: CRUD Code Generator from DDL"
       },
       {
-        "command": "extension.generateProject",
+        "command": "extension.generateProjectCommand",
         "title": "eGovFrame: Start > New Project"
       },
       {
-        "command": "extension.generateProjectByForm",
+        "command": "extension.generateProjectWebview",
         "title": "eGovFrame: Start > New Project (Form)"
       },
       {
-        "command": "extension.generateConfig",
+        "command": "extension.generateConfigCommand",
         "title": "eGovFrame: Generate Config"
       },
       {
@@ -85,17 +85,17 @@
     "menus": {
       "explorer/context": [
         {
-          "command": "extension.generateProject",
+          "command": "extension.generateProjectCommand",
           "when": "explorerResourceIsFolder",
           "group": "navigation"
         },
         {
-          "command": "extension.generateProjectByForm",
+          "command": "extension.generateProjectWebview",
           "when": "explorerResourceIsFolder",
           "group": "navigation"
         },
         {
-          "command": "extension.generateConfig",
+          "command": "extension.generateConfigCommand",
           "title": "eGovFrame: Generate Config",
           "when": "explorerResourceIsFolder || explorerResourceIsFile",
           "group": "navigation"
@@ -103,7 +103,7 @@
       ],
       "editor/context": [
         {
-          "command": "extension.generateCode",
+          "command": "extension.generateCodeCommand",
           "when": "editorTextFocus",
           "group": "navigation"
         },
@@ -148,7 +148,7 @@
     },
     "keybindings": [
       {
-        "command": "extension.generateCode",
+        "command": "extension.generateCodeCommand",
         "key": "ctrl+shift+g",
         "when": "editorTextFocus"
       }

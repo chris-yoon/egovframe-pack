@@ -9,7 +9,7 @@ import {
 import { parseDDL } from '../../utils/ddlParser';
 import { registerHandlebarsHelpers } from '../../utils/handlebarHelpers';
 
-export function registerGenerateCodeContainerCommand(context: vscode.ExtensionContext) {
+export function registerGenerateCodeExplorer(context: vscode.ExtensionContext) {
   registerHandlebarsHelpers();
 
   // 웹뷰를 생성하고 등록한다.

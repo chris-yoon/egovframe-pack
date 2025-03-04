@@ -1,12 +1,12 @@
 import * as vscode from 'vscode';
 import { registerHandlebarsHelpers } from './utils/handlebarHelpers';
-import { registerGenerateCodeCommand } from './generators/code/generateCode';
-import { registerGenerateProjectCommand } from './generators/project/generateProject';
-import { registerGenerateConfigCommand } from './generators/config/generateConfig';
-import { registerGenerateConfigContainerCommand } from './generators/config/generateConfigContainer';
-import { registerGenerateProjectByFormCommand } from './generators/project/generateProjectByForm';
-import { registerGenerateCodeContainerCommand } from './generators/code/generateCodeContainer';
-import { registerGenerateProjectContainerCommand } from './generators/project/generateProjectContainer';
+import { registerGenerateCodeCommand } from './generators/code/generateCodeCommand';
+import { registerGenerateCodeExplorer } from './generators/code/generateCodeExplorer';
+import { registerGenerateConfigCommand } from './generators/config/generateConfigCommand';
+import { registerGenerateConfigExplorer } from './generators/config/generateConfigExplorer';
+import { registerGenerateProjectCommand } from './generators/project/generateProjectCommand';
+import { registerGenerateProjectWebview } from './generators/project/generateProjectWebview';
+import { registerGenerateProjectExplorer } from './generators/project/generateProjectExplorer';
 import { registerSnippetProvider } from './snippets/snippetProvider';
 import { registerSnippetCommand } from './snippets/snippetCommand';
 import { registerSnippetExplorer } from './snippets/snippetExplorer';
@@ -19,12 +19,12 @@ export function activate(context: vscode.ExtensionContext) {
 
   // 각각의 기능을 활성화합니다.
   registerGenerateCodeCommand(context);
+  registerGenerateCodeExplorer(context);
   registerGenerateProjectCommand(context);
   registerGenerateConfigCommand(context);
-  registerGenerateConfigContainerCommand(context);
-  registerGenerateProjectByFormCommand(context);
-  registerGenerateCodeContainerCommand(context);
-  registerGenerateProjectContainerCommand(context);
+  registerGenerateConfigExplorer(context);
+  registerGenerateProjectWebview(context);
+  registerGenerateProjectExplorer(context);
   
   // Register the snippet features
   registerSnippetProvider(context);

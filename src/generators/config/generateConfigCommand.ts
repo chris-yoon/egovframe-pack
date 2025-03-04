@@ -12,7 +12,7 @@ export function registerGenerateConfigCommand(context: vscode.ExtensionContext) 
     const templates: TemplateConfig[] = JSON.parse(fs.readFileSync(configFilePath, "utf8"));
 
     let generateConfig = vscode.commands.registerCommand(
-        "extension.generateConfig",
+        "extension.generateConfigCommand",
         async (uri: vscode.Uri) => {
             const options: TemplateQuickPickItem[] = templates.map((template) => ({
                 label: template.displayName,

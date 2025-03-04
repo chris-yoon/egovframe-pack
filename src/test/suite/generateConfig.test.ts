@@ -59,8 +59,8 @@ suite('Generate Config Test Suite', () => {
     test('generateConfig command should be registered', async () => {
         const commands = await vscode.commands.getCommands(true);
         assert.ok(
-            commands.includes('extension.generateConfig'),
-            'extension.generateConfig command should be registered'
+            commands.includes('extension.generateConfigCommand'),
+            'extension.generateConfigCommand should be registered'
         );
     });
 
@@ -98,7 +98,7 @@ suite('Generate Config Test Suite', () => {
             template: mockTemplate
         } as TemplateQuickPickItem);
 
-        await vscode.commands.executeCommand('extension.generateConfig');
+        await vscode.commands.executeCommand('extension.generateConfigCommand');
 
         assert.ok(quickPickStub.called, 'showQuickPick should be called');
         assert.strictEqual(
@@ -139,7 +139,7 @@ suite('Generate Config Test Suite', () => {
                 } as any;
             });
 
-        await vscode.commands.executeCommand('extension.generateConfig');
+        await vscode.commands.executeCommand('extension.generateConfigCommand');
 
         assert.ok(webviewCreated, 'Webview should be created');
         assert.ok(createWebviewPanelStub.called, 'createWebviewPanel should be called');
@@ -211,7 +211,7 @@ suite('Generate Config Test Suite', () => {
                 });
 
             // 명령어 실행
-            await vscode.commands.executeCommand('extension.generateConfig');
+            await vscode.commands.executeCommand('extension.generateConfigCommand');
 
         } catch (error) {
             console.error('Test failed with error:', error);
@@ -229,7 +229,7 @@ suite('Generate Config Test Suite', () => {
 
         const createWebviewPanelSpy = sandbox.spy(vscode.window, 'createWebviewPanel');
 
-        await vscode.commands.executeCommand('extension.generateConfig');
+        await vscode.commands.executeCommand('extension.generateConfigCommand');
 
         assert.ok(!createWebviewPanelSpy.called, 'Webview should not be created when QuickPick is cancelled');
     });

@@ -3,8 +3,8 @@ import * as path from "path";
 import * as fs from "fs-extra";
 import { Template, generateProject } from "../../utils/projectGeneratorUtils";
 
-export function registerGenerateProjectByFormCommand(context: vscode.ExtensionContext) {
-  let disposable = vscode.commands.registerCommand("extension.generateProjectByForm", () => {
+export function registerGenerateProjectWebview(context: vscode.ExtensionContext) {
+  let disposable = vscode.commands.registerCommand("extension.generateProjectWebview", () => {
     createWebview(context);
   });
 
@@ -19,13 +19,13 @@ function createWebview(context: vscode.ExtensionContext) {
     { enableScripts: true }
   );
 
-  const htmlTemplatePath = path.join(context.extensionPath, "webviews", "generateProjectByForm.html");
+  const htmlTemplatePath = path.join(context.extensionPath, "webviews", "generateProjectWebview.html");
   panel.webview.html = fs.readFileSync(htmlTemplatePath, "utf8");
 
   panel.webview.onDidReceiveMessage(
     async (message) => {
       try {
-        if (message.command === "generateProjectByForm") {
+        if (message.command === "generateProjectWebview") {
           const extensionPath = vscode.extensions.getExtension(
             "egovframework.vscode-egovframe-initializr"
           )?.extensionPath;

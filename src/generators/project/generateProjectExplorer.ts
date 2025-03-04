@@ -47,7 +47,7 @@ class TemplateTreeDataProvider implements vscode.TreeDataProvider<TemplateTreeIt
                 vscode.TreeItemCollapsibleState.None,
                 group.templates[0],
                 {
-                  command: "extension.generateProjectContainer",
+                  command: "extension.generateProjectExplorer",
                   title: "Generate Project",
                   arguments: [group.templates[0]],
                 }
@@ -65,7 +65,7 @@ class TemplateTreeDataProvider implements vscode.TreeDataProvider<TemplateTreeIt
                 vscode.TreeItemCollapsibleState.None,
                 template,
                 {
-                  command: "extension.generateProjectContainer",
+                  command: "extension.generateProjectExplorer",
                   title: "Generate Project",
                   arguments: [template],
                 }
@@ -102,7 +102,7 @@ function groupTemplates(templates: Template[]): GroupedTemplates[] {
   return groupedTemplates;
 }
 
-export function registerGenerateProjectContainerCommand(context: vscode.ExtensionContext) {
+export function registerGenerateProjectExplorer(context: vscode.ExtensionContext) {
   const configFilePath = path.join(context.extensionPath, "templates-projects.json");
   const templates: Template[] = JSON.parse(fs.readFileSync(configFilePath, "utf8"));
   const groupedTemplates: GroupedTemplates[] = groupTemplates(templates);
@@ -115,7 +115,7 @@ export function registerGenerateProjectContainerCommand(context: vscode.Extensio
   });
 
   let generateProjectCmd = vscode.commands.registerCommand(
-    "extension.generateProjectContainer",
+    "extension.generateProjectExplorer",
     async (template: Template) => {
       try {
         const extensionPath = vscode.extensions.getExtension(

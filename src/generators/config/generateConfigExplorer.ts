@@ -45,7 +45,7 @@ class TemplateTreeDataProvider implements vscode.TreeDataProvider<TemplateTreeIt
           group.groupName
             ? new TemplateTreeItem(group.groupName, vscode.TreeItemCollapsibleState.Collapsed)
             : new TemplateTreeItem(group.templates[0].displayName, vscode.TreeItemCollapsibleState.None, group.templates[0], {
-                command: "extension.generateConfigContainer",
+                command: "extension.generateConfigExplorer",
                 title: "Generate Config",
                 arguments: [group.templates[0]],
               })
@@ -58,7 +58,7 @@ class TemplateTreeDataProvider implements vscode.TreeDataProvider<TemplateTreeIt
           group.templates.map(
             (template) =>
               new TemplateTreeItem(template.displayName.split(" > ").pop() || template.displayName, vscode.TreeItemCollapsibleState.None, template, {
-                command: "extension.generateConfigContainer",
+                command: "extension.generateConfigExplorer",
                 title: "Generate Config",
                 arguments: [template],
               })
@@ -71,7 +71,7 @@ class TemplateTreeDataProvider implements vscode.TreeDataProvider<TemplateTreeIt
 }
 
 // Activation function
-export function registerGenerateConfigContainerCommand(context: vscode.ExtensionContext) {
+export function registerGenerateConfigExplorer(context: vscode.ExtensionContext) {
   const configFilePath = path.join(context.extensionPath, "templates-context-xml.json");
   const templates: TemplateConfig[] = JSON.parse(fs.readFileSync(configFilePath, "utf8"));
 
@@ -84,7 +84,7 @@ export function registerGenerateConfigContainerCommand(context: vscode.Extension
   });
 
   let generateConfig = vscode.commands.registerCommand(
-    "extension.generateConfigContainer",
+    "extension.generateConfigExplorer",
     async (template: TemplateConfig) => {
       await createConfigWebview(
         context,

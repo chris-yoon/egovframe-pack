@@ -51,8 +51,8 @@ suite('Generate Code Test Suite', () => {
         console.log('Extension commands:', extensionCommands);
         
         // 명령어 존재 확인
-        assert.ok(extensionCommands.includes('extension.generateCode'), 
-            'extension.generateCode command should be registered');
+        assert.ok(extensionCommands.includes('extension.generateCodeCommand'), 
+            'extension.generateCodeCommand should be registered');
     });
 
     // 에디터 내에서 DDL 선택 후 CRUD 코드 생성 테스트
@@ -82,7 +82,7 @@ suite('Generate Code Test Suite', () => {
         editor.selection = new vscode.Selection(entireRange.start, entireRange.end);
 
         // generateCode 명령 실행
-        await vscode.commands.executeCommand('extension.generateCode');
+        await vscode.commands.executeCommand('extension.generateCodeCommand');
 
         // 생성된 파일 확인
         const generatedFiles = await fs.readdir(workspaceFolder);
