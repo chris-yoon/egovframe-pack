@@ -37,6 +37,14 @@ export class EgovSnippetProvider implements vscode.CompletionItemProvider {
         } else if (fileExtension === '.jsp') {
             this.addJspSnippets(completionItems);
         }
+
+        // Configure each completion item to replace the 'egov-' prefix
+        completionItems.forEach(item => {
+            item.range = new vscode.Range(
+                position.translate(0, -5), // Move 5 characters back (length of 'egov-')
+                position
+            );
+        });
         
         return completionItems;
     }
