@@ -28,11 +28,11 @@
     "snippets": [
       {
         "language": "java",
-        "path": "./snippets/java-snippets.json"
+        "path": "./snippets/explorer/java-snippets.json"
       },
       {
         "language": "xml",
-        "path": "./snippets/xml-snippets.json"
+        "path": "./snippets/explorer/xml-snippets.json"
       }
     ],
     "commands": [

@@ -86,7 +86,7 @@ async function loadAllSnippets(extensionPath: string): Promise<Array<{
     description: string;
     category: string;
 }>> {
-    const snippetsDir = path.join(extensionPath, 'snippets');
+    const snippetsDir = path.join(extensionPath, 'snippets', 'explorer');
     const snippetFiles = await fs.readdir(snippetsDir);
     
     const allSnippets: Array<{

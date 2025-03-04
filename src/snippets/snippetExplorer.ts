@@ -68,7 +68,7 @@ class SnippetTreeDataProvider implements vscode.TreeDataProvider<SnippetTreeItem
     async getChildren(element?: SnippetTreeItem): Promise<SnippetTreeItem[]> {
         if (!element) {
             // Root level - show categories
-            const snippetsDir = path.join(this.extensionPath, 'snippets');
+            const snippetsDir = path.join(this.extensionPath, 'snippets', 'explorer');
             
             try {
                 const files = await fs.readdir(snippetsDir);
@@ -91,7 +91,7 @@ class SnippetTreeDataProvider implements vscode.TreeDataProvider<SnippetTreeItem
             }
         } else if (element.category) {
             // Category level - show snippets in this category
-            const snippetsDir = path.join(this.extensionPath, 'snippets');
+            const snippetsDir = path.join(this.extensionPath, 'snippets', 'explorer'); // Add 'explorer' to path
             const filePath = path.join(snippetsDir, `${element.category.toLowerCase()}-snippets.json`);
             
             try {

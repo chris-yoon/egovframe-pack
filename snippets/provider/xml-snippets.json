@@ -1,0 +1,98 @@
+{
+  "mybatis-mapper": {
+    "conditions": {
+      "fileContent": ["<!DOCTYPE mapper"],
+      "fileName": ["_SQL.xml", "_Mapper.xml"]
+    },
+    "snippets": {
+      "insert": {
+        "prefix": "egov-insert",
+        "body": [
+          "<insert id=\"insert${1:Name}\" parameterType=\"${2:package}.service.${1:Name}VO\">",
+          "    INSERT INTO ${3:TABLE_NAME} (",
+          "        ID, NAME, DESCRIPTION, USE_YN, REG_USER",
+          "    ) VALUES (",
+          "        #{id}, #{name}, #{description}, #{useYn}, #{regUser}",
+          "    )",
+          "    ${0}",
+          "</insert>"
+        ],
+        "description": "eGovFrame MyBatis insert statement"
+      },
+      "update": {
+        "prefix": "egov-update",
+        "body": [
+          "<update id=\"update${1:Name}\" parameterType=\"${2:package}.service.${1:Name}VO\">",
+          "    UPDATE ${3:TABLE_NAME} SET",
+          "        NAME = #{name},",
+          "        DESCRIPTION = #{description},",
+          "        USE_YN = #{useYn}",
+          "    WHERE ID = #{id}",
+          "    ${0}",
+          "</update>"
+        ],
+        "description": "eGovFrame MyBatis update statement"
+      },
+      "delete": {
+        "prefix": "egov-delete",
+        "body": [
+          "<delete id=\"delete${1:Name}\" parameterType=\"${2:package}.service.${1:Name}VO\">",
+          "    DELETE FROM ${3:TABLE_NAME}",
+          "    WHERE ID = #{id}",
+          "    ${0}",
+          "</delete>"
+        ],
+        "description": "eGovFrame MyBatis delete statement"
+      }
+    }
+  },
+  "spring-config": {
+    "conditions": {
+      "fileContent": ["<beans", "www.springframework.org"]
+    },
+    "snippets": {
+      "bean": {
+        "prefix": "egov-bean",
+        "body": [
+          "<bean id=\"${1:beanId}\" class=\"${2:package}.${3:ClassName}\">",
+          "    <property name=\"${4:propertyName}\" value=\"${5:propertyValue}\" />",
+          "    ${0}",
+          "</bean>"
+        ],
+        "description": "eGovFrame Spring bean definition"
+      },
+      "datasource": {
+        "prefix": "egov-datasource",
+        "body": [
+          "<!-- DataSource Configuration -->",
+          "<bean id=\"dataSource\" class=\"org.apache.commons.dbcp2.BasicDataSource\" destroy-method=\"close\">",
+          "    <property name=\"driverClassName\" value=\"${1:com.mysql.cj.jdbc.Driver}\" />",
+          "    <property name=\"url\" value=\"${2:jdbc:mysql://localhost:3306/egovdb?serverTimezone=UTC}\" />",
+          "    <property name=\"username\" value=\"${3:root}\" />",
+          "    <property name=\"password\" value=\"${4:password}\" />",
+          "</bean>",
+          "${0}"
+        ],
+        "description": "eGovFrame DataSource Configuration"
+      },
+      "sqlsession": {
+        "prefix": "egov-sqlsession",
+        "body": [
+          "<!-- SqlSession setup for MyBatis Database Layer -->",
+          "<bean id=\"sqlSession\" class=\"org.mybatis.spring.SqlSessionFactoryBean\">",
+          "    <property name=\"dataSource\" ref=\"dataSource\" />",
+          "    <property name=\"configLocation\" value=\"classpath:/egovframework/sqlmap/sql-mapper-config.xml\" />",
+          "    <property name=\"mapperLocations\" value=\"classpath:/egovframework/sqlmap/mappers/**/*_SQL.xml\" />",
+          "</bean>",
+          "",
+          "<bean class=\"org.mybatis.spring.mapper.MapperScannerConfigurer\">",
+          "    <property name=\"basePackage\" value=\"${1:egovframework.example.sample}.service.impl\" />",
+          "    <property name=\"sqlSessionFactoryBeanName\" value=\"sqlSession\" />",
+          "</bean>",
+          "${0}"
+        ],
+        "description": "eGovFrame SqlSession Configuration for MyBatis"
+      }
+    }
+  }
+}

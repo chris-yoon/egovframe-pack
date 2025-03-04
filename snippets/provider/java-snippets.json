@@ -1,0 +1,39 @@
+{
+  "controller": {
+    "conditions": {
+      "fileContent": ["@Controller"],
+      "fileName": ["Controller.java"]
+    },
+    "snippets": {
+      "requestMapping": {
+        "prefix": "egov-requestmapping",
+        "body": [
+          "@RequestMapping(value=\"/${1:path}\")",
+          "public String ${2:methodName}(@ModelAttribute(\"${3:voName}\") ${4:VOType} ${3:voName}, ModelMap model) throws Exception {",
+          "    ${0}",
+          "    return \"/${1:path}/${5:viewName}\";",
+          "}"
+        ],
+        "description": "eGovFrame RequestMapping method"
+      }
+    }
+  },
+  "service": {
+    "conditions": {
+      "fileContent": ["implements", "Service", "@Service"]
+    },
+    "snippets": {
+      "serviceMethod": {
+        "prefix": "egov-servicemethod",
+        "body": [
+          "@Override",
+          "public ${1:ReturnType} ${2:methodName}(${3:ParamType} ${4:paramName}) throws Exception {",
+          "    ${0}",
+          "    return ${5:daoName}.${2:methodName}(${4:paramName});",
+          "}"
+        ],
+        "description": "eGovFrame Service method implementation"
+      }
+    }
+  }
+}
