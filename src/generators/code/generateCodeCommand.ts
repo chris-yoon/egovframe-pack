@@ -1,24 +1,25 @@
 import * as vscode from 'vscode';
+import * as fs from 'fs-extra';
 import { 
-  generateCrudFromDDL
+  generateCrudFromDDL,
+  getTemplateContext,
+  renderTemplate
 } from '../../utils/codeGeneratorUtils';
 import { registerHandlebarsHelpers } from '../../utils/handlebarHelpers';
+import { parseDDL } from '../../utils/ddlParser';
 
 // 이 함수는 VSCode 확장이 활성화될 때 호출된다.
 export function registerGenerateCodeCommand(context: vscode.ExtensionContext) {
   registerHandlebarsHelpers();
-  // generateCode 명령: 사용자가 DDL을 입력하면, 이를 파싱하여 템플릿 파일을 렌더링하고 파일을 생성한다.
+
+  // 기존 generateCode 명령어
   let generateCodeDisposable = vscode.commands.registerCommand('extension.generateCodeCommand', async () => {
-    // 현재 활성화된 텍스트 에디터를 가져온다.
     const editor = vscode.window.activeTextEditor;
-    // 선택된 텍스트를 DDL로 사용한다.
     let ddl = editor?.document.getText(editor.selection);
 
-    // DDL이 선택되지 않은 경우, Webview를 통해 입력받는다.
     if (!ddl) {
       ddl = await showDDLInputWebview(context);
 
-      // Webview를 통해 입력받은 DDL이 없으면 오류 메시지를 표시하고 종료한다.
       if (!ddl) {
         vscode.window.showErrorMessage('No DDL statement provided.');
         return;
@@ -28,7 +29,95 @@ export function registerGenerateCodeCommand(context: vscode.ExtensionContext) {
     await generateCrudFromDDL(ddl, context);
   });
 
-  context.subscriptions.push(generateCodeDisposable);
+  // Upload Templates 명령어
+  let uploadTemplatesDisposable = vscode.commands.registerCommand('extension.uploadTemplates', async () => {
+    const editor = vscode.window.activeTextEditor;
+    let ddl = editor?.document.getText(editor?.selection);
+
+    if (!ddl) {
+      ddl = await showDDLInputWebview(context);
+      if (!ddl) {
+        vscode.window.showErrorMessage('No DDL statement provided.');
+        return;
+      }
+    }
+
+    const selectedFiles = await vscode.window.showOpenDialog({
+      canSelectFiles: true,
+      canSelectFolders: false,
+      canSelectMany: true,
+      filters: {
+        'Handlebars Templates': ['hbs'],
+        'All Files': ['*']
+      },
+      title: 'Select Template Files'
+    });
+
+    if (selectedFiles && selectedFiles.length > 0) {
+      try {
+        for (const file of selectedFiles) {
+          const { tableName, attributes, pkAttributes } = parseDDL(ddl);
+          const templateContext = getTemplateContext(tableName, attributes, pkAttributes);
+          const renderedContent = await renderTemplate(file.fsPath, templateContext);
+          
+          const outputPath = file.fsPath.replace('.hbs', '.generated');
+          await fs.writeFile(outputPath, renderedContent);
+          
+          const doc = await vscode.workspace.openTextDocument(outputPath);
+          await vscode.window.showTextDocument(doc);
+        }
+        vscode.window.showInformationMessage('Templates generated successfully');
+      } catch (error) {
+        vscode.window.showErrorMessage(`Failed to process templates: ${error}`);
+      }
+    }
+  });
+
+  // Download Template Context 명령어
+  let downloadTemplateContextDisposable = vscode.commands.registerCommand('extension.downloadTemplateContext', async () => {
+    const editor = vscode.window.activeTextEditor;
+    let ddl = editor?.document.getText(editor?.selection);
+
+    if (!ddl) {
+      ddl = await showDDLInputWebview(context);
+      if (!ddl) {
+        vscode.window.showErrorMessage('No DDL statement provided.');
+        return;
+      }
+    }
+
+    const saveLocation = await vscode.window.showSaveDialog({
+      filters: {
+        'JSON files': ['json']
+      },
+      saveLabel: 'Save Template Context',
+      title: 'Save Template Context As'
+    });
+
+    if (saveLocation) {
+      try {
+        const { tableName, attributes, pkAttributes } = parseDDL(ddl);
+        const templateContext = getTemplateContext(tableName, attributes, pkAttributes);
+        const jsonContent = JSON.stringify(templateContext, null, 2);
+        
+        await fs.writeFile(saveLocation.fsPath, jsonContent);
+        
+        const doc = await vscode.workspace.openTextDocument(saveLocation.fsPath);
+        await vscode.window.showTextDocument(doc);
+        
+        vscode.window.showInformationMessage('Template context saved successfully');
+      } catch (error) {
+        vscode.window.showErrorMessage(`Failed to save template context: ${error}`);
+      }
+    }
+  });
+
+  // 모든 명령어를 context.subscriptions에 추가
+  context.subscriptions.push(
+    generateCodeDisposable,
+    uploadTemplatesDisposable,
+    downloadTemplateContextDisposable
+  );
 }
 
 // showDDLInputWebview 함수: 사용자가 DDL을 입력할 수 있는 Webview를 제공한다.

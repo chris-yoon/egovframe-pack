@@ -80,6 +80,16 @@
         "command": "extension.refreshSnippets",
         "title": "Refresh Snippets",
         "icon": "$(refresh)"
+      },
+      {
+        "command": "extension.uploadTemplates",
+        "title": "eGovFrame: Upload Templates",
+        "icon": "$(cloud-upload)"
+      },
+      {
+        "command": "extension.downloadTemplateContext",
+        "title": "eGovFrame: Download Template Context",
+        "icon": "$(cloud-download)"
       }
     ],
     "menus": {
