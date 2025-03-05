@@ -36,6 +36,7 @@ coverage/
 *.lcov
 .coverage
 .coverage.*
+test-workspace/
 
 # Environment variables
 .env

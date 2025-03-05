@@ -99,6 +99,7 @@ Available settings:
 - Visual Studio Code ^1.75.0
 - Node.js 20.x or higher
 - npm (Node Package Manager)
+- VS Code Extension Publishing Tool (vsce)
 
 ### Required Libraries
 
@@ -148,11 +149,26 @@ The following npm packages will be automatically installed when you run `npm ins
    npm install --save-dev @typescript-eslint/eslint-plugin @typescript-eslint/parser eslint
    ```
 
-2. Build Extension
+2. Build Extension (one-time)
    ```bash
    npm run clean
    npm run pretest
    npm run compile
+   ```
+
+3. Run Extension
+   ```bash
+   npm run watch
+   ```
+
+4. Test Extension
+   ```bash
+   npm run test
+   ```
+
+5. Package Extension
+   ```bash
+   vsce package
    ```
 
 ## License

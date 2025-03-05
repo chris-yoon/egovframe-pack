@@ -36,6 +36,15 @@ suite('Generate Project Test Suite', () => {
         // 임시 워크스페이스 생성
         workspaceFolder = path.join(__dirname, '../../../test-workspace');
         await fs.ensureDir(workspaceFolder);
+        
+        // 디렉토리가 실제로 생성되었는지 확인
+        await new Promise(resolve => setTimeout(resolve, 100)); // 파일 시스템 동기화를 위한 짧은 대기
+        
+        // 디렉토리 존재 확인
+        const exists = await fs.pathExists(workspaceFolder);
+        if (!exists) {
+            throw new Error(`Failed to create workspace directory: ${workspaceFolder}`);
+        }
 
         // templates-projects.json 경로 설정
         templatesPath = path.join(context.extensionPath, 'templates-projects.json');
@@ -114,6 +123,29 @@ suite('Generate Project Test Suite', () => {
             await fs.pathExists(path.join(projectPath, 'pom.xml')),
             'pom.xml should be generated'
         );
+
+        // 생성된 파일 목록을 재귀적으로 가져와서 로그로 표시
+        const getFilesRecursively = async (dir: string): Promise<string[]> => {
+            const files = await fs.readdir(dir);
+            const filePaths = await Promise.all(
+                files.map(async file => {
+                    const filePath = path.join(dir, file);
+                    const stats = await fs.stat(filePath);
+                    if (stats.isDirectory()) {
+                        return getFilesRecursively(filePath);
+                    } else {
+                        return filePath;
+                    }
+                })
+            );
+            return filePaths.flat();
+        };
+
+        const files = await getFilesRecursively(projectPath);
+        console.log('Generated project files:');
+        files.forEach(file => {
+            console.log('  -', path.relative(projectPath, file));
+        });
     });
 
     // 취소 처리 테스트
