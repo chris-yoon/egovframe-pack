@@ -53,55 +53,16 @@
 
   <dependencies>
     <!-- 실행환경 라이브러리 -->
-    <!--
-        mybatis를 사용하는 데 jdk1.5로 컴파일 할 경우 아래와 같이 변경해 주시기 바랍니다.
-        (3.2.X 버전에서 부터 jdk1.6으로 컴파일 되어 발생하는 현상)
-          <dependency>
-           <groupId>org.egovframe.rte</groupId>
-           <artifactId>org.egovframe.rte.psl.dataaccess</artifactId>
-           <version>${org.egovframe.rte.version}</version>
-           <exclusions>
-            <exclusion>
-             <artifactId>mybatis</artifactId>
-             <groupId>org.mybatis</groupId>
-            </exclusion>
-           </exclusions>
-          </dependency>
-          <dependency>
-           <groupId>org.mybatis</groupId>
-           <artifactId>mybatis</artifactId>
-			<version>3.5.16</version>
-          </dependency>
-        -->
     <dependency>
       <groupId>org.egovframe.rte</groupId>
       <artifactId>org.egovframe.rte.fdl.idgnr</artifactId>
       <version>${org.egovframe.rte.version}</version>
     </dependency>
-
-    <!--
-        JBoss의 경우는 <body-context>부분을 empty로 수정하여 적용하시면 되며,
-        pom.xml을 아래와 같이 적용하시면 수정된 jar를 참조하실 수 있습니다.
-        (기존 org.egovframe.rte.ptl.mvc dependency에 내부적으로 참조되고 있어,
-        해당 부분을 exclude 처리해야 함)
-        아래 주석을 해제하시면 됩니다.
-        -->
     <dependency>
       <groupId>org.egovframe.rte</groupId>
       <artifactId>org.egovframe.rte.ptl.mvc</artifactId>
       <version>${org.egovframe.rte.version}</version>
-      <!-- <exclusions>
-                <exclusion>
-                    <groupId>org.springmodules</groupId>
-                    <artifactId>spring-modules-validation</artifactId>
-                </exclusion>
-            <exclusions> -->
     </dependency>
-    <!-- <dependency>
-          <groupId>org.egovframe.rte</groupId>
-          <artifactId>spring-modules-validation</artifactId>
-          <version>0.9</version>
-        </dependency> -->
     <dependency>
       <groupId>org.egovframe.rte</groupId>
       <artifactId>org.egovframe.rte.fdl.property</artifactId>
@@ -109,27 +70,23 @@
     </dependency>
     <dependency>
       <groupId>org.egovframe.rte</groupId>
-      <artifactId>org.egovframe.rte.fdl.security</artifactId>
-      <version>${org.egovframe.rte.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.egovframe.rte</groupId>
       <artifactId>org.egovframe.rte.fdl.excel</artifactId>
       <version>${org.egovframe.rte.version}</version>
+      <exclusions>
+        <exclusion>
+          <artifactId>commons-beanutils</artifactId>
+          <groupId>commons-beanutils</groupId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>org.egovframe.rte</groupId>
-      <artifactId>org.egovframe.rte.bat.core</artifactId>
+      <artifactId>org.egovframe.rte.fdl.xml</artifactId>
       <version>${org.egovframe.rte.version}</version>
     </dependency>
     <dependency>
       <groupId>org.egovframe.rte</groupId>
       <artifactId>org.egovframe.rte.fdl.crypto</artifactId>
-      <version>${org.egovframe.rte.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.egovframe.rte</groupId>
-      <artifactId>org.egovframe.rte.fdl.access</artifactId>
       <version>${org.egovframe.rte.version}</version>
     </dependency>
     <!-- 실행환경 라이브러리 끝 -->
@@ -154,17 +111,11 @@
       <groupId>javax.servlet.jsp.jstl</groupId>
       <artifactId>jstl-api</artifactId>
       <version>1.2</version>
-      <exclusions>
-        <exclusion>
-          <groupId>javax.servlet</groupId>
-          <artifactId>servlet-api</artifactId>
-        </exclusion>
-      </exclusions>
     </dependency>
     <dependency>
-      <groupId>org.apache.taglibs</groupId>
-      <artifactId>taglibs-standard-impl</artifactId>
-      <version>1.2.5</version>
+      <groupId>taglibs</groupId>
+      <artifactId>standard</artifactId>
+      <version>1.1.2</version>
     </dependency>
     <dependency>
       <groupId>javax.servlet</groupId>
@@ -187,29 +138,11 @@
       <version>1.26.2</version>
     </dependency>
     <dependency>
-      <groupId>xerces</groupId>
-      <artifactId>xercesImpl</artifactId>
-      <version>2.12.2</version>
+      <groupId>org.hsqldb</groupId>
+      <artifactId>hsqldb</artifactId>
+      <version>2.7.2</version>
+      <classifier>jdk8</classifier>
     </dependency>
-    <!-- cache -->
-    <!-- <dependency>
-            <groupId>net.sf.ehcache</groupId>
-            <artifactId>ehcache-core</artifactId>
-            <version>2.10.9.2</version>
-            <exclusions>
-                <exclusion>
-                    <artifactId>slf4j-api</artifactId>
-                    <groupId>org.slf4j</groupId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-		    <groupId>net.sf.ehcache</groupId>
-		    <artifactId>ehcache</artifactId>
-		    <version>2.10.9.2</version>
-		</dependency> -->
-    <!-- cache end -->
-
     <!-- Scheduling -->
     <dependency>
       <groupId>org.quartz-scheduler</groupId>
@@ -230,35 +163,30 @@
     <!-- Scheduling end-->
 
     <!-- 공통컴포넌트 시작 -->
-
-    <!-- Validation 에서 사용 antlr.TokenStream -->
+    <!-- 게시판 생성시 사용 TokenStream -->
     <dependency>
       <groupId>org.antlr</groupId>
       <artifactId>antlr</artifactId>
       <version>3.5</version>
     </dependency>
-
     <!-- 우편번호를 위한 라이브러리 -->
     <dependency>
       <groupId>oro</groupId>
       <artifactId>oro</artifactId>
       <version>2.0.8</version>
     </dependency>
-
     <!-- 요소기술 달력을 위한 라이브러리 -->
     <dependency>
       <groupId>com.ibm.icu</groupId>
       <artifactId>icu4j</artifactId>
       <version>75.1</version>
     </dependency>
-
     <!-- FTP용 3rd party 라이브러리 -->
     <dependency>
       <groupId>commons-net</groupId>
       <artifactId>commons-net</artifactId>
       <version>3.11.1</version>
     </dependency>
-
     <!-- Email -->
     <dependency>
       <groupId>org.apache.commons</groupId>
@@ -270,7 +198,6 @@
       <artifactId>sndng-mail</artifactId>
       <version>1.0</version>
     </dependency>
-
     <!-- Cross-Site Scripting -->
     <dependency>
       <groupId>javax.servlet.jsp</groupId>
@@ -300,7 +227,12 @@
         </exclusion>
       </exclusions>
     </dependency>
-
+    <!-- XML스키마를 자바클래스로 생성하는 라이브러리 -->
+    <dependency>
+      <groupId>org.apache.xmlbeans</groupId>
+      <artifactId>xmlbeans</artifactId>
+      <version>2.6.0</version>
+    </dependency>
     <!-- fileupload -->
     <dependency>
       <groupId>commons-fileupload</groupId>
@@ -313,68 +245,12 @@
         </exclusion>
       </exclusions>
     </dependency>
-
-    <!-- Twitter -->
-    <dependency>
-      <groupId>org.twitter4j</groupId>
-      <artifactId>twitter4j-core</artifactId>
-      <version>4.0.7</version>
-    </dependency>
-    <!-- Twitter v2 -->
-    <dependency>
-      <groupId>io.github.takke</groupId>
-      <artifactId>jp.takke.twitter4j-v2</artifactId>
-      <version>1.4.2</version>
-    </dependency>
-
-    <!-- Ajax -->
-    <dependency>
-      <groupId>net.sourceforge.ajaxtags</groupId>
-      <artifactId>ajaxtags-resources</artifactId>
-      <version>1.5.7</version>
-    </dependency>
-
-    <!-- WYSIWYG Editor -->
-    <dependency>
-      <groupId>com.ckeditor</groupId>
-      <artifactId>ckeditor-java-core</artifactId>
-      <version>3.5.3</version>
-    </dependency>
-
     <!-- xmlParserAPI -->
     <dependency>
       <groupId>org.apache.xmlgraphics</groupId>
       <artifactId>batik-ext</artifactId>
       <version>1.17</version>
     </dependency>
-
-    <!-- oauth2 login -->
-    <dependency>
-      <groupId>com.github.scribejava</groupId>
-      <artifactId>scribejava-apis</artifactId>
-      <version>8.3.3</version>
-    </dependency>
-    <dependency>
-      <groupId>com.github.scribejava</groupId>
-      <artifactId>scribejava-core</artifactId>
-      <version>8.3.3</version>
-    </dependency>
-
-    <!-- WebSocket Messenger -->
-    <dependency>
-      <groupId>javax.websocket</groupId>
-      <artifactId>javax.websocket-api</artifactId>
-      <version>1.1</version>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.glassfish</groupId>
-      <artifactId>javax.json</artifactId>
-      <version>1.1.4</version>
-    </dependency>
-
-    <!-- ajax json -->
-    <!-- social에서 참조 하고 있어 임시 주석 처리 -->
     <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>
       <artifactId>jackson-core</artifactId>
@@ -390,41 +266,6 @@
       <artifactId>jackson-databind</artifactId>
       <version>2.17.1</version>
     </dependency>
-
-    <!-- LDAP조직도관리 관련 라이브러리  -->
-    <dependency>
-      <groupId>org.springframework.ldap</groupId>
-      <artifactId>spring-ldap-core</artifactId>
-      <version>2.4.1</version>
-      <exclusions>
-        <exclusion>
-          <groupId>org.springframework</groupId>
-          <artifactId>spring-beans</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>org.springframework</groupId>
-          <artifactId>spring-core</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>org.springframework</groupId>
-          <artifactId>spring-tx</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>org.slf4j</groupId>
-          <artifactId>slf4j-api</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>org.slf4j</groupId>
-          <artifactId>jcl-over-slf4j</artifactId>
-        </exclusion>
-      </exclusions>
-    </dependency>
-    <dependency>
-      <groupId>org.codehaus.jackson</groupId>
-      <artifactId>jackson-mapper-asl</artifactId>
-      <version>1.9.13</version>
-    </dependency>
-
     <dependency>
       <groupId>mysql</groupId>
       <artifactId>mysql-connector-java</artifactId>
@@ -440,60 +281,6 @@
       <artifactId>postgresql</artifactId>
       <version>42.7.3</version>
     </dependency>
-
-    <dependency>
-      <groupId>org.projectlombok</groupId>
-      <artifactId>lombok</artifactId>
-      <version>1.18.34</version>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>com.github.javaparser</groupId>
-      <artifactId>javaparser-core</artifactId>
-      <version>3.26.1</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.xmlbeans</groupId>
-      <artifactId>xmlbeans</artifactId>
-      <version>2.6.0</version>
-    </dependency>
-
-    <!-- 3rd party 라이브러리로 별도의 설치 필요 끝 -->
-
-    <!-- 법정도코드, 기관코드 연계 -->
-    <dependency>
-      <groupId>com.googlecode.json-simple</groupId>
-      <artifactId>json-simple</artifactId>
-      <version>1.1.1</version>
-    </dependency>
-
-    <!-- 공통컴포넌트 끝 -->
-
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>4.13.2</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.springframework</groupId>
-      <artifactId>spring-test</artifactId>
-      <version>${spring.maven.artifact.version}</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>javax.inject</groupId>
-      <artifactId>javax.inject</artifactId>
-      <version>1</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>javax.annotation</groupId>
-      <artifactId>javax.annotation-api</artifactId>
-      <version>1.3.2</version>
-      <scope>test</scope>
-    </dependency>
-
     <!-- 3rd party 라이브러리로 별도의 설치 필요 -->
     <!-- oracle 11g driver -->
     <dependency>
@@ -519,52 +306,107 @@
       <artifactId>cubrid</artifactId>
       <version>10.2.0</version>
     </dependency>
-    <!-- goldilocks driver -->
+    <!-- 3rd party 라이브러리로 별도의 설치 필요 끝 -->
+    <!-- 공통컴포넌트 끝 -->
+    <!-- 모바일 공통컴포넌트 -->
+    <!-- json lib  -->
+    <dependency>
+      <groupId>net.sf.json-lib</groupId>
+      <artifactId>json-lib</artifactId>
+      <version>2.4</version>
+      <classifier>jdk15</classifier>
+      <exclusions>
+        <exclusion>
+          <artifactId>commons-logging</artifactId>
+          <groupId>commons-logging</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>commons-beanutils</artifactId>
+          <groupId>commons-beanutils</groupId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.httpcomponents.client5</groupId>
+      <artifactId>httpclient5</artifactId>
+      <version>5.3.1</version>
+      <exclusions>
+        <exclusion>
+          <artifactId>commons-logging</artifactId>
+          <groupId>commons-logging</groupId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>org.jdom</groupId>
+      <artifactId>jdom2</artifactId>
+      <version>2.0.6.1</version>
+    </dependency>
+    <dependency>
+      <groupId>org.w3c</groupId>
+      <artifactId>dom</artifactId>
+      <version>2.3.0-jaxb-1.0.6</version>
+    </dependency>
+    <dependency>
+      <groupId>com.sun.xml.rpc</groupId>
+      <artifactId>jaxrpc-impl</artifactId>
+      <version>1.1.6</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.servicemix.specs</groupId>
+      <artifactId>org.apache.servicemix.specs.jaxws-api-2.2</artifactId>
+      <version>2.9.0</version>
+    </dependency>
+    <dependency>
+      <groupId>soap</groupId>
+      <artifactId>soap</artifactId>
+      <version>2.3.1</version>
+    </dependency>
+    <dependency>
+      <groupId>xalan</groupId>
+      <artifactId>xalan</artifactId>
+      <version>2.7.3</version>
+    </dependency>
+    <dependency>
+      <groupId>com.sun.xml.ws</groupId>
+      <artifactId>jaxws-rt</artifactId>
+      <version>4.0.2</version>
+    </dependency>
+    <dependency>
+      <groupId>javax.jms</groupId>
+      <artifactId>jms-api</artifactId>
+      <version>1.1-rev-1</version>
+    </dependency>
+    <dependency>
+      <groupId>javax.xml</groupId>
+      <artifactId>jaxrpc-api-osgi</artifactId>
+      <version>1.1-b01</version>
+    </dependency>
+    <!-- 대한민국정보포털 검색API -->
     <dependency>
       <groupId>project</groupId>
-      <artifactId>goldilocks8</artifactId>
-      <version>8.0.0</version>
+      <artifactId>KoreaGovPortalSearch</artifactId>
+      <version>0.0.1</version>
     </dependency>
-
-    <!--  M-Gov (SMS Service API) -->
+    <!-- MMS -->
     <dependency>
       <groupId>project</groupId>
-      <artifactId>smeapi</artifactId>
-      <version>2.7.0</version>
+      <artifactId>moseApi</artifactId>
+      <version>1.6.1</version>
     </dependency>
-
-    <!-- GPKI인증서 로그인처리 라이브러리 -->
+    <!-- 기상청 날씨조회 -->
     <dependency>
-      <groupId>project</groupId>
-      <artifactId>gpkisecureweb</artifactId>
-      <version>1.0.4.9</version>
+      <groupId>com.googlecode.json-simple</groupId>
+      <artifactId>json-simple</artifactId>
+      <version>1.1.1</version>
     </dependency>
-    <dependency>
-      <groupId>project</groupId>
-      <artifactId>libgpkiapi</artifactId>
-      <version>1.4.0</version>
-    </dependency>
-
-    <!-- 디지털원패스 라이브러리 시작 -->
-    <dependency>
-      <groupId>project</groupId>
-      <artifactId>onepass</artifactId>
-      <version>2.0.0</version>
-    </dependency>
-    <!-- 디지털원패스 라이브러리 끝 -->
-
-    <dependency>
-      <groupId>javax.faces</groupId>
-      <artifactId>javax.faces-api</artifactId>
-      <version>2.3</version>
-    </dependency>
-
+    <!-- 모바일 공통컴포넌트 끝 -->
   </dependencies>
 
   <build>
     <defaultGoal>install</defaultGoal>
     <directory>${basedir}/target</directory>
-    <finalName>egovframework-all-in-one</finalName>
+    <finalName>egovframework-all-in-one-mobile</finalName>
     <pluginManagement>
       <plugins>
         <plugin>
