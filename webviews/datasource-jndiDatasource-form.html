@@ -64,61 +64,20 @@
     <h2>Generation File</h2>
     
     <label for="txtFileName">File Name</label>
-    <input type="text" id="txtFileName" name="txtFileName" value="context-datasource" placeholder="Enter file name" required />
+    <input type="text" id="txtFileName" name="txtFileName" value="context-datasource-jndi" placeholder="Enter file name" required />
 
     <h2>DataSource Configuration</h2>
 
-    <label for="rdoType">WAS Type</label>
-    <select id="rdoType" name="rdoType" required onchange="toggleFields()">
-      <option value="Jeus" selected>Jeus</option>
-      <option value="Weblogic">Weblogic</option>
-    </select>
-
     <label for="txtDatasourceName">DataSource Name</label>
-    <input type="text" id="txtDatasourceName" name="txtDatasourceName" placeholder="Enter datasource name" required />
+    <input type="text" id="txtDatasourceName" name="txtDatasourceName" value="jndiDataSource" placeholder="Enter datasource name" required />
 
     <label for="txtJndiName">JNDI Name</label>
-    <input type="text" id="txtJndiName" name="txtJndiName" placeholder="Enter JNDI name" required />
-
-    <div id="jeusFields" class="conditional active">
-      <label for="txtFactoryInitial">Factory Initial</label>
-      <input type="text" id="txtFactoryInitial" name="txtFactoryInitial" placeholder="Enter factory initial" />
-
-      <label for="txtProviderUrl">Provider URL</label>
-      <input type="text" id="txtProviderUrl" name="txtProviderUrl" placeholder="Enter provider URL" />
-    </div>
-
-    <div id="weblogicFields" class="conditional">
-      <label for="txtPropertiesLocation">Properties Location</label>
-      <input type="text" id="txtPropertiesLocation" name="txtPropertiesLocation" placeholder="Enter properties location" value="classpath:" />
-    </div>
+    <input type="text" id="txtJndiName" name="txtJndiName" value="jdbc/PROJECT_DS" placeholder="Enter JNDI name" required />
 
     <button type="submit">Generate</button>
   </form>
 
   <script>
-    function toggleFields() {
-      const rdoType = document.getElementById('rdoType').value;
-      
-      const jeusFields = document.getElementById('jeusFields');
-      const weblogicFields = document.getElementById('weblogicFields');
-      
-      // Hide all conditional fields initially and remove required attribute
-      jeusFields.style.display = 'none';
-      weblogicFields.style.display = 'none';
-      Array.from(jeusFields.querySelectorAll('input')).forEach(input => input.required = false);
-      Array.from(weblogicFields.querySelectorAll('input')).forEach(input => input.required = false);
-
-      // Show the relevant fields based on the selected WAS type and add required attribute
-      if (rdoType === 'Jeus') {
-        jeusFields.style.display = 'block';
-        Array.from(jeusFields.querySelectorAll('input')).forEach(input => input.required = true);
-      } else if (rdoType === 'Weblogic') {
-        weblogicFields.style.display = 'block';
-        Array.from(weblogicFields.querySelectorAll('input')).forEach(input => input.required = true);
-      }
-    }
-
     function updateFileName() {
       const isXmlSelected = document.getElementById('rdoXml').checked;
       const fileNameInput = document.getElementById('txtFileName');
@@ -140,12 +99,8 @@
 
       const formData = {
         txtFileName: document.getElementById('txtFileName').value,
-        rdoType: document.getElementById('rdoType').value,
         txtDatasourceName: document.getElementById('txtDatasourceName').value,
-        txtJndiName: document.getElementById('txtJndiName').value,
-        txtFactoryInitial: document.getElementById('txtFactoryInitial').value,
-        txtProviderUrl: document.getElementById('txtProviderUrl').value,
-        txtPropertiesLocation: document.getElementById('txtPropertiesLocation').value,
+        txtJndiName: document.getElementById('txtJndiName').value
       };
 
       vscode.postMessage({
@@ -153,9 +108,6 @@
         data: formData
       });
     });
-
-    // Initialize the form with the correct fields displayed
-    toggleFields();
   </script>
 </body>
 </html>
