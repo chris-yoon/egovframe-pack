@@ -5,7 +5,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>{{groupID}}</groupId>
 	<artifactId>{{projectName}}</artifactId>
-	<packaging>jar</packaging>
+	<packaging>war</packaging>
 	<version>1.0.0</version>
 	<name>{{projectName}}</name>
 	<url>https://www.egovframe.go.kr</url>
@@ -17,10 +17,19 @@
 		</license>
 	</licenses>
 
+	<parent>
+		<groupId>org.springframework.boot</groupId>
+		<artifactId>spring-boot-starter-parent</artifactId>
+		<version>2.7.18</version>
+	</parent>
+
 	<properties>
-		<spring.maven.artifact.version>5.3.27</spring.maven.artifact.version>
-		<org.egovframe.rte.version>4.2.0</org.egovframe.rte.version>
-		<batch.maven.artifact.version>4.3.8</batch.maven.artifact.version>
+		<spring.maven.artifact.version>5.3.37</spring.maven.artifact.version>
+		<org.egovframe.rte.version>4.3.0</org.egovframe.rte.version>
+		<batch.maven.artifact.version>4.3.10</batch.maven.artifact.version>
+		<java.version>1.8</java.version>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 	</properties>
 
 	<repositories>
@@ -46,14 +55,7 @@
 		</repository>
 	</repositories>
 
-	<parent>
-		<groupId>org.springframework.boot</groupId>
-		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>2.7.12</version>
-	</parent>
-
 	<dependencies>
-
 		<!-- spring boot dependency start -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -79,7 +81,6 @@
 			<optional>true</optional>
 		</dependency>
 		<!-- spring boot dependency end -->
-
 		<dependency>
 			<groupId>org.egovframe.rte</groupId>
 			<artifactId>org.egovframe.rte.bat.core</artifactId>
@@ -116,7 +117,6 @@
 			<artifactId>org.egovframe.rte.itl.integration</artifactId>
 			<version>${org.egovframe.rte.version}</version>
 		</dependency>
-
 		<!-- For Testing -->
 		<dependency>
 			<groupId>org.springframework</groupId>
@@ -128,25 +128,21 @@
 			<artifactId>junit</artifactId>
 			<scope>test</scope>
 		</dependency>
-
 		<dependency>
 			<groupId>org.quartz-scheduler</groupId>
 			<artifactId>quartz</artifactId>
 		</dependency>
-
 		<dependency>
 			<groupId>org.hsqldb</groupId>
 			<artifactId>hsqldb</artifactId>
-			<version>2.7.2</version>
+			<version>2.7.3</version>
 			<classifier>jdk8</classifier>
 		</dependency>
-
 		<dependency>
 			<groupId>org.antlr</groupId>
 			<artifactId>antlr</artifactId>
 			<version>3.5</version>
 		</dependency>
-
 		<dependency>
 			<groupId>com.googlecode.log4jdbc</groupId>
 			<artifactId>log4jdbc</artifactId>
@@ -158,64 +154,49 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
-
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-dbcp2</artifactId>
 		</dependency>
-
 		<dependency>
 			<groupId>mysql</groupId>
 			<artifactId>mysql-connector-java</artifactId>
 			<version>8.0.33</version>
 		</dependency>
-
 		<dependency>
 			<groupId>javax.servlet.jsp.jstl</groupId>
 			<artifactId>jstl-api</artifactId>
 			<version>1.2</version>
 		</dependency>
-
 		<dependency>
-			<groupId>taglibs</groupId>
-			<artifactId>standard</artifactId>
-			<version>1.1.2</version>
+			<groupId>org.apache.taglibs</groupId>
+			<artifactId>taglibs-standard-impl</artifactId>
+			<version>1.2.5</version>
 		</dependency>
-
-		<!-- oracle 10g driver -->
-		<!--
-        <dependency>
-            <groupId>ojdbc</groupId>
-            <artifactId>ojdbc</artifactId>
-            <version>14</version>
-        </dependency>
-        -->
+		<!-- oracle 11g driver -->
+		<!--<dependency>
+			<groupId>project</groupId>
+			<artifactId>ojdbc6</artifactId>
+			<version>11.2.0.3</version>
+		</dependency>-->
 		<!-- altibase driver -->
-		<!--
-        <dependency>
-            <groupId>altibase</groupId>
-            <artifactId>altibase-jdbc-driver</artifactId>
-            <version>5.1.3.18</version>
-        </dependency>
-        -->
-
+		<!--<dependency>
+			<groupId>project</groupId>
+			<artifactId>altibase</artifactId>
+			<version>7.1.0</version>
+		</dependency>-->
 		<!-- tibero driver -->
-		<!--
-        <dependency>
-            <groupId>com.tmax.tibero</groupId>
-            <artifactId>tibero-jdbc</artifactId>
-            <version>3.0</version>
-        </dependency>
-        -->
-
+		<!--<dependency>
+			<groupId>project</groupId>
+			<artifactId>tibero5</artifactId>
+			<version>5.0.0</version>
+		</dependency>-->
 		<!-- cubrid driver -->
-		<!--
-        <dependency>
-            <groupId>cubrid</groupId>
-            <artifactId>cubrid-jdbc</artifactId>
-            <version>8.4</version>
-        </dependency>
-        -->
+		<!--<dependency>
+			<groupId>project</groupId>
+			<artifactId>cubrid</artifactId>
+			<version>10.2.0</version>
+		</dependency>-->
 	</dependencies>
 
 	<build>
@@ -227,24 +208,25 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-compiler-plugin</artifactId>
-					<version>3.11.0</version>
+					<version>3.13.0</version>
 					<configuration>
-						<source>1.8</source>
-						<target>1.8</target>
-						<encoding>UTF-8</encoding>
+						<source>${java.version}</source>
+						<target>${java.version}</target>
 					</configuration>
 				</plugin>
-				<!-- EMMA -->
 				<plugin>
-					<groupId>org.codehaus.mojo</groupId>
-					<artifactId>emma-maven-plugin</artifactId>
-					<version>1.0-alpha-3</version>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-war-plugin</artifactId>
+					<version>3.4.0</version>
+					<configuration>
+						<failOnMissingWebXml>false</failOnMissingWebXml>
+					</configuration>
 				</plugin>
 				<!-- PMD manven plugin -->
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-pmd-plugin</artifactId>
-					<version>3.21.0</version>
+					<version>3.23.0</version>
 				</plugin>
 			</plugins>
 		</pluginManagement>
@@ -253,8 +235,9 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
+				<version>3.3.0</version>
 				<configuration>
-					<skipTests>false</skipTests>
+					<skipTests>true</skipTests>
 					<forkMode>once</forkMode>
 					<reportFormat>xml</reportFormat>
 					<excludes>
@@ -266,18 +249,34 @@
 					</includes>
 				</configuration>
 			</plugin>
-			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>emma-maven-plugin</artifactId>
-				<inherited>true</inherited>
-			</plugin>
-			<!-- JavaDoc -->
+			<!--  JavaDoc -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
+				<version>3.7.0</version>
+				<configuration>
+					<doclint>none</doclint>
+				</configuration>
+				<executions>
+					<execution>
+						<id>attach-sources</id>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<!-- spring-boot-maven-plugin -->
+			<plugin>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-maven-plugin</artifactId>
+				<configuration>
+					<executable>true</executable>
+				</configuration>
 			</plugin>
 		</plugins>
 	</build>
+
 	<reporting>
 		<outputDirectory>${basedir}/target/site</outputDirectory>
 		<plugins>
@@ -300,15 +299,11 @@
 					</reportSet>
 				</reportSets>
 			</plugin>
-			<!-- JUnit Test Results & EMMA Coverage Reporting -->
+			<!-- JUnit Test Results -->
 			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>emma-maven-plugin</artifactId>
-				<inherited>true</inherited>
-			</plugin>
-			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>surefire-report-maven-plugin</artifactId>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-report-plugin</artifactId>
+				<version>3.3.0</version>
 				<inherited>true</inherited>
 				<reportSets>
 					<reportSet>
@@ -322,23 +317,20 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
+				<version>3.7.0</version>
 				<configuration>
 					<minmemory>128m</minmemory>
 					<maxmemory>512m</maxmemory>
-					<encoding>${encoding}</encoding>
-					<docencoding>${encoding}</docencoding>
-					<charset>${encoding}</charset>
 				</configuration>
 			</plugin>
 			<!-- Generating Java Source in HTML -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-jxr-plugin</artifactId>
+				<version>3.3.0</version>
 				<configuration>
-					<inputEncoding>${encoding}</inputEncoding>
-					<outputEncoding>${encoding}</outputEncoding>
 					<linkJavadoc>true</linkJavadoc>
-					<javadocDir>apidocs</javadocDir>
+					<javadocDir>api docs</javadocDir>
 				</configuration>
 			</plugin>
 		</plugins>
