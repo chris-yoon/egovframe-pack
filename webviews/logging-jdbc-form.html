@@ -65,23 +65,26 @@
 
     <h2>Generation File</h2>
     <label for="txtFileName">File Name</label>
-    <input type="text" id="txtFileName" name="txtFileName" value="context-logging" placeholder="Enter file name" required />
+    <input type="text" id="txtFileName" name="txtFileName" value="log4j2-jdbc" placeholder="Enter file name" required />
 
     <h2>Configuration</h2>
     <label for="txtAppenderName">Appender Name</label>
-    <input type="text" id="txtAppenderName" name="txtAppenderName" placeholder="Enter appender name" required />
+    <input type="text" id="txtAppenderName" name="txtAppenderName" value="jdbc" placeholder="Enter appender name" required />
+
+    <label for="txtTableName">Table Name</label>
+    <input type="text" id="txtTableName" name="txtTableName" value="log" placeholder="Enter table name" required />
 
     <label for="txtDriver">Database Driver Class</label>
-    <input type="text" id="txtDriver" name="txtDriver" placeholder="Enter driver class" required />
+    <input type="text" id="txtDriver" name="txtDriver" value="com.mysql.cj.jdbc.Driver" placeholder="Enter driver class" required />
 
     <label for="txtUrl">Database URL</label>
-    <input type="text" id="txtUrl" name="txtUrl" placeholder="Enter database URL" required />
+    <input type="text" id="txtUrl" name="txtUrl" value="jdbc:mysql://localhost:3306/log" placeholder="Enter database URL" required />
 
     <label for="txtUser">Database User</label>
-    <input type="text" id="txtUser" name="txtUser" placeholder="Enter database user" required />
+    <input type="text" id="txtUser" name="txtUser" value="log" placeholder="Enter database user" required />
 
     <label for="txtPasswd">Database Password</label>
-    <input type="password" id="txtPasswd" name="txtPasswd" placeholder="Enter database password" required />
+    <input type="password" id="txtPasswd" name="txtPasswd" value="log01" placeholder="Enter database password" required />
 
     <label for="txtQuery">SQL Query</label>
     <input type="text" id="txtQuery" name="txtQuery" value="insert into STMR_LOG (msg) values('%d %p [%c] - <%m>%n')" placeholder="Enter SQL query" required></input>
@@ -125,6 +128,7 @@
       const formData = {
         txtFileName: form.txtFileName.value,
         txtAppenderName: form.txtAppenderName.value,
+        txtTableName: form.txtTableName.value,
         txtDriver: form.txtDriver.value,
         txtUrl: form.txtUrl.value,
         txtUser: form.txtUser.value,

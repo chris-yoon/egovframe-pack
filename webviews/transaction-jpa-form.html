@@ -63,23 +63,23 @@
 
     <h2>Generation File</h2>
     <label for="txtFileName">File Name</label>
-    <input type="text" id="txtFileName" name="txtFileName" value="context-transaction" placeholder="Enter file name" required />
+    <input type="text" id="txtFileName" name="txtFileName" value="context-transaction-jpa" placeholder="Enter file name" required />
 
     <h2>Configuration</h2>
     <label for="txtTransactionName">Transaction Manager Name</label>
-    <input type="text" id="txtTransactionName" name="txtTransactionName" placeholder="Enter transaction manager name" required />
+    <input type="text" id="txtTransactionName" name="txtTransactionName" value="transactionManager" placeholder="Enter transaction manager name" required />
+
+    <label for="txtDataSourceName">Data Source Name</label>
+    <input type="text" id="txtDataSourceName" name="txtDataSourceName" value="dataSource" placeholder="Enter data source name" required />
 
     <label for="txtEttMgrFactory">Entity Manager Factory Name</label>
-    <input type="text" id="txtEttMgrFactory" name="txtEttMgrFactory" placeholder="Enter entity manager factory name" required />
+    <input type="text" id="txtEttMgrFactory" name="txtEttMgrFactory" value="entityManagerFactory" placeholder="Enter entity manager factory name" required />
 
     <label for="txtPstUnitName">Persistence Unit Name</label>
     <input type="text" id="txtPstUnitName" name="txtPstUnitName" placeholder="Enter persistence unit name" required />
 
     <label for="txtPstXMLLoc">Persistence XML Location</label>
     <input type="text" id="txtPstXMLLoc" name="txtPstXMLLoc" value="classpath:" placeholder="Enter persistence XML location" required />
-
-    <label for="txtDataSourceName">Data Source Name</label>
-    <input type="text" id="txtDataSourceName" name="txtDataSourceName" placeholder="Enter data source name" required />
 
     <button type="button" onclick="submitForm()">Generate</button>
   </form>

@@ -64,26 +64,26 @@
 
     <h2>Generation File</h2>
     <label for="txtFileName">File Name</label>
-    <input type="text" id="txtFileName" name="txtFileName" value="context-logging" placeholder="Enter file name" required />
+    <input type="text" id="txtFileName" name="txtFileName" value="log4j-rolling-file-time" placeholder="Enter file name" required />
 
     <h2>Configuration</h2>
     <label for="txtAppenderName">Appender Name</label>
-    <input type="text" id="txtAppenderName" name="txtAppenderName" placeholder="Enter appender name" required />
+    <input type="text" id="txtAppenderName" name="txtAppenderName" value="rolling-file-time" placeholder="Enter appender name" required />
 
     <label for="txtLogFileName">Log File Name</label>
-    <input type="text" id="txtLogFileName" name="txtLogFileName" value="./logs/daily/dailyRollingSample.log" placeholder="Enter log file name" required />
+    <input type="text" id="txtLogFileName" name="txtLogFileName" value="./logs/time/timeBasedRollingSample.log" placeholder="Enter log file name" required />
 
-    <label for="cboAppend">Append</label>
-    <select id="cboAppend" name="cboAppend" required>
-      <option value="true">True</option>
-      <option value="false">False</option>
-    </select>
-
-    <label for="txtDatePattern">Date Pattern</label>
-    <input type="text" id="txtDatePattern" name="txtDatePattern" value=".yyyy-MM-dd-HH-mm-ss" placeholder="Enter date pattern" required />
+    <label for="txtLogFileNamePattern">Log File Name Pattern</label>
+    <input type="text" id="txtLogFileNamePattern" name="txtLogFileNamePattern" value="./logs/time/timeBasedRollingSample.%d{yyyy-MM-dd_HH-mm}.log" placeholder="Enter log file name pattern" required />
 
     <label for="txtConversionPattern">Conversion Pattern</label>
     <input type="text" id="txtConversionPattern" name="txtConversionPattern" value="%d %5p [%c] %m%n" placeholder="Enter conversion pattern" required />
+
+    <label for="cboModulate">Modulate</label>
+    <select id="cboModulate" name="cboModulate" required>
+      <option value="true">True</option>
+      <option value="false">False</option>
+    </select>
 
     <button type="button" onclick="submitForm()">Generate</button>
   </form>
@@ -125,8 +125,8 @@
         txtFileName: form.txtFileName.value,
         txtAppenderName: form.txtAppenderName.value,
         txtLogFileName: form.txtLogFileName.value,
-        cboAppend: form.cboAppend.value,
-        txtDatePattern: form.txtDatePattern.value,
+        txtLogFileNamePattern: form.txtLogFileNamePattern.value,
+        cboModulate: form.cboModulate.value,
         txtConversionPattern: form.txtConversionPattern.value
       };
       vscode.postMessage({

@@ -2,9 +2,13 @@
 <!DOCTYPE xml>
 <Configuration>
   <Appenders>
-    <File name="{{txtAppenderName}}" fileName="{{txtLogFileName}}" append="{{cboAppend}}">
+    <RollingFile name="{{txtAppenderName}}" fileName="{{txtLogFileName}}"
+      filePattern="{{txtLogFileNamePattern}}">
       <PatternLayout pattern="{{txtConversionPattern}}" />
-    </File>
+      <Policies>
+        <TimeBasedTriggeringPolicy interval="1" modulate="{{cboModulate}}" />
+      </Policies>
+    </RollingFile>
   </Appenders>
   <Loggers>
     <Logger name="egovframework" level="DEBUG" additivity="false">

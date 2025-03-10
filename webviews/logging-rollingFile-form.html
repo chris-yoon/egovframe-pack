@@ -63,20 +63,23 @@
 
     <h2>Generation File</h2>
     <label for="txtFileName">File Name</label>
-    <input type="text" id="txtFileName" name="txtFileName" value="context-logging" placeholder="Enter file name" required />
+    <input type="text" id="txtFileName" name="txtFileName" value="log4j-rolling-file" placeholder="Enter file name" required />
 
     <h2>Configuration</h2>
     <label for="txtAppenderName">Appender Name</label>
-    <input type="text" id="txtAppenderName" name="txtAppenderName" placeholder="Enter appender name" required />
+    <input type="text" id="txtAppenderName" name="txtAppenderName" value="rolling-file" placeholder="Enter appender name" required />
+
+    <label for="txtLogFileName">Log File Name</label>
+    <input type="text" id="txtLogFileName" name="txtLogFileName" value="./logs/rolling/rollingSample.log" placeholder="Enter log file name" required />
 
     <label for="txtLogFileNamePattern">Log File Name Pattern</label>
     <input type="text" id="txtLogFileNamePattern" name="txtLogFileNamePattern" value="./logs/rolling/rollingSample.%i.log" placeholder="Enter log file name pattern" required />
 
     <label for="txtMaxIndex">Max Index</label>
-    <input type="text" id="txtMaxIndex" name="txtMaxIndex" value="3" placeholder="Enter max index" required />
+    <input type="text" id="txtMaxIndex" name="txtMaxIndex" value="20" placeholder="Enter max index" required />
 
     <label for="txtMaxFileSize">Max File Size</label>
-    <input type="text" id="txtMaxFileSize" name="txtMaxFileSize" value="1000" placeholder="Enter max file size" required />
+    <input type="text" id="txtMaxFileSize" name="txtMaxFileSize" value="3000" placeholder="Enter max file size" required />
 
     <label for="txtConversionPattern">Conversion Pattern</label>
     <input type="text" id="txtConversionPattern" name="txtConversionPattern" value="%d %5p [%c] %m%n" placeholder="Enter conversion pattern" required />
@@ -120,6 +123,7 @@
       const formData = {
         txtFileName: form.txtFileName.value,
         txtAppenderName: form.txtAppenderName.value,
+        txtLogFileName: form.txtLogFileName.value,
         txtLogFileNamePattern: form.txtLogFileNamePattern.value,
         txtMaxIndex: form.txtMaxIndex.value,
         txtMaxFileSize: form.txtMaxFileSize.value,

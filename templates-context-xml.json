@@ -18,8 +18,6 @@
   { "displayName": "Logging > New Console Appender", "templateFolder": "logging", "templateFile": "console.hbs", "webView": "logging-console-form.html", "fileNameProperty": "txtFileName", "javaConfigTemplate": "console-java.hbs" },
   { "displayName": "Logging > New File Appender", "templateFolder": "logging", "templateFile": "file.hbs", "webView": "logging-file-form.html", "fileNameProperty": "txtFileName", "javaConfigTemplate": "file-java.hbs" },
   { "displayName": "Logging > New Rolling File Appender", "templateFolder": "logging", "templateFile": "rollingFile.hbs", "webView": "logging-rollingFile-form.html", "fileNameProperty": "txtFileName", "javaConfigTemplate": "rollingFile-java.hbs" },
-  { "displayName": "Logging > New Daily Rolling File Appender", "templateFolder": "logging", "templateFile": "dailyRollingFile.hbs", "webView": "logging-dailyRollingFile-form.html", "fileNameProperty": "txtFileName", "javaConfigTemplate": "dailyRollingFile-java.hbs" },
-  { "displayName": "Logging > New JDBC Appender", "templateFolder": "logging", "templateFile": "jdbc.hbs", "webView": "logging-jdbc-form.html", "fileNameProperty": "txtFileName", "javaConfigTemplate": "jdbc-java.hbs" },
-  { "displayName": "Logging > New eGovDB Appender", "templateFolder": "logging", "templateFile": "egovDb.hbs", "webView": "logging-egovDb-form.html", "fileNameProperty": "txtFileName", "javaConfigTemplate": "egovDb-java.hbs" },
-  { "displayName": "Logging > New eGovJDBC Appender", "templateFolder": "logging", "templateFile": "egovJdbc.hbs", "webView": "logging-egovJdbc-form.html", "fileNameProperty": "txtFileName", "javaConfigTemplate": "egovJdbc-java.hbs" }
+  { "displayName": "Logging > New Time-Based Rolling File Appender", "templateFolder": "logging", "templateFile": "timeBasedRollingFile.hbs", "webView": "logging-timeBased-RollingFile-form.html", "fileNameProperty": "txtFileName", "javaConfigTemplate": "dailyRollingFile-java.hbs" },
+  { "displayName": "Logging > New JDBC Appender", "templateFolder": "logging", "templateFile": "jdbc.hbs", "webView": "logging-jdbc-form.html", "fileNameProperty": "txtFileName", "javaConfigTemplate": "jdbc-java.hbs" }
 ]

@@ -1,23 +1,39 @@
-<?xml version="1.0" encoding="UTF-8" ?>
-<!DOCTYPE log4j:configuration SYSTEM "log4j.dtd">
-<log4j:configuration xmlns:log4j='http://jakarta.apache.org/log4j/'>
-
-	<appender name="{{txtAppenderName}}" class="org.apache.log4j.jdbc.JDBCAppender">
-		<param name="Driver" value="{{txtDriver}}"/>
-		<param name="URL" value="{{txtUrl}}"/>
-		<param name="User" value="{{txtUser}}"/>
-		<param name="Password" value="{{txtPasswd}}"/>
-		<param name="Sql" value="{{txtQuery}}"/>
-	</appender>
-	
-	<logger name="org.springframework" additivity="false">
-		<level value="DEBUG" />
-		<appender-ref ref="{{txtAppenderName}}" />
-	</logger>
-	
-	<root>
-		<level value="OFF" />
-		<appender-ref ref="{{txtAppenderName}}" />
-	</root>
-		
-</log4j:configuration>
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE xml>
+<Configuration>
+  <Appenders>
+    <JDBC name="{{txtAppenderName}}" tableName="{{txtTableName}}">
+      <DriverManager
+        driverClassName="{{txtDriver}}"
+        connectionString="{{txtUrl}}"
+        userName="{{txtUser}}"
+        password="{{txtPasswd}}">
+      </DriverManager>
+      <Column name="reg_dt" isEventTimestamp="true" />
+      <Column name="level" pattern="%p" />
+      <Column name="logger" pattern="%c" />
+      <Column name="message" pattern="%m" />
+      <Column name="exception" pattern="%ex{full}" />
+      <!--
+        <Filters>
+          <ThresholdFilter level="INFO" onMatch="DENY" onMismatch="NEUTRAL"/>
+          <RegexFilter regex=".*Exception.*" onMatch="NEUTRAL" onMismatch="DENY"/>
+        </Filters>
+      -->
+    </JDBC>
+  </Appenders>
+  <Loggers>
+    <Logger name="egovframework" level="DEBUG" additivity="false">
+      <AppenderRef ref="{{txtAppenderName}}" />
+    </Logger>
+    <Logger name="org.egovframe" level="DEBUG" additivity="false">
+      <AppenderRef ref="{{txtAppenderName}}" />
+    </Logger>
+    <Logger name="org.springframework" level="DEBUG" additivity="false">
+      <AppenderRef ref="{{txtAppenderName}}" />
+    </Logger>
+    <Root level="INFO">
+      <AppenderRef ref="{{txtAppenderName}}" />
+    </Root>
+  </Loggers>
+</Configuration>
