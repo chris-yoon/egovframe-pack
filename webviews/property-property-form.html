@@ -71,7 +71,7 @@
 
     <h2>Configuration</h2>
     <label for="txtPropertyServiceName">Property Service Name</label>
-    <input type="text" id="txtPropertyServiceName" name="txtPropertyServiceName" placeholder="Enter property service name" required />
+    <input type="text" id="txtPropertyServiceName" name="txtPropertyServiceName" value="propertiesService" placeholder="Enter property service name" required />
 
     <label for="rdoType">Type</label>
     <label>
@@ -86,10 +86,10 @@
     <!-- Internal Properties Section -->
     <div id="internalPropertiesSection" class="conditional">
       <label for="txtKey">Key</label>
-      <input type="text" id="txtKey" name="txtKey" placeholder="Enter key" />
+      <input type="text" id="txtKey" name="txtKey" value="pageUnit" placeholder="Enter key" />
 
       <label for="txtValue">Value</label>
-      <input type="text" id="txtValue" name="txtValue" placeholder="Enter value" />
+      <input type="text" id="txtValue" name="txtValue" value="20" placeholder="Enter value" />
     </div>
 
     <!-- External File Section -->
@@ -102,7 +102,7 @@
       </select>
 
       <label for="txtPropertyFile">Property File Name</label>
-      <input type="text" id="txtPropertyFile" name="txtPropertyFile" value="classpath*:" placeholder="Enter property file name" />
+      <input type="text" id="txtPropertyFile" name="txtPropertyFile" value="classpath*:/egovframework/egovProps/conf/config.properties" placeholder="Enter property file name" />
     </div>
 
     <button type="button" onclick="submitForm()">Generate</button>
