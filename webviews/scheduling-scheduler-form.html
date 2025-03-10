@@ -14,7 +14,7 @@
       margin-bottom: 8px;
       font-weight: bold;
     }
-    input[type="text"] {
+    input[type="text"], select {
       width: 95%;
       padding: 8px;
       margin-bottom: 20px;
@@ -66,11 +66,17 @@
     <input type="text" id="txtFileName" name="txtFileName" value="context-scheduling" placeholder="Enter file name" required />
 
     <h2>Configuration</h2>
+    <label for="cboTriggerType">TriggerFactoryBean Type</label>
+    <select id="cboTriggerType" name="cboTriggerType" required>
+      <option value="SimpleTriggerFactoryBean">SimpleTriggerFactoryBean</option>
+      <option value="CronTriggerFactoryBean">CronTriggerFactoryBean</option>
+    </select>
+
     <label for="txtSchedulerName">Scheduler Name</label>
-    <input type="text" id="txtSchedulerName" name="txtSchedulerName" placeholder="Enter scheduler name" required />
+    <input type="text" id="txtSchedulerName" name="txtSchedulerName" value="schedulerFactory" placeholder="Enter scheduler name" required />
 
     <label for="txtTriggerName">Trigger Name</label>
-    <input type="text" id="txtTriggerName" name="txtTriggerName" placeholder="Enter trigger name" required />
+    <input type="text" id="txtTriggerName" name="txtTriggerName" value="triggerName" placeholder="Enter trigger name" required />
 
     <button type="button" onclick="submitForm()">Generate</button>
   </form>
@@ -101,6 +107,7 @@
       const form = document.getElementById('schedulerForm');
       const formData = {
         txtFileName: form.txtFileName.value,
+        cboTriggerType: form.cboTriggerType.value,
         txtSchedulerName: form.txtSchedulerName.value,
         txtTriggerName: form.txtTriggerName.value
       };

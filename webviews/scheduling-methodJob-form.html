@@ -83,7 +83,7 @@
     <h2>Job Configuration</h2>
     <!-- Job Configuration Section -->
     <label for="txtJobName">Job Name:</label>
-    <input type="text" id="txtJobName" name="txtJobName" placeholder="Enter job name" required />
+    <input type="text" id="txtJobName" name="txtJobName" value="jobDetail" placeholder="Enter job name" required />
 
     <label for="cboConcurrent">Concurrent:</label>
     <select id="cboConcurrent" name="cboConcurrent" required>
@@ -94,26 +94,26 @@
     <h2>Service Configuration</h2>
     <!-- Service Configuration Section -->
     <label for="txtServiceName">Service Name:</label>
-    <input type="text" id="txtServiceName" name="txtServiceName" placeholder="Enter service name" required />
+    <input type="text" id="txtServiceName" name="txtServiceName" value="jobService" placeholder="Enter service name" required />
 
     <label for="txtServiceClass">Service Class:</label>
     <input type="text" id="txtServiceClass" name="txtServiceClass" placeholder="Enter service class name" required />
 
     <label for="txtServiceMethod">Service Method:</label>
-    <input type="text" id="txtServiceMethod" name="txtServiceMethod" placeholder="Enter service method" required />
+    <input type="text" id="txtServiceMethod" name="txtServiceMethod" value="runJob" placeholder="Enter service method" required />
 
     <label for="chkProperty">
-      <input type="checkbox" id="chkProperty" name="chkProperty" onchange="togglePropertySection()" />
+      <input type="checkbox" id="chkProperty" name="chkProperty" onchange="togglePropertySection()" checked />
       Add Property
     </label>
 
     <!-- Conditional Properties Section -->
     <div id="propertySection" class="conditional">
       <label for="txtPropertyName">Property Name:</label>
-      <input type="text" id="txtPropertyName" name="txtPropertyName" placeholder="Enter property name" />
+      <input type="text" id="txtPropertyName" name="txtPropertyName" value="paramSampleJob" placeholder="Enter property name" />
 
       <label for="txtPropertyValue">Property Value:</label>
-      <input type="text" id="txtPropertyValue" name="txtPropertyValue" placeholder="Enter property value" />
+      <input type="text" id="txtPropertyValue" name="txtPropertyValue" value="SampleJobValue" placeholder="Enter property value" />
     </div>
 
     <button type="button" onclick="submitForm()">Generate</button>

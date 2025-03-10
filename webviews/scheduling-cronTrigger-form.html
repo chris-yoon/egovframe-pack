@@ -21,6 +21,13 @@
       border: 1px solid #ccc;
       border-radius: 4px;
     }
+    select {
+      width: 95%;
+      padding: 8px;
+      margin-bottom: 20px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
     .radio-group {
       display: inline-flex;
       margin-bottom: 20px;
@@ -66,11 +73,17 @@
     <input type="text" id="txtFileName" name="txtFileName" value="context-scheduling" placeholder="Enter file name" required />
 
     <h2>Configuration</h2>
+    <label for="cboJobDetailType">JobDetailFactoryBean Type</label>
+    <select id="cboJobDetailType" name="cboJobDetailType" required>
+      <option value="JobDetailFactoryBean">JobDetailFactoryBean</option>
+      <option value="MethodInvokingJobDetailFactoryBean">MethodInvokingJobDetailFactoryBean</option>
+    </select>
+
     <label for="txtTriggerName">Trigger Name</label>
-    <input type="text" id="txtTriggerName" name="txtTriggerName" placeholder="Enter trigger name" required />
+    <input type="text" id="txtTriggerName" name="txtTriggerName" value="cronTrigger" placeholder="Enter trigger name" required />
 
     <label for="txtJobName">Job Name</label>
-    <input type="text" id="txtJobName" name="txtJobName" placeholder="Enter job name" required />
+    <input type="text" id="txtJobName" name="txtJobName" value="jobDetail" placeholder="Enter job name" required />
 
     <label for="txtExpression">Cron Expression</label>
     <input type="text" id="txtExpression" name="txtExpression" value="*/10 * * * * ?" placeholder="Enter cron expression" required />
@@ -104,6 +117,7 @@
       const form = document.getElementById('cronTriggerForm');
       const formData = {
         txtFileName: form.txtFileName.value,
+        cboJobDetailType: form.cboJobDetailType.value,
         txtTriggerName: form.txtTriggerName.value,
         txtJobName: form.txtJobName.value,
         txtExpression: form.txtExpression.value

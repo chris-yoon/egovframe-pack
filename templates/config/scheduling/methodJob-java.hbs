@@ -4,24 +4,18 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean;
 
+import {{txtServiceClass}};
+
 @Configuration
 public class {{txtFileName}} {
 
-  @Bean(name = "{{txtServiceName}}")
-  public {{txtServiceClass}} {{txtServiceName}}() {
-    {{txtServiceClass}} service = new {{txtServiceClass}}();
-    {{#if chkProperty}}
-    service.set{{txtPropertyName}}("{{txtPropertyValue}}");
-    {{/if}}
-    return service;
-  }
-
+  // MethodInvoking JobDetail 설정
   @Bean(name = "{{txtJobName}}")
-  public MethodInvokingJobDetailFactoryBean {{txtJobName}}({{txtServiceClass}} {{txtServiceName}}) {
-    MethodInvokingJobDetailFactoryBean jobDetailFactoryBean = new MethodInvokingJobDetailFactoryBean();
-    jobDetailFactoryBean.setTargetObject({{txtServiceName}});
-    jobDetailFactoryBean.setTargetMethod("{{txtServiceMethod}}");
-    jobDetailFactoryBean.setConcurrent({{cboConcurrent}});
-    return jobDetailFactoryBean;
+  public MethodInvokingJobDetailFactoryBean testMethodInvokingJobDetail({{txtServiceClass}} {{txtServiceName}}) {
+    MethodInvokingJobDetailFactoryBean jobDetailFactory = new MethodInvokingJobDetailFactoryBean();
+    jobDetailFactory.setTargetObject({{txtServiceName}});
+    jobDetailFactory.setTargetMethod("{{txtServiceMethod}}");
+    jobDetailFactory.setConcurrent({{cboConcurrent}});
+    return jobDetailFactory;
   }
 }
