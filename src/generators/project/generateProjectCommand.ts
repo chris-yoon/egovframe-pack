@@ -29,7 +29,7 @@ export function registerGenerateProjectCommand(context: vscode.ExtensionContext)
       });
       if (!selected) {return;}
 
-      const config = await getProjectConfig();
+      const config = await getProjectConfig(selected.template);
       if (!config) {return;}
 
       await generateProject(selected.template, config, extensionPath);

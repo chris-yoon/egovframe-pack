@@ -126,7 +126,7 @@ export function registerGenerateProjectExplorer(context: vscode.ExtensionContext
           return;
         }
 
-        const config = await getProjectConfig();
+        const config = await getProjectConfig(template);
         if (!config) {return;}
 
         await generateProject(template, config, extensionPath);

@@ -21,18 +21,21 @@ export interface ProjectConfig {
   groupID: string;
 }
 
-export async function getProjectConfig(): Promise<ProjectConfig | undefined> {
+export async function getProjectConfig(template: Template): Promise<ProjectConfig | undefined> {
   const projectName = await vscode.window.showInputBox({
     prompt: "Enter project name",
     placeHolder: "ProjectName",
   });
   if (!projectName) {return;}
 
-  const groupID = await vscode.window.showInputBox({
-    prompt: "Enter group ID",
-    placeHolder: "GroupID",
-  });
-  if (!groupID) {return;}
+  let groupID = "";
+  if (template.pomFile !== "") {
+    groupID = await vscode.window.showInputBox({
+      prompt: "Enter group ID",
+      placeHolder: "GroupID",
+    }) || "";
+    if (!groupID) {return;}
+  }
 
   return { projectName, groupID };
 }
