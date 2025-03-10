@@ -70,10 +70,10 @@
 
     <h2>Configuration</h2>
     <label for="txtTransactionName">Transaction Manager Name</label>
-    <input type="text" id="txtTransactionName" name="txtTransactionName" placeholder="Enter transaction manager name" required />
+    <input type="text" id="txtTransactionName" name="txtTransactionName" value="txManager" placeholder="Enter transaction manager name" required />
 
     <label for="txtDatasourceName">Datasource Name</label>
-    <input type="text" id="txtDatasourceName" name="txtDatasourceName" placeholder="Enter datasource name" required />
+    <input type="text" id="txtDatasourceName" name="txtDatasourceName" value="dataSource" placeholder="Enter datasource name" required />
 
     <label for="chkTransactionTemplate">
       <input type="checkbox" id="chkTransactionTemplate" name="chkTransactionTemplate" />
@@ -82,7 +82,7 @@
 
     <div id="transactionTemplateSection" class="conditional">
       <label for="txtTransactionTemplateName">Transaction Template Name</label>
-      <input type="text" id="txtTransactionTemplateName" name="txtTransactionTemplateName" placeholder="Enter transaction template name" />
+      <input type="text" id="txtTransactionTemplateName" name="txtTransactionTemplateName" value="transactionTemplate" placeholder="Enter transaction template name" />
     </div>
 
     <label for="chkAnnotationTransactionManagement">
@@ -91,22 +91,22 @@
     </label>
 
     <label for="chkConfigurationalTransactionManagement">
-      <input type="checkbox" id="chkConfigurationalTransactionManagement" name="chkConfigurationalTransactionManagement" />
+      <input type="checkbox" id="chkConfigurationalTransactionManagement" name="chkConfigurationalTransactionManagement" checked />
       Enable Configurational Transaction Management
     </label>
 
     <div id="configurationalTransactionSection" class="conditional">
       <label for="txtPointCutName">Pointcut Name</label>
-      <input type="text" id="txtPointCutName" name="txtPointCutName" placeholder="Enter pointcut name" />
+      <input type="text" id="txtPointCutName" name="txtPointCutName" value="requiredTx" placeholder="Enter pointcut name" />
 
       <label for="txtPointCutExpression">Pointcut Expression</label>
-      <input type="text" id="txtPointCutExpression" name="txtPointCutExpression" placeholder="Enter pointcut expression" />
+      <input type="text" id="txtPointCutExpression" name="txtPointCutExpression" value="execution(* egovframework.com..*Impl.*(..)) or execution(* org.egovframe.rte.fdl.excel.impl.*Impl.*(..))" placeholder="Enter pointcut expression" />
 
       <label for="txtAdviceName">Advice Name</label>
-      <input type="text" id="txtAdviceName" name="txtAdviceName" placeholder="Enter advice name" />
+      <input type="text" id="txtAdviceName" name="txtAdviceName" value="txAdvice" placeholder="Enter advice name" />
 
       <label for="txtMethodName">Method Name</label>
-      <input type="text" id="txtMethodName" name="txtMethodName" placeholder="Enter method name" />
+      <input type="text" id="txtMethodName" name="txtMethodName" value="*" placeholder="Enter method name" />
 
       <label for="chkReadOnly">
         <input type="checkbox" id="chkReadOnly" name="chkReadOnly" />
@@ -114,13 +114,13 @@
       </label>
 
       <label for="chkRollbackFor">
-        <input type="checkbox" id="chkRollbackFor" name="chkRollbackFor" />
+        <input type="checkbox" id="chkRollbackFor" name="chkRollbackFor" checked/>
         Rollback For Exception
       </label>
 
       <div id="rollbackForSection" class="conditional">
         <label for="txtRollbackFor">Rollback For</label>
-        <input type="text" id="txtRollbackFor" name="txtRollbackFor" placeholder="Enter rollback-for exception" />
+        <input type="text" id="txtRollbackFor" name="txtRollbackFor" value="Exception" placeholder="Enter rollback-for exception" />
       </div>
 
       <label for="chkNoRollbackFor">
@@ -130,7 +130,7 @@
 
       <div id="noRollbackForSection" class="conditional">
         <label for="txtNoRollbackFor">No Rollback For</label>
-        <input type="text" id="txtNoRollbackFor" name="txtNoRollbackFor" placeholder="Enter no-rollback-for exception" />
+        <input type="text" id="txtNoRollbackFor" name="txtNoRollbackFor" value="RuntimeException" placeholder="Enter no-rollback-for exception" />
       </div>
 
       <label for="chkTimeout">
@@ -140,12 +140,12 @@
 
       <div id="timeoutSection" class="conditional">
         <label for="txtTimeout">Timeout (seconds)</label>
-        <input type="text" id="txtTimeout" name="txtTimeout" placeholder="Enter timeout in seconds" />
+        <input type="text" id="txtTimeout" name="txtTimeout" value="20" placeholder="Enter timeout in seconds" />
       </div>
 
       <label for="cmbPropagation">Propagation</label>
       <select id="cmbPropagation" name="cmbPropagation">
-        <option value="REQUIRED">REQUIRED</option>
+        <option value="REQUIRED" selected>REQUIRED</option>
         <option value="SUPPORTS">SUPPORTS</option>
         <option value="MANDATORY">MANDATORY</option>
         <option value="REQUIRES_NEW">REQUIRES_NEW</option>
@@ -156,7 +156,7 @@
 
       <label for="cmbIsolation">Isolation</label>
       <select id="cmbIsolation" name="cmbIsolation">
-        <option value="DEFAULT">DEFAULT</option>
+        <option value="DEFAULT" selected>DEFAULT</option>
         <option value="READ_UNCOMMITTED">READ_UNCOMMITTED</option>
         <option value="READ_COMMITTED">READ_COMMITTED</option>
         <option value="REPEATABLE_READ">REPEATABLE_READ</option>
@@ -183,11 +183,13 @@
     document.getElementById('chkTimeout').addEventListener('change', () => toggleSection('chkTimeout', 'timeoutSection'));
 
     // Initialize the form with the correct section visibility
-    toggleSection('chkTransactionTemplate', 'transactionTemplateSection');
-    toggleSection('chkConfigurationalTransactionManagement', 'configurationalTransactionSection');
-    toggleSection('chkRollbackFor', 'rollbackForSection');
-    toggleSection('chkNoRollbackFor', 'noRollbackForSection');
-    toggleSection('chkTimeout', 'timeoutSection');
+    document.addEventListener('DOMContentLoaded', function() {
+      toggleSection('chkTransactionTemplate', 'transactionTemplateSection');
+      toggleSection('chkConfigurationalTransactionManagement', 'configurationalTransactionSection'); // This will now show the section by default
+      toggleSection('chkRollbackFor', 'rollbackForSection'); // This will now show the section by default
+      toggleSection('chkNoRollbackFor', 'noRollbackForSection');
+      toggleSection('chkTimeout', 'timeoutSection');
+    });
     function updateFileName() {
       const isXmlSelected = document.getElementById('rdoXml').checked;
       const fileNameInput = document.getElementById('txtFileName');
