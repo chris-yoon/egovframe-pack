@@ -29,12 +29,13 @@
 	
 	<tx:advice id="{{txtAdviceName}}" transaction-manager="{{txtTransactionName}}">
 		<tx:attributes>
-			<tx:method name="{{txtMethodName}}" read-only="{{chkReadOnly}}"
+			<tx:method name="{{txtMethodName}}" 
+				read-only="{{chkReadOnly}}"
 				{{#if chkRollbackFor}} rollback-for="{{txtRollbackFor}}"{{/if}}
 				{{#if chkNoRollbackFor}} no-rollback-for="{{txtNoRollbackFor}}"{{/if}}
 				{{#if chkTimeout}} timeout="{{txtTimeout}}"{{/if}}
 				propagation="{{cmbPropagation}}"
-				isolation="{{cmbIsolation}}"/>
+				isolation="{{cmbIsolation}}" />
 		</tx:attributes>
 	</tx:advice>
 	{{/if}}
