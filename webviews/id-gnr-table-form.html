@@ -74,19 +74,19 @@
 
     <h2>Configuration</h2>
     <label for="txtIdServiceName">ID Service Name:</label>
-    <input type="text" id="txtIdServiceName" name="txtIdServiceName" required />
+    <input type="text" id="txtIdServiceName" value="tableIdGnrService" name="txtIdServiceName" required />
 
     <label for="txtDatasourceName">Datasource Name:</label>
-    <input type="text" id="txtDatasourceName" name="txtDatasourceName" required />
+    <input type="text" id="txtDatasourceName" value="dataSource" name="txtDatasourceName" required />
 
     <label for="txtTableId">Table ID:</label>
-    <input type="text" id="txtTableId" name="txtTableId" required />
+    <input type="text" id="txtTableId" name="txtTableId" value="SEQ_TABLE" required />
 
     <label for="txtTableName">Table Name:</label>
-    <input type="text" id="txtTableName" name="txtTableName" required />
+    <input type="text" id="txtTableName" name="txtTableName" value="SEQ_COLUMN" required />
 
     <label for="txtBlockSize">Block Size:</label>
-    <input type="number" id="txtBlockSize" name="txtBlockSize" required />
+    <input type="number" id="txtBlockSize" name="txtBlockSize" value="10" required />
 
     <label for="chkStrategy">Use Strategy:
     <input type="checkbox" id="chkStrategy" name="chkStrategy" onclick="toggleStrategyFields()" />
@@ -94,16 +94,16 @@
 
     <div id="strategyFields" style="display: none;">
       <label for="txtStrategyName">Strategy Name:</label>
-      <input type="text" id="txtStrategyName" name="txtStrategyName" />
+      <input type="text" id="txtStrategyName" name="txtStrategyName" value="prefixIdGnrStrategy" />
 
       <label for="txtPrefix">Prefix:</label>
-      <input type="text" id="txtPrefix" name="txtPrefix" />
+      <input type="text" id="txtPrefix" name="txtPrefix" value="PRE" />
 
       <label for="txtCipers">Ciphers:</label>
-      <input type="number" id="txtCipers" name="txtCipers" />
+      <input type="number" id="txtCipers" name="txtCipers" value="20" />
 
       <label for="txtFillChar">Fill Character:</label>
-      <input type="text" id="txtFillChar" name="txtFillChar" />
+      <input type="text" id="txtFillChar" name="txtFillChar" value="0" />
     </div>
 
     <button type="button" onclick="submitForm()">Generate</button>

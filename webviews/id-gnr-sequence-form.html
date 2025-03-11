@@ -71,13 +71,13 @@
 
     <h2>Configuration</h2>
     <label for="txtIdServiceName">Bean Name</label>
-    <input type="text" id="txtIdServiceName" name="txtIdServiceName" placeholder="Enter bean name" required />
+    <input type="text" id="txtIdServiceName" name="txtIdServiceName" value="sequenceIdGnrService" placeholder="Enter bean name" required />
 
     <label for="txtDatasourceName">Data Source Name</label>
-    <input type="text" id="txtDatasourceName" name="txtDatasourceName" placeholder="Enter data source name" required />
+    <input type="text" id="txtDatasourceName" name="txtDatasourceName" value="dataSource" placeholder="Enter data source name" required />
 
     <label for="txtQuery">Query</label>
-    <input type="text" id="txtQuery" name="txtQuery" placeholder="Enter query" required />
+    <input type="text" id="txtQuery" name="txtQuery" value="SELECT SEQ_NO.NEXTVAL FROM DUAL" placeholder="Enter query" required />
 
     <label>Type</label>
     <div class="radio-group">
@@ -87,7 +87,7 @@
       </label>
 
       <label for="rdoDefault">
-        <input type="radio" id="rdoDefault" name="rdoType" value="Default" checked>
+        <input type="radio" id="rdoDefault" name="rdoType" value="Base" checked>
         Default
       </label>
     </div>

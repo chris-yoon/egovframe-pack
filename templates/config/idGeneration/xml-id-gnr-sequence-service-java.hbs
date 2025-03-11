@@ -1,27 +1,23 @@
 package {{defaultPackageName}}.config;
 
-import org.egovframe.rte.fdl.idgnr.impl.EgovSequenceIdGnrService;
+import javax.sql.DataSource;
+
+import org.egovframe.rte.fdl.idgnr.impl.EgovSequenceIdGnrServiceImpl;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import javax.sql.DataSource;
 
 @Configuration
 public class {{txtFileName}} {
 
-  private final DataSource dataSource;
-
-  public {{txtFileName}}(DataSource dataSource) {
-    this.dataSource = dataSource;
-  }
-
-  @Bean(name = "{{txtIdServiceName}}")
-  public EgovSequenceIdGnrService {{txtIdServiceName}}() {
-    EgovSequenceIdGnrService sequenceIdGnrService = new EgovSequenceIdGnrService();
-    sequenceIdGnrService.setDataSource(dataSource);
-    sequenceIdGnrService.setQuery("{{txtQuery}}");
+  @Bean(name = "{{txtIdServiceName}}", destroyMethod = "destroy")
+  public EgovSequenceIdGnrServiceImpl {{txtIdServiceName}}(@Qualifier("{{txtDatasourceName}}") DataSource dataSource) {
+    EgovSequenceIdGnrServiceImpl egovSequenceIdGnrService = new EgovSequenceIdGnrServiceImpl();
+    egovSequenceIdGnrService.setDataSource(dataSource);
+    egovSequenceIdGnrService.setQuery("{{txtQuery}}");
     {{#if (eq rdoType "BigDecimal")}}
-    sequenceIdGnrService.setUseBigDecimals(true);
+    egovSequenceIdGnrService.setUseBigDecimals(true);
     {{/if}}
-    return sequenceIdGnrService;
+    return egovSequenceIdGnrService;
   }
 }

@@ -78,14 +78,14 @@
 
     <h2>Configuration</h2>
     <label for="txtIdServiceName">Service Name:</label>
-    <input type="text" id="txtIdServiceName" name="txtIdServiceName" required />
+    <input type="text" id="txtIdServiceName" name="txtIdServiceName" value="uuidIdGnrService" required />
 
     <label for="rdoType">Type:
     <input type="checkbox" id="rdoType" name="rdoType" value="Address" onchange="toggleAddressField()" /> Address
     </label>
     <div id="addressField">
       <label for="txtAddress">Address:</label>
-      <input type="text" id="txtAddress" name="txtAddress" />
+      <input type="text" id="txtAddress" name="txtAddress" value="12:34:56:78:9A:AB" />
     </div>
 
     <button type="button" onclick="submitForm()">Generate</button>
