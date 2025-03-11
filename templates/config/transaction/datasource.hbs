@@ -17,10 +17,6 @@
 	</bean> 
 	{{/if}}
 	
-	{{#if chkAnnotationTransactionManagement}}
-	<tx:annotation-driven transaction-manager="{{txtTransactionName}}" />
-	{{/if}}
-	
 	{{#if chkConfigurationalTransactionManagement}}
 	<aop:config>
 		<aop:pointcut id="{{txtPointCutName}}" expression="{{txtPointCutExpression}}"/>
@@ -38,6 +34,10 @@
 				isolation="{{cmbIsolation}}" />
 		</tx:attributes>
 	</tx:advice>
+	{{/if}}
+	
+	{{#if chkAnnotationTransactionManagement}}
+	<tx:annotation-driven transaction-manager="{{txtTransactionName}}" proxy-target-class="true" />
 	{{/if}}
 	
 </beans>

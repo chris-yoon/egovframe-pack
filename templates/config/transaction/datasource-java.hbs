@@ -88,6 +88,9 @@ public class {{txtFileName}} {
     return txMethods;
   }
 
+  // -------------------------------------------------------------
+	// TransactionAdvisor 설정
+	// -------------------------------------------------------------
   @Bean
   public Advisor txAdvisor(@Qualifier("{{txtTransactionName}}") DataSourceTransactionManager txManager) {
     AspectJExpressionPointcut pointcut = new AspectJExpressionPointcut();

@@ -14,7 +14,7 @@
       margin-bottom: 8px;
       font-weight: bold;
     }
-    input[type="text"] {
+    input[type="text"], select {
       width: 95%;
       padding: 8px;
       margin-bottom: 20px;
@@ -67,19 +67,152 @@
 
     <h2>Configuration</h2>
     <label for="txtTransactionName">Transaction Manager Name</label>
-    <input type="text" id="txtTransactionName" name="txtTransactionName" value="transactionManager" placeholder="Enter transaction manager name" required />
+    <input type="text" id="txtTransactionName" name="txtTransactionName" value="transactionManager" value="transactionManager" placeholder="Enter transaction manager name" required />
 
     <label for="txtDataSourceName">Data Source Name</label>
-    <input type="text" id="txtDataSourceName" name="txtDataSourceName" value="dataSource" placeholder="Enter data source name" required />
+    <input type="text" id="txtDataSourceName" name="txtDataSourceName" value="dataSource" value="dataSource" placeholder="Enter data source name" required />
 
     <label for="txtEttMgrFactory">Entity Manager Factory Name</label>
-    <input type="text" id="txtEttMgrFactory" name="txtEttMgrFactory" value="entityManagerFactory" placeholder="Enter entity manager factory name" required />
+    <input type="text" id="txtEttMgrFactory" name="txtEttMgrFactory" value="entityManagerFactory" value="entityManagerFactory" placeholder="Enter entity manager factory name" required />
 
-    <label for="txtPstUnitName">Persistence Unit Name</label>
-    <input type="text" id="txtPstUnitName" name="txtPstUnitName" placeholder="Enter persistence unit name" required />
+    <label for="txtEntityPackages">Entity Packages to Scan</label>
+    <input type="text" id="txtEntityPackages" name="txtEntityPackages" placeholder="com.example.domain" required />
 
-    <label for="txtPstXMLLoc">Persistence XML Location</label>
-    <input type="text" id="txtPstXMLLoc" name="txtPstXMLLoc" value="classpath:" placeholder="Enter persistence XML location" required />
+    <label for="cmbDialect">Dialect Name</label>
+    <select id="cmbDialect" name="cmbDialect" required>
+      <optgroup label="H2">
+        <option value="org.hibernate.dialect.H2Dialect">H2 Dialect</option>
+      </optgroup>
+      
+      <optgroup label="MySQL">
+        <option value="org.hibernate.dialect.MySQL5Dialect">MySQL 5 Dialect</option>
+        <option value="org.hibernate.dialect.MySQL5InnoDBDialect">MySQL 5 InnoDB Dialect</option>
+        <option value="org.hibernate.dialect.MySQL8Dialect">MySQL 8 Dialect</option>
+      </optgroup>
+      
+      <optgroup label="MariaDB">
+        <option value="org.hibernate.dialect.MariaDBDialect">MariaDB Dialect</option>
+        <option value="org.hibernate.dialect.MariaDB53Dialect">MariaDB 5.3 Dialect</option>
+        <option value="org.hibernate.dialect.MariaDB102Dialect">MariaDB 10.2 Dialect</option>
+        <option value="org.hibernate.dialect.MariaDB103Dialect">MariaDB 10.3 Dialect</option>
+      </optgroup>
+      
+      <optgroup label="PostgreSQL">
+        <option value="org.hibernate.dialect.PostgreSQL9Dialect">PostgreSQL 9 Dialect</option>
+        <option value="org.hibernate.dialect.PostgreSQL10Dialect">PostgreSQL 10 Dialect</option>
+        <option value="org.hibernate.dialect.PostgreSQL11Dialect">PostgreSQL 11 Dialect</option>
+        <option value="org.hibernate.dialect.PostgreSQL12Dialect">PostgreSQL 12 Dialect</option>
+      </optgroup>
+      
+      <optgroup label="Oracle">
+        <option value="org.hibernate.dialect.Oracle10gDialect">Oracle 10g Dialect</option>
+        <option value="org.hibernate.dialect.Oracle11gDialect">Oracle 11g Dialect</option>
+        <option value="org.hibernate.dialect.Oracle12cDialect">Oracle 12c Dialect</option>
+        <option value="org.hibernate.dialect.Oracle21cDialect">Oracle 21c Dialect</option>
+      </optgroup>
+      
+      <optgroup label="SQL Server">
+        <option value="org.hibernate.dialect.SQLServer2008Dialect">SQL Server 2008 Dialect</option>
+        <option value="org.hibernate.dialect.SQLServer2012Dialect">SQL Server 2012 Dialect</option>
+        <option value="org.hibernate.dialect.SQLServer2016Dialect">SQL Server 2016 Dialect</option>
+      </optgroup>
+      
+      <optgroup label="DB2">
+        <option value="org.hibernate.dialect.DB2Dialect">DB2 Dialect</option>
+        <option value="org.hibernate.dialect.DB2400Dialect">DB2/400 Dialect</option>
+        <option value="org.hibernate.dialect.DB2390Dialect">DB2/390 Dialect</option>
+      </optgroup>
+      
+      <optgroup label="Derby">
+        <option value="org.hibernate.dialect.DerbyDialect">Derby Dialect</option>
+        <option value="org.hibernate.dialect.DerbyTenSevenDialect">Derby 10.7 Dialect</option>
+        <option value="org.hibernate.dialect.DerbyTenFiveDialect">Derby 10.5 Dialect</option>
+        <option value="org.hibernate.dialect.DerbyTenSixDialect">Derby 10.6 Dialect</option>
+      </optgroup>
+      
+      <optgroup label="Other Databases">
+        <option value="org.hibernate.dialect.HSQLDialect">HSQL Dialect</option>
+        <option value="org.hibernate.dialect.InformixDialect">Informix Dialect</option>
+        <option value="org.hibernate.dialect.FirebirdDialect">Firebird Dialect</option>
+        <option value="org.hibernate.dialect.SybaseASE15Dialect">Sybase ASE 15 Dialect</option>
+        <option value="org.hibernate.dialect.SQLAnywhereDialect">SQL Anywhere Dialect</option>
+        <option value="org.hibernate.dialect.SQLiteDialect">SQLite Dialect</option>
+        <option value="org.hibernate.dialect.TeradataDialect">Teradata Dialect</option>
+        <option value="org.hibernate.dialect.HANARowStoreDialect">HANA Row Store Dialect</option>
+        <option value="org.hibernate.dialect.HANACalcViewDialect">HANA Calc View Dialect</option>
+      </optgroup>
+    </select>
+
+    <label for="txtRepositoryPackage">Repository Package</label>
+    <input type="text" id="txtRepositoryPackage" name="txtRepositoryPackage" placeholder="com.example.repository" required />
+
+    <h2>Transaction Attributes</h2>
+    <label for="txtPointCutName">Pointcut Name</label>
+    <input type="text" id="txtPointCutName" name="txtPointCutName" value="requiredTx" placeholder="Enter pointcut name" />
+
+    <label for="txtPointCutExpression">Pointcut Expression</label>
+    <input type="text" id="txtPointCutExpression" name="txtPointCutExpression" value="execution(* egovframework.sample..*Impl.*(..))" placeholder="Enter pointcut expression" />
+
+    <label for="txtAdviceName">Advice Name</label>
+    <input type="text" id="txtAdviceName" name="txtAdviceName" value="txAdvice" placeholder="Enter advice name" />
+
+    <label for="txtMethodName">Method Name</label>
+    <input type="text" id="txtMethodName" name="txtMethodName" value="*" placeholder="Enter method name" />
+
+    <label for="chkReadOnly">
+      <input type="checkbox" id="chkReadOnly" name="chkReadOnly" />
+      Read-Only
+    </label>
+
+    <label for="chkRollbackFor">
+      <input type="checkbox" id="chkRollbackFor" name="chkRollbackFor" checked/>
+      Rollback For Exception
+    </label>
+
+    <div id="rollbackForSection" class="conditional">
+      <label for="txtRollbackFor">Rollback For</label>
+      <input type="text" id="txtRollbackFor" name="txtRollbackFor" value="Exception" placeholder="Enter rollback-for exception" />
+    </div>
+
+    <label for="chkNoRollbackFor">
+      <input type="checkbox" id="chkNoRollbackFor" name="chkNoRollbackFor" />
+      No Rollback For Exception
+    </label>
+
+    <div id="noRollbackForSection" class="conditional">
+      <label for="txtNoRollbackFor">No Rollback For</label>
+      <input type="text" id="txtNoRollbackFor" name="txtNoRollbackFor" value="RuntimeException" placeholder="Enter no-rollback-for exception" />
+    </div>
+
+    <label for="chkTimeout">
+      <input type="checkbox" id="chkTimeout" name="chkTimeout" />
+      Set Timeout
+    </label>
+
+    <div id="timeoutSection" class="conditional">
+      <label for="txtTimeout">Timeout (seconds)</label>
+      <input type="text" id="txtTimeout" name="txtTimeout" value="20" placeholder="Enter timeout in seconds" />
+    </div>
+
+    <label for="cmbPropagation">Propagation</label>
+    <select id="cmbPropagation" name="cmbPropagation">
+      <option value="REQUIRED" selected>REQUIRED</option>
+      <option value="SUPPORTS">SUPPORTS</option>
+      <option value="MANDATORY">MANDATORY</option>
+      <option value="REQUIRES_NEW">REQUIRES_NEW</option>
+      <option value="NOT_SUPPORTED">NOT_SUPPORTED</option>
+      <option value="NEVER">NEVER</option>
+      <option value="NESTED">NESTED</option>
+    </select>
+
+    <label for="cmbIsolation">Isolation</label>
+    <select id="cmbIsolation" name="cmbIsolation">
+      <option value="DEFAULT" selected>DEFAULT</option>
+      <option value="READ_UNCOMMITTED">READ_UNCOMMITTED</option>
+      <option value="READ_COMMITTED">READ_COMMITTED</option>
+      <option value="REPEATABLE_READ">REPEATABLE_READ</option>
+      <option value="SERIALIZABLE">SERIALIZABLE</option>
+    </select>
 
     <button type="button" onclick="submitForm()">Generate</button>
   </form>
@@ -94,7 +227,7 @@
       if (isXmlSelected) {
         fileNameInput.value = 'context-transaction';
       } else {
-        fileNameInput.value = 'EgovTransactionConfig';
+        fileNameInput.value = 'EgovTransactionJpaConfig';
       }
     }
 
@@ -112,9 +245,23 @@
         txtFileName: form.txtFileName.value,
         txtTransactionName: form.txtTransactionName.value,
         txtEttMgrFactory: form.txtEttMgrFactory.value,
-        txtPstUnitName: form.txtPstUnitName.value,
-        txtPstXMLLoc: form.txtPstXMLLoc.value,
-        txtDataSourceName: form.txtDataSourceName.value
+        txtDataSourceName: form.txtDataSourceName.value,
+        txtEntityPackages: form.txtEntityPackages.value,
+        txtRepositoryPackage: form.txtRepositoryPackage.value,
+        cmbDialect: form.cmbDialect.value,
+        txtPointCutName: form.txtPointCutName.value,
+        txtPointCutExpression: form.txtPointCutExpression.value,
+        txtAdviceName: form.txtAdviceName.value,
+        txtMethodName: form.txtMethodName.value,
+        chkReadOnly: form.chkReadOnly.checked,
+        chkRollbackFor: form.chkRollbackFor.checked,
+        txtRollbackFor: form.txtRollbackFor.value,
+        chkNoRollbackFor: form.chkNoRollbackFor.checked,
+        txtNoRollbackFor: form.txtNoRollbackFor.value,
+        chkTimeout: form.chkTimeout.checked,
+        txtTimeout: form.txtTimeout.value,
+        cmbPropagation: form.cmbPropagation.value,
+        cmbIsolation: form.cmbIsolation.value
       };
       vscode.postMessage({
         command: command,
