@@ -19,7 +19,7 @@
       )
       VALUES (
 {{#each attributes}}
-        {{#if @first}}#{{{ccName}}}{{else}}, #{{{ccName}}}{{/if}}
+        {{#if @first}}{{concat "#" "{" ccName "}"}}{{else}}, {{concat "#" "{" ccName "}"}}{{/if}}
 {{/each}}
       )
     ]]>
@@ -30,11 +30,11 @@
       UPDATE {{tableName}}
       SET
 {{#each attributes}}
-        {{#if @first}}{{columnName}} = #{{{ccName}}}{{else}}, {{columnName}} = #{{{ccName}}}{{/if}}
+        {{#if @first}}{{columnName}} = {{concat "#" "{" ccName "}"}}{{else}}, {{columnName}} = {{concat "#" "{" ccName "}"}}{{/if}}
 {{/each}}
       WHERE 
 {{#each pkAttributes}}
-        {{#if @first}}{{columnName}} = #{{{ccName}}}{{else}} AND {{columnName}} = #{{{ccName}}}{{/if}}
+        {{#if @first}}{{columnName}} = {{concat "#" "{" ccName "}"}}{{else}} AND {{columnName}} = {{concat "#" "{" ccName "}"}}{{/if}}
 {{/each}}
     ]]>
   </update>
@@ -48,7 +48,7 @@
       FROM {{tableName}}
       WHERE 
 {{#each pkAttributes}}
-        {{#if @first}}{{columnName}} = #{{{ccName}}}{{else}} AND {{columnName}} = #{{{ccName}}}{{/if}}
+        {{#if @first}}{{columnName}} = {{concat "#" "{" ccName "}"}}{{else}} AND {{columnName}} = {{concat "#" "{" ccName "}"}}{{/if}}
 {{/each}}
     ]]>
   </select>
@@ -63,14 +63,14 @@
       WHERE 1=1
       <if test="searchKeyword != null and searchKeyword != ''">
         <if test="searchCondition == 0">
-          AND {{pkAttributes.[0].columnName}} = #{{{searchKeyword}}}
+          AND {{pkAttributes.[0].columnName}} = {{concat "#" "{" "searchKeyword" "}"}}
         </if>
         <if test="searchCondition == 1">
-          AND {{attributes.[0].columnName}} LIKE CONCAT('%', #{{{searchKeyword}}}, '%')
+          AND {{attributes.[0].columnName}} LIKE CONCAT('%', {{concat "#" "{" "searchKeyword" "}"}}, '%')
         </if>
       </if>
       ORDER BY {{sortOrder}}
-      LIMIT #{{{recordCountPerPage}}} OFFSET #{{{firstIndex}}}
+      LIMIT {{concat "#" "{" "recordCountPerPage" "}"}} OFFSET {{concat "#" "{" "firstIndex" "}"}}
     ]]>
   </select>
 
@@ -81,10 +81,10 @@
       WHERE 1=1
       <if test="searchKeyword != null and searchKeyword != ''">
         <if test="searchCondition == 0">
-          AND {{pkAttributes.[0].columnName}} = #{{{searchKeyword}}}
+          AND {{pkAttributes.[0].columnName}} = {{concat "#" "{" "searchKeyword" "}"}}
         </if>
         <if test="searchCondition == 1">
-          AND {{attributes.[0].columnName}} LIKE CONCAT('%', #{{{searchKeyword}}}, '%')
+          AND {{attributes.[0].columnName}} LIKE CONCAT('%', {{concat "#" "{" "searchKeyword" "}"}}, '%')
         </if>
       </if>
     ]]>

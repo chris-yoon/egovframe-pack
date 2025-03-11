@@ -139,7 +139,7 @@ export function getTemplateContext(tableName: string, attributes: Column[], pkAt
     const defaultPackageName = vscode.workspace.getConfiguration('egovframeInitializr').get<string>('defaultPackageName', 'egovframework.example.sample');
     
     return {
-        namespace: `${defaultPackageName}.mapper`,
+        namespace: `${defaultPackageName}.${tableName}Mapper`,
         resultMapId: `${tableName}Result`,
         resultMapType: `${defaultPackageName}.service.${tableName}VO`,
         tableName,

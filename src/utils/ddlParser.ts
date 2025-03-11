@@ -22,8 +22,8 @@ export function parseDDL(ddl: string): ParsedDDL {
     // 공백 정규화
     ddl = ddl.replace(/\s+/g, ' ').trim();
 
-    // 테이블 이름 추출
-    const tableNameMatch = RegExp(/CREATE TABLE (\w+)/i).exec(ddl);
+    // 테이블 이름 추출 (백틱 처리 추가)
+    const tableNameMatch = RegExp(/CREATE TABLE [`]?(\w+)[`]?/i).exec(ddl);
     if (!tableNameMatch) {
         throw new Error('Unable to parse table name from DDL');
     }
@@ -40,23 +40,34 @@ export function parseDDL(ddl: string): ParsedDDL {
     const columnsArray = columnDefinitions
         .split(/,(?![^(]*\))/)
         .map(column => column.trim())
-        .filter(column => column && !column.startsWith('CONSTRAINT') && !column.startsWith('PRIMARY KEY'));
+        .filter(column => column && !column.startsWith('UNIQUE KEY') && !column.startsWith('KEY') && !column.startsWith('CONSTRAINT'));
 
     const attributes: Column[] = [];
     const pkAttributes: Column[] = [];
 
+    // PRIMARY KEY 제약조건 찾기
+    const pkConstraintMatch = RegExp(/PRIMARY KEY\s*\(([^)]+)\)/i).exec(ddl);
+    const primaryKeyColumns = pkConstraintMatch 
+        ? pkConstraintMatch[1].split(',').map(col => col.trim().replace(/[`"']/g, ''))
+        : [];
+
     // 각 컬럼 파싱
     columnsArray.forEach(columnDef => {
-        // 기본 컬럼 정보 추출
+        if (columnDef.trim().toUpperCase().startsWith('PRIMARY KEY')) {
+            return; // PRIMARY KEY 정의 줄은 건너뛰기
+        }
+
+        // 기본 컬럼 정보 추출 (백틱 처리 추가)
         const parts = columnDef.split(' ');
-        const columnName = parts[0].replace(/[`"']/g, ''); // 따옴표 제거
+        const columnName = parts[0].replace(/[`"']/g, ''); // 백틱과 따옴표 제거
         const rawDataType = parts[1].toUpperCase();
         
         // 데이터 타입에서 크기 정보 제거
         const dataType = RegExp(/^\w+/).exec(rawDataType)?.[0] ?? rawDataType;
         
         // PRIMARY KEY 확인
-        const isPrimaryKey = columnDef.toUpperCase().includes('PRIMARY KEY');
+        const isPrimaryKey = primaryKeyColumns.includes(columnName) || 
+                           columnDef.toUpperCase().includes('PRIMARY KEY');
         
         // camelCase 이름 생성
         const ccName = convertToCamelCase(columnName);
@@ -76,23 +87,6 @@ export function parseDDL(ddl: string): ParsedDDL {
             pkAttributes.push(column);
         }
     });
-
-    // PRIMARY KEY 제약조건이 별도로 정의된 경우 처리
-    const pkConstraintMatch = RegExp(/PRIMARY KEY\s*\((.*?)\)/i).exec(ddl);
-    if (pkConstraintMatch) {
-        const pkColumns = pkConstraintMatch[1]
-            .split(',')
-            .map(col => col.trim().replace(/[`"']/g, ''));
-
-        attributes.forEach(column => {
-            if (pkColumns.includes(column.columnName)) {
-                column.isPrimaryKey = true;
-                if (!pkAttributes.includes(column)) {
-                    pkAttributes.push(column);
-                }
-            }
-        });
-    }
 
     // 결과가 비어있는지 확인
     if (attributes.length === 0) {
