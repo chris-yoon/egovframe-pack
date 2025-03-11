@@ -139,7 +139,7 @@ export function getTemplateContext(tableName: string, attributes: Column[], pkAt
     const defaultPackageName = vscode.workspace.getConfiguration('egovframeInitializr').get<string>('defaultPackageName', 'egovframework.example.sample');
     
     return {
-        namespace: `${defaultPackageName}.${tableName}Mapper`,
+        namespace: `${defaultPackageName}.service.impl.${tableName}Mapper`,
         resultMapId: `${tableName}Result`,
         resultMapType: `${defaultPackageName}.service.${tableName}VO`,
         tableName,
@@ -270,7 +270,7 @@ async function generateFileContents(
         [`${tableName}Register.html`]: await renderTemplate(templateFilePaths.thymeleafRegisterTemplateFilePath, context),
         [`${tableName}Controller.java`]: await renderTemplate(templateFilePaths.controllerTemplateFilePath, context),
         [`${tableName}Service.java`]: await renderTemplate(templateFilePaths.serviceTemplateFilePath, context),
-        [`DefaultVO.java`]: await renderTemplate(templateFilePaths.defaultVoTemplateFilePath, context),
+        [`${tableName}DefaultVO.java`]: await renderTemplate(templateFilePaths.defaultVoTemplateFilePath, context),
         [`${tableName}VO.java`]: await renderTemplate(templateFilePaths.voTemplateFilePath, context),
         [`${tableName}ServiceImpl.java`]: await renderTemplate(templateFilePaths.serviceImplTemplateFilePath, context),
         [`${tableName}Mapper.java`]: await renderTemplate(templateFilePaths.mapperInterfaceTemplateFilePath, context),

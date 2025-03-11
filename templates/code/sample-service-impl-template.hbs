@@ -7,14 +7,14 @@
 {{~setVar "daoPackage" (concat serviceImplPackage "." className "DAO")~}}
 {{~setVar "daoClassName" (concat className "DAO")~}}
 {{~setVar "daoName" (lowercase className)~}}
-{{~setVar "daoInstanceName" (lowercase className)~}}
-{{~setVar "mapperPackage" (concat serviceImplPackage "." className "Mapper")~}}
+{{~setVar "daoInstanceName" (concat (lowercase className) "DAO")~}}
+{{~setVar "mapperPackage" serviceImplPackage~}}
 {{~setVar "mapperClassName" (concat className "Mapper")~}}
-{{~setVar "mapperName" (lowercase className)~}}
+{{~setVar "mapperName" (concat (lowercase className) "Mapper")~}}
 {{~setVar "mapperInstanceName" (lowercase className)~}}
 {{~setVar "serviceClassName" (concat className "Service")~}}
 {{~setVar "serviceImplClassName" (concat className "ServiceImpl")~}}
-{{~setVar "serviceName" (lowercase className)~}}
+{{~setVar "serviceName" (concat (lowercase className) "Service")~}}
 {{!-- Setting variables for method names --}}
 {{~setVar "insertMethodName" (concat "insert" className)~}}
 {{~setVar "updateMethodName" (concat "update" className)~}}
@@ -35,9 +35,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.egovframe.rte.fdl.cmmn.EgovAbstractServiceImpl;
+import org.egovframe.rte.fdl.idgnr.EgovIdGnrService;
 import {{servicePackage}}.{{serviceClassName}};
 import {{servicePackage}}.{{defaultVoClassName}};
 import {{servicePackage}}.{{voClassName}};
+import {{daoPackage}};
 import {{mapperPackage}}.{{mapperClassName}};
 
 /**

@@ -5,8 +5,8 @@
 {{~setVar "defaultVoClassName" (concat className "DefaultVO")~}}
 {{~setVar "daoPackage" (concat packageName ".service.impl")~}}
 {{~setVar "daoClassName" (concat className "DAO")~}}
-{{~setVar "daoName" classNameFirstCharLower~}}
-{{~setVar "daoInstanceName" classNameFirstCharLower~}}
+{{~setVar "daoName" (concat classNameFirstCharLower "DAO")~}}
+{{~setVar "daoInstanceName" (concat classNameFirstCharLower "DAO")~}}
 {{~setVar "insertMethodName" (concat "insert" className)~}}
 {{~setVar "updateMethodName" (concat "update" className)~}}
 {{~setVar "deleteMethodName" (concat "delete" className)~}}

@@ -39,6 +39,16 @@
     ]]>
   </update>
 
+  <delete id="delete{{tableName}}">
+    <![CDATA[
+      DELETE FROM {{tableName}}
+      WHERE 
+{{#each pkAttributes}}
+        {{#if @first}}{{columnName}} = {{concat "#" "{" ccName "}"}}{{else}} AND {{columnName}} = {{concat "#" "{" ccName "}"}}{{/if}}
+{{/each}}
+    ]]>
+  </delete>
+
   <select id="select{{tableName}}" resultMap="{{resultMapId}}">
     <![CDATA[
       SELECT

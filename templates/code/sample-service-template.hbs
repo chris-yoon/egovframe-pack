@@ -17,8 +17,8 @@ package {{servicePackage}};
 import java.util.List;
 {{#if (eq voPackage voPackage)}}
 // Vo 객체에 대한 import 구문
-// import (vo package).{{defaultVoClassName}};
-// import (vo package).{{voClassName}};
+import {{servicePackage}}.{{defaultVoClassName}};
+import {{servicePackage}}.{{voClassName}};
 {{else}}
 import {{defaultVoPackage}};
 import {{voPackage}};
