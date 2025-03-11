@@ -135,11 +135,6 @@
           "group": "navigation"
         },
         {
-          "command": "extension.collapseAllConfigs",
-          "when": "view == egovframeConfigView",
-          "group": "navigation"
-        },
-        {
           "command": "extension.insertSampleDDL",
           "when": "view == egovframeCodeView",
           "group": "navigation"

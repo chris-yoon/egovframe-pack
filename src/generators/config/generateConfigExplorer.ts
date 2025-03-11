@@ -79,35 +79,49 @@ export function registerGenerateConfigExplorer(context: vscode.ExtensionContext)
   const groupedTemplates: GroupedTemplates[] = groupTemplates(templates);
 
   const templateTreeDataProvider = new TemplateTreeDataProvider(groupedTemplates);
-  vscode.window.createTreeView("egovframeConfigView", {
+  const treeView = vscode.window.createTreeView("egovframeConfigView", {
     treeDataProvider: templateTreeDataProvider,
+    showCollapseAll: true
   });
 
+  // Collapse All 명령어 등록
+  let collapseAll = vscode.commands.registerCommand("extension.collapseAllConfigs", () => {
+    vscode.commands.executeCommand("workbench.actions.treeView.egovframeConfigView.collapseAll");
+  });
+
+  // Config 생성 명령어 등록
   let generateConfig = vscode.commands.registerCommand(
     "extension.generateConfigExplorer",
     async (template: TemplateConfig) => {
-      await createConfigWebview(
-        context,
-        {
-          title: template.displayName,
-          htmlFileName: template.webView,
-          templateFolder: template.templateFolder,
-          templateFile: template.templateFile,
-          initialPath: undefined,
-          fileNameProperty: template.fileNameProperty,
-          javaConfigTemplate: template.javaConfigTemplate,
-          yamlTemplate: template.yamlTemplate,
-          propertiesTemplate: template.propertiesTemplate
-        }
-      );
+      try {
+        await createConfigWebview(
+          context,
+          {
+            title: template.displayName,
+            htmlFileName: template.webView,
+            templateFolder: template.templateFolder,
+            templateFile: template.templateFile,
+            initialPath: undefined,
+            fileNameProperty: template.fileNameProperty,
+            javaConfigTemplate: template.javaConfigTemplate,
+            yamlTemplate: template.yamlTemplate,
+            propertiesTemplate: template.propertiesTemplate
+          }
+        );
+      } catch (error) {
+        vscode.window.showErrorMessage(`Error generating config: ${error}`);
+      }
     }
   );
 
-  context.subscriptions.push(generateConfig);
+  // 명령어들을 context.subscriptions에 추가
+  context.subscriptions.push(
+    treeView,
+    generateConfig,
+    collapseAll
+  );
 }
 
 export function deactivate(): void {
-  // Clean up resources and perform any necessary deactivation tasks
-  // Currently no cleanup is needed, but we explicitly declare return type
-  // to satisfy the linter and maintain good practices
+  // Clean up resources
 }
