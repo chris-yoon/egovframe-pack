@@ -16,6 +16,8 @@ export interface TemplateConfig {
     webView: string;
     fileNameProperty: string;
     javaConfigTemplate?: string;
+    yamlTemplate?: string;
+    propertiesTemplate?: string;
 }
 
 export interface GroupedTemplates {
@@ -106,6 +108,8 @@ interface ConfigWebviewOptions {
     initialPath?: string;
     fileNameProperty: string;
     javaConfigTemplate?: string;
+    yamlTemplate?: string;
+    propertiesTemplate?: string;
 }
 
 export async function createConfigWebview(
@@ -127,7 +131,7 @@ export async function createConfigWebview(
     panel.webview.onDidReceiveMessage(
         async (message) => {
             try {
-                if (message.command === "generateXml" || message.command === "generateJavaConfigByForm") {
+                if (message.command === "generateXml" || message.command === "generateYaml" || message.command === "generateProperties" || message.command === "generateJavaConfigByForm") {
                     let outputFolderPath: string;
                     
                     if (options.initialPath) {
@@ -147,11 +151,21 @@ export async function createConfigWebview(
                         outputFolderPath = folderUri[0].fsPath;
                     }
 
-                    if (message.command === "generateXml") {
-                        await generateFile(message.data, context, options.templateFolder, options.templateFile, outputFolderPath, options.fileNameProperty, "xml");
-                    } else {
-                        await generateFile(message.data, context, options.templateFolder, options.javaConfigTemplate!, outputFolderPath, options.fileNameProperty, "java");
+                    switch (message.command) {
+                        case "generateXml":
+                            await generateFile(message.data, context, options.templateFolder, options.templateFile, outputFolderPath, options.fileNameProperty, "xml");
+                            break;
+                        case "generateJavaConfigByForm":
+                            await generateFile(message.data, context, options.templateFolder, options.javaConfigTemplate!, outputFolderPath, options.fileNameProperty, "java");
+                            break;
+                        case "generateYaml":
+                            await generateFile(message.data, context, options.templateFolder, options.yamlTemplate!, outputFolderPath, options.fileNameProperty, "yaml");
+                            break;
+                        case "generateProperties":
+                            await generateFile(message.data, context, options.templateFolder, options.propertiesTemplate!, outputFolderPath, options.fileNameProperty, "properties");
+                            break;
                     }
+
                     panel.dispose();
                 }
             } catch (error) {

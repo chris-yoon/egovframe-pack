@@ -95,7 +95,9 @@ export function registerGenerateConfigExplorer(context: vscode.ExtensionContext)
           templateFile: template.templateFile,
           initialPath: undefined,
           fileNameProperty: template.fileNameProperty,
-          javaConfigTemplate: template.javaConfigTemplate
+          javaConfigTemplate: template.javaConfigTemplate,
+          yamlTemplate: template.yamlTemplate,
+          propertiesTemplate: template.propertiesTemplate
         }
       );
     }

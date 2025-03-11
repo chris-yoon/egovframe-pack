@@ -55,9 +55,14 @@
         XML
       </label>
 
-      <label for="rdoJavaConfig">
-        <input type="radio" id="rdoJavaConfig" name="generationType" value="javaConfig" onchange="updateFileName()">
-        JavaConfig
+      <label for="rdoYaml">
+        <input type="radio" id="rdoYaml" name="generationType" value="yaml" onchange="updateFileName()">
+        YAML
+      </label>
+
+      <label for="rdoProperties">
+        <input type="radio" id="rdoProperties" name="generationType" value="properties" onchange="updateFileName()">
+        Properties
       </label>
     </div>
 
@@ -80,10 +85,12 @@
 
     function updateFileName() {
       const isXmlSelected = document.getElementById('rdoXml').checked;
+      const isYamlSelected = document.getElementById('rdoYaml').checked;
+      const isPropertiesSelected = document.getElementById('rdoProperties').checked;
       const fileNameInput = document.getElementById('txtFileName');
 
-      if (isXmlSelected) {
-        fileNameInput.value = 'context-logging';
+      if (isXmlSelected || isYamlSelected || isPropertiesSelected) {
+        fileNameInput.value = 'log4j2-console';
       } else {
         fileNameInput.value = 'EgovLoggingConfig';
       }
@@ -95,7 +102,14 @@
 
       // Get the selected generation type
       const generationType = document.querySelector('input[name="generationType"]:checked').value;
-      const command = generationType === 'xml' ? 'generateXml' : 'generateJavaConfigByForm';
+      let command;
+      if (generationType === 'xml') {
+        command = 'generateXml';
+      } else if (generationType === 'yaml') {
+        command = 'generateYaml';
+      } else {
+        command = 'generateProperties';
+      }
 
       // Get the selected radio button value for Type
       const form = document.getElementById('log4jForm');
