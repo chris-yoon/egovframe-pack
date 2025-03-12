@@ -7,7 +7,6 @@ import { registerGenerateConfigExplorer } from './generators/config/generateConf
 import { registerGenerateProjectCommand } from './generators/project/generateProjectCommand';
 import { registerGenerateProjectWebview } from './generators/project/generateProjectWebview';
 import { registerGenerateProjectExplorer } from './generators/project/generateProjectExplorer';
-import { registerSnippetProvider } from './snippets/snippetProvider';
 
 let extensionContext: vscode.ExtensionContext;
 
@@ -24,9 +23,6 @@ export function activate(context: vscode.ExtensionContext) {
   registerGenerateProjectWebview(context);
   registerGenerateProjectExplorer(context);
   
-  // Register the snippet features
-  registerSnippetProvider(context);
-
   context.subscriptions.push(
     vscode.commands.registerCommand('extension.openPackageSettings', async () => {
       const config = vscode.workspace.getConfiguration('egovframeInitializr');
