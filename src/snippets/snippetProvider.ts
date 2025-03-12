@@ -30,11 +30,19 @@ interface SnippetFile {
  */
 export class EgovSnippetProvider implements vscode.CompletionItemProvider {
     private snippetCache: Map<string, SnippetFile> = new Map();
-    
+    private initialized: boolean = false;
+
     constructor(private extensionPath: string) {
-        this.loadSnippets().catch(err => 
-            console.error('Failed to preload snippets:', err)
-        );
+        this.initialize();
+    }
+
+    private async initialize(): Promise<void> {
+        try {
+            await this.loadSnippets();
+            this.initialized = true;
+        } catch (err) {
+            console.error('Failed to initialize snippets:', err);
+        }
     }
 
     private async loadSnippets(): Promise<void> {
@@ -60,6 +68,14 @@ export class EgovSnippetProvider implements vscode.CompletionItemProvider {
         position: vscode.Position,
         token: vscode.CancellationToken
     ): Promise<vscode.CompletionItem[]> {
+        // 초기화가 완료될 때까지 대기
+        if (!this.initialized) {
+            await new Promise(resolve => setTimeout(resolve, 100));
+            if (!this.initialized) {
+                return [];
+            }
+        }
+
         try {
             // 취소 토큰 확인
             if (token.isCancellationRequested) {
