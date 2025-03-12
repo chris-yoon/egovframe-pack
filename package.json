@@ -2,7 +2,7 @@
   "name": "vscode-egovframe-initializr",
   "displayName": "eGovFrame Initializr",
   "description": "Generate eGovFrame code from DDL and project from templates",
-  "version": "0.1.2",
+  "version": "1.1.2",
   "publisher": "egovframework",
   "enabledApiProposals": [
     "contribViewContainerTitle",
