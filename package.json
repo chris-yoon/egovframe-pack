@@ -25,16 +25,6 @@
   "main": "./out/extension.js",
   "readme": "README.md",
   "contributes": {
-    "snippets": [
-      {
-        "language": "java",
-        "path": "./snippets/explorer/java-snippets.json"
-      },
-      {
-        "language": "xml",
-        "path": "./snippets/explorer/xml-snippets.json"
-      }
-    ],
     "commands": [
       {
         "command": "extension.generateCodeCommand",
@@ -71,10 +61,6 @@
         "command": "extension.openPackageSettings",
         "title": "Package Settings",
         "icon": "$(gear)"
-      },
-      {
-        "command": "extension.insertEgovSnippet",
-        "title": "eGovFrame: Insert Snippet"
       },
       {
         "command": "extension.refreshSnippets",
@@ -143,11 +129,6 @@
           "command": "extension.openPackageSettings",
           "when": "view == egovframeCodeView || view == egovframeConfigView",
           "group": "navigation"
-        },
-        {
-          "command": "extension.insertEgovSnippet",
-          "when": "view == egovframeSnippetsView",
-          "group": "navigation"
         }
       ]
     },
@@ -203,10 +184,6 @@
         {
           "id": "egovframeConfigView",
           "name": "Generate Configurations"
-        },
-        {
-          "id": "egovframeSnippetsView",
-          "name": "Snippets"
         }
       ]
     }

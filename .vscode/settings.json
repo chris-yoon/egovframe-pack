@@ -8,5 +8,13 @@
 	},
 	// Turn off tsc task auto detection since we have the necessary tasks as npm scripts
 	"typescript.tsc.autoDetect": "off",
-	"pieces.cloudCapabilities": "Local"
+	"pieces.cloudCapabilities": "Local",
+	"editor.snippetSuggestions": "top",
+	"[xml]": {
+		"editor.quickSuggestions": {
+			"other": true,
+			"comments": false,
+			"strings": true
+		}
+	}
 }

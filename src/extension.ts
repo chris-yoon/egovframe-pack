@@ -8,8 +8,6 @@ import { registerGenerateProjectCommand } from './generators/project/generatePro
 import { registerGenerateProjectWebview } from './generators/project/generateProjectWebview';
 import { registerGenerateProjectExplorer } from './generators/project/generateProjectExplorer';
 import { registerSnippetProvider } from './snippets/snippetProvider';
-import { registerSnippetCommand } from './snippets/snippetCommand';
-import { registerSnippetExplorer } from './snippets/snippetExplorer';
 
 let extensionContext: vscode.ExtensionContext;
 
@@ -28,8 +26,6 @@ export function activate(context: vscode.ExtensionContext) {
   
   // Register the snippet features
   registerSnippetProvider(context);
-  registerSnippetCommand(context);
-  registerSnippetExplorer(context);
 
   context.subscriptions.push(
     vscode.commands.registerCommand('extension.openPackageSettings', async () => {
