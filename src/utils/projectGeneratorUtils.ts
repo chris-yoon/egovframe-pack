@@ -19,6 +19,7 @@ export interface SourceItem {
 export interface ProjectConfig {
   projectName: string;
   groupID: string;
+  outputPath?: string;
 }
 
 export async function getProjectConfig(template: Template): Promise<ProjectConfig | undefined> {
@@ -46,7 +47,10 @@ export async function generateProject(
   extensionPath: string
 ): Promise<void> {
   const zipFilePath = path.join(extensionPath, "examples", template.fileName);
-  const projectRoot = path.join(vscode.workspace.workspaceFolders?.[0]?.uri.fsPath ?? "", config.projectName);
+  
+  // outputPath가 지정되지 않은 경우 현재 워크스페이스 사용
+  const baseOutputPath = config.outputPath || vscode.workspace.workspaceFolders?.[0]?.uri.fsPath || "";
+  const projectRoot = path.join(baseOutputPath, config.projectName);
   
   await fs.ensureDir(projectRoot);
 
