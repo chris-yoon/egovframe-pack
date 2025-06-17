@@ -10,14 +10,7 @@ import {
 	VSCodeRadioGroup,
 } from "@vscode/webview-ui-toolkit/react"
 
-// VSCode API 타입 정의
-declare global {
-	function acquireVsCodeApi(): {
-		postMessage: (message: any) => void
-		getState: () => any
-		setState: (state: any) => void
-	}
-}
+import { useVSCode } from '../../../context/VSCodeContext'
 
 interface ProjectTemplate {
 	displayName: string
@@ -34,19 +27,7 @@ interface ProjectConfig {
 	template: ProjectTemplate
 }
 
-// VS Code API 래퍼
-const vscode = (() => {
-	try {
-		return acquireVsCodeApi()
-	} catch (err) {
-		console.error("Failed to acquire vscode API:", err)
-		return {
-			postMessage: (message: any) => console.log("Mock vscode message:", message),
-			getState: () => ({}),
-			setState: (state: any) => console.log("Mock vscode setState:", state)
-		}
-	}
-})()
+// VS Code API Hook 사용
 
 const PROJECT_CATEGORIES = ["All", "Web", "Template", "Mobile", "Boot", "MSA", "Batch"]
 
@@ -121,6 +102,8 @@ const createLoadTemplatesMessage = () => ({
 })
 
 export const ProjectsView = () => {
+	const { vscode, isReady, error: vscodeError } = useVSCode()
+	
 	const [selectedCategory, setSelectedCategory] = useState<string>("All")
 	const [selectedTemplate, setSelectedTemplate] = useState<ProjectTemplate | null>(null)
 	const [projectName, setProjectName] = useState<string>("")
@@ -141,10 +124,10 @@ export const ProjectsView = () => {
 
 		// Load templates from backend
 		console.log("🔄 Loading templates from backend...")
-		vscode.postMessage(createLoadTemplatesMessage())
+		vscode?.postMessage(createLoadTemplatesMessage())
 
 		// Request current workspace path when component mounts
-		vscode.postMessage({ type: "getWorkspacePath" })
+		vscode?.postMessage({ type: "getWorkspacePath" })
 
 		// Listen for messages from extension
 		const handleMessage = (event: MessageEvent) => {
@@ -204,7 +187,7 @@ export const ProjectsView = () => {
 
 	const handleSelectOutputPath = () => {
 		console.log("Selecting output path...")
-		vscode.postMessage(createSelectOutputPathMessage())
+		vscode?.postMessage(createSelectOutputPathMessage())
 	}
 
 	const validateForm = (): boolean => {
@@ -250,7 +233,7 @@ export const ProjectsView = () => {
 			// Send message to extension for actual project generation
 			const message = createProjectGenerationMessage(config, generationMethod)
 			console.log("Sending project generation message:", message)
-			vscode.postMessage(message)
+			vscode?.postMessage(message)
 		} catch (error) {
 			console.error("Error generating project:", error)
 			setIsGenerating(false)
@@ -259,7 +242,7 @@ export const ProjectsView = () => {
 	}
 
 	const handleGenerateByCommand = () => {
-		vscode.postMessage(createGenerateProjectByCommandMessage())
+		vscode?.postMessage(createGenerateProjectByCommandMessage())
 	}
 
 	const handleInsertSample = () => {
@@ -323,7 +306,7 @@ export const ProjectsView = () => {
 					appearance="primary" 
 					onClick={() => {
 						setIsLoadingTemplates(true)
-						vscode.postMessage(createLoadTemplatesMessage())
+						vscode?.postMessage(createLoadTemplatesMessage())
 					}}>
 					<span className="codicon codicon-refresh" style={{ marginRight: "6px" }}></span>
 					Retry Loading Templates

@@ -36,6 +36,7 @@ class EgovWebviewViewProvider implements vscode.WebviewViewProvider {
       console.log('📨 Received message from EgovView:', data);
       try {
         const messageType = data.command || data.type; // command 또는 type 필드 모두 지원
+        console.log('🔍 Processing message type:', messageType);
         switch (messageType) {
           case 'generateProject':
             await this.handleGenerateProject(data.projectConfig || data.config, webviewView.webview);
@@ -44,9 +45,11 @@ class EgovWebviewViewProvider implements vscode.WebviewViewProvider {
             await this.handleLoadTemplates(webviewView.webview);
             break;
           case 'selectOutputPath':
+            console.log('🗂️ Handling selectOutputPath message');
             await this.handleSelectOutputPath(webviewView.webview);
             break;
           case 'getWorkspacePath':
+            console.log('🏠 Handling getWorkspacePath message');
             await this.handleGetWorkspacePath(webviewView.webview);
             break;
           case 'generateCode':
@@ -519,10 +522,12 @@ class EgovWebviewViewProvider implements vscode.WebviewViewProvider {
     const result = await vscode.window.showOpenDialog(options);
     if (result && result[0]) {
       console.log('📁 Selected folder:', result[0].fsPath);
-      webview.postMessage({
+      const responseMessage = {
         type: 'selectedOutputPath',
         path: result[0].fsPath
-      });
+      };
+      console.log('📤 Sending selectedOutputPath response:', responseMessage);
+      webview.postMessage(responseMessage);
     } else {
       console.log('❌ No folder selected');
     }
@@ -534,33 +539,569 @@ class EgovWebviewViewProvider implements vscode.WebviewViewProvider {
     if (workspaceFolders && workspaceFolders.length > 0) {
       const workspacePath = workspaceFolders[0].uri.fsPath;
       console.log('📍 Workspace path:', workspacePath);
-      webview.postMessage({
+      const responseMessage = {
         type: 'currentWorkspacePath',
         path: workspacePath
-      });
+      };
+      console.log('📤 Sending currentWorkspacePath response:', responseMessage);
+      webview.postMessage(responseMessage);
     } else {
       console.log('❌ No workspace folder found');
-      webview.postMessage({
+      const responseMessage = {
         type: 'currentWorkspacePath',
         path: ''
-      });
+      };
+      console.log('📤 Sending empty currentWorkspacePath response:', responseMessage);
+      webview.postMessage(responseMessage);
     }
   }
 
   private async handleGenerateCode(message: any, webview: vscode.Webview) {
     try {
+      console.log('🚀 Starting code generation with message:', message);
+      
+      // Validate input
+      if (!message.ddl || !message.packageName || !message.outputPath) {
+        throw new Error('Missing required fields: DDL, package name, or output path');
+      }
+
       webview.postMessage({
-        type: 'codeGenerationResult',
-        success: true
+        type: 'progress',
+        text: '🔍 Parsing DDL...'
       });
-      vscode.window.showInformationMessage('Code generated successfully');
+
+      // Parse DDL
+      const parsedDDL = this.parseDDL(message.ddl);
+      console.log('📋 Parsed DDL:', parsedDDL);
+
+      if (!parsedDDL.tableName || parsedDDL.attributes.length === 0) {
+        throw new Error('Invalid DDL: Could not extract table information');
+      }
+
+      webview.postMessage({
+        type: 'progress',
+        text: `📦 Generating code for table: ${parsedDDL.tableName}`
+      });
+
+      // Prepare output directory
+      const outputDir = path.join(message.outputPath, 'generated');
+      await fs.ensureDir(outputDir);
+
+      // Generate Java package structure
+      const packagePath = message.packageName.split('.').join(path.sep);
+      const javaDir = path.join(outputDir, 'src', 'main', 'java', packagePath);
+      await fs.ensureDir(javaDir);
+
+      // Generate SQL directory
+      const sqlDir = path.join(outputDir, 'src', 'main', 'resources', 'egovframework', 'sqlmap');
+      await fs.ensureDir(sqlDir);
+
+      // Generate JSP directory
+      const jspDir = path.join(outputDir, 'src', 'main', 'webapp', 'WEB-INF', 'jsp', 'egovframework');
+      await fs.ensureDir(jspDir);
+
+      webview.postMessage({
+        type: 'progress',
+        text: '📝 Creating Java files...'
+      });
+
+      // Generate files
+      const context = this.createTemplateContext(parsedDDL, message.packageName);
+      await this.generateJavaFiles(javaDir, context);
+      await this.generateSQLFiles(sqlDir, context);
+      await this.generateJSPFiles(jspDir, context);
+
+      webview.postMessage({
+        type: 'success',
+        message: `✅ Code generated successfully at: ${outputDir}`
+      });
+
+      // Show success message with option to open generated folder
+      const action = await vscode.window.showInformationMessage(
+        `Code generated successfully for table '${parsedDDL.tableName}'`,
+        'Open Folder',
+        'View in Explorer'
+      );
+
+      if (action === 'Open Folder') {
+        vscode.commands.executeCommand('vscode.openFolder', vscode.Uri.file(outputDir), true);
+      } else if (action === 'View in Explorer') {
+        vscode.commands.executeCommand('revealFileInOS', vscode.Uri.file(outputDir));
+      }
+
     } catch (error) {
+      console.error('❌ Error in code generation:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+      
       webview.postMessage({
-        type: 'codeGenerationResult',
-        success: false,
-        error: 'Code generation failed'
+        type: 'error',
+        message: errorMessage
       });
+      
+      vscode.window.showErrorMessage(`Code generation failed: ${errorMessage}`);
     }
+  }
+
+  // DDL 파싱 메서드
+  private parseDDL(ddl: string): any {
+    const lines = ddl.trim().split('\n');
+    let tableName = '';
+    const attributes: any[] = [];
+    const pkAttributes: any[] = [];
+
+    for (const line of lines) {
+      const trimmedLine = line.trim();
+      
+      // Extract table name
+      if (trimmedLine.toUpperCase().includes('CREATE TABLE')) {
+        const match = trimmedLine.match(/CREATE TABLE\s+(\w+)/i);
+        if (match) {
+          tableName = match[1].toLowerCase();
+        }
+      }
+
+      // Extract column definitions
+      if (trimmedLine.includes('(') || (trimmedLine.includes(' ') && !trimmedLine.startsWith('--'))) {
+        const columnMatch = trimmedLine.match(/(\w+)\s+(\w+)(\([^)]*\))?\s*(.*)/i);
+        if (columnMatch) {
+          const columnName = columnMatch[1].toLowerCase();
+          const dataType = columnMatch[2].toUpperCase();
+          const ccName = this.toCamelCase(columnName);
+          const javaType = this.mapSqlToJavaType(dataType);
+          const isPrimaryKey = trimmedLine.toUpperCase().includes('PRIMARY KEY');
+
+          attributes.push({
+            columnName,
+            dataType,
+            ccName,
+            javaType,
+            isPrimaryKey
+          });
+
+          if (isPrimaryKey) {
+            pkAttributes.push({
+              columnName,
+              ccName,
+              javaType
+            });
+          }
+        }
+      }
+    }
+
+    return { tableName, attributes, pkAttributes };
+  }
+
+  // Camel Case 변환
+  private toCamelCase(str: string): string {
+    return str.replace(/_([a-z])/g, (g) => g[1].toUpperCase());
+  }
+
+  // SQL to Java 타입 매핑
+  private mapSqlToJavaType(sqlType: string): string {
+    const type = sqlType.toUpperCase();
+    if (type.includes('VARCHAR') || type.includes('TEXT') || type.includes('CHAR')) return 'String';
+    if (type.includes('INT') || type.includes('BIGINT')) return 'Long';
+    if (type.includes('DECIMAL') || type.includes('NUMERIC')) return 'BigDecimal';
+    if (type.includes('DATE') || type.includes('TIMESTAMP')) return 'Date';
+    if (type.includes('BOOLEAN')) return 'Boolean';
+    return 'String';
+  }
+
+  // 템플릿 컨텍스트 생성
+  private createTemplateContext(parsedDDL: any, packageName: string) {
+    return {
+      tableName: parsedDDL.tableName,
+      tableNameCamelCase: this.toCamelCase(parsedDDL.tableName),
+      tableNamePascalCase: this.toCamelCase(parsedDDL.tableName).charAt(0).toUpperCase() + this.toCamelCase(parsedDDL.tableName).slice(1),
+      attributes: parsedDDL.attributes,
+      pkAttributes: parsedDDL.pkAttributes,
+      hasCompositeKey: parsedDDL.pkAttributes.length > 1,
+      packageName: packageName,
+      packagePath: packageName.split('.').join('/'),
+      packageImport: packageName
+    };
+  }
+
+  // Java 파일 생성
+  private async generateJavaFiles(javaDir: string, context: any) {
+    const voContent = this.generateVOFile(context);
+    const serviceContent = this.generateServiceFile(context);
+    const serviceImplContent = this.generateServiceImplFile(context);
+    const daoContent = this.generateDAOFile(context);
+    const controllerContent = this.generateControllerFile(context);
+
+    await fs.writeFile(path.join(javaDir, `${context.tableNamePascalCase}VO.java`), voContent);
+    await fs.writeFile(path.join(javaDir, `${context.tableNamePascalCase}Service.java`), serviceContent);
+    await fs.writeFile(path.join(javaDir, `${context.tableNamePascalCase}ServiceImpl.java`), serviceImplContent);
+    await fs.writeFile(path.join(javaDir, `${context.tableNamePascalCase}DAO.java`), daoContent);
+    await fs.writeFile(path.join(javaDir, `${context.tableNamePascalCase}Controller.java`), controllerContent);
+  }
+
+  // SQL 파일 생성
+  private async generateSQLFiles(sqlDir: string, context: any) {
+    const sqlContent = this.generateSQLMapperFile(context);
+    await fs.writeFile(path.join(sqlDir, `${context.tableNamePascalCase}_SQL.xml`), sqlContent);
+  }
+
+  // JSP 파일 생성
+  private async generateJSPFiles(jspDir: string, context: any) {
+    const tableDir = path.join(jspDir, context.tableName);
+    await fs.ensureDir(tableDir);
+
+    const listContent = this.generateListJSP(context);
+    const detailContent = this.generateDetailJSP(context);
+    const registerContent = this.generateRegisterJSP(context);
+    const modifyContent = this.generateModifyJSP(context);
+
+    await fs.writeFile(path.join(tableDir, `${context.tableName}List.jsp`), listContent);
+    await fs.writeFile(path.join(tableDir, `${context.tableName}Detail.jsp`), detailContent);
+    await fs.writeFile(path.join(tableDir, `${context.tableName}Register.jsp`), registerContent);
+    await fs.writeFile(path.join(tableDir, `${context.tableName}Modify.jsp`), modifyContent);
+  }
+
+  // 간단한 템플릿 생성 메서드들 (실제로는 Handlebars 템플릿 사용)
+  private generateVOFile(context: any): string {
+    const fields = context.attributes.map((attr: any) => 
+      `    private ${attr.javaType} ${attr.ccName};\n`
+    ).join('');
+    
+    const gettersSetters = context.attributes.map((attr: any) => `
+    public ${attr.javaType} get${attr.ccName.charAt(0).toUpperCase() + attr.ccName.slice(1)}() {
+        return ${attr.ccName};
+    }
+
+    public void set${attr.ccName.charAt(0).toUpperCase() + attr.ccName.slice(1)}(${attr.javaType} ${attr.ccName}) {
+        this.${attr.ccName} = ${attr.ccName};
+    }`
+    ).join('\n');
+
+    return `package ${context.packageName};
+
+import java.io.Serializable;
+import java.util.Date;
+import java.math.BigDecimal;
+
+/**
+ * ${context.tableNamePascalCase} VO class
+ */
+public class ${context.tableNamePascalCase}VO implements Serializable {
+    private static final long serialVersionUID = 1L;
+
+${fields}
+${gettersSetters}
+}`;
+  }
+
+  private generateServiceFile(context: any): string {
+    return `package ${context.packageName};
+
+import java.util.List;
+
+/**
+ * ${context.tableNamePascalCase} Service Interface
+ */
+public interface ${context.tableNamePascalCase}Service {
+    
+    List<${context.tableNamePascalCase}VO> select${context.tableNamePascalCase}List(${context.tableNamePascalCase}VO searchVO) throws Exception;
+    
+    ${context.tableNamePascalCase}VO select${context.tableNamePascalCase}Detail(${context.tableNamePascalCase}VO ${context.tableNameCamelCase}VO) throws Exception;
+    
+    void insert${context.tableNamePascalCase}(${context.tableNamePascalCase}VO ${context.tableNameCamelCase}VO) throws Exception;
+    
+    void update${context.tableNamePascalCase}(${context.tableNamePascalCase}VO ${context.tableNameCamelCase}VO) throws Exception;
+    
+    void delete${context.tableNamePascalCase}(${context.tableNamePascalCase}VO ${context.tableNameCamelCase}VO) throws Exception;
+}`;
+  }
+
+  private generateServiceImplFile(context: any): string {
+    return `package ${context.packageName};
+
+import java.util.List;
+import org.springframework.stereotype.Service;
+import javax.annotation.Resource;
+
+/**
+ * ${context.tableNamePascalCase} Service Implementation
+ */
+@Service("${context.tableNameCamelCase}Service")
+public class ${context.tableNamePascalCase}ServiceImpl implements ${context.tableNamePascalCase}Service {
+    
+    @Resource(name = "${context.tableNameCamelCase}DAO")
+    private ${context.tableNamePascalCase}DAO ${context.tableNameCamelCase}DAO;
+    
+    @Override
+    public List<${context.tableNamePascalCase}VO> select${context.tableNamePascalCase}List(${context.tableNamePascalCase}VO searchVO) throws Exception {
+        return ${context.tableNameCamelCase}DAO.select${context.tableNamePascalCase}List(searchVO);
+    }
+    
+    @Override
+    public ${context.tableNamePascalCase}VO select${context.tableNamePascalCase}Detail(${context.tableNamePascalCase}VO ${context.tableNameCamelCase}VO) throws Exception {
+        return ${context.tableNameCamelCase}DAO.select${context.tableNamePascalCase}Detail(${context.tableNameCamelCase}VO);
+    }
+    
+    @Override
+    public void insert${context.tableNamePascalCase}(${context.tableNamePascalCase}VO ${context.tableNameCamelCase}VO) throws Exception {
+        ${context.tableNameCamelCase}DAO.insert${context.tableNamePascalCase}(${context.tableNameCamelCase}VO);
+    }
+    
+    @Override
+    public void update${context.tableNamePascalCase}(${context.tableNamePascalCase}VO ${context.tableNameCamelCase}VO) throws Exception {
+        ${context.tableNameCamelCase}DAO.update${context.tableNamePascalCase}(${context.tableNameCamelCase}VO);
+    }
+    
+    @Override
+    public void delete${context.tableNamePascalCase}(${context.tableNamePascalCase}VO ${context.tableNameCamelCase}VO) throws Exception {
+        ${context.tableNameCamelCase}DAO.delete${context.tableNamePascalCase}(${context.tableNameCamelCase}VO);
+    }
+}`;
+  }
+
+  private generateDAOFile(context: any): string {
+    return `package ${context.packageName};
+
+import java.util.List;
+import org.springframework.stereotype.Repository;
+
+/**
+ * ${context.tableNamePascalCase} DAO Interface
+ */
+@Repository("${context.tableNameCamelCase}DAO")
+public interface ${context.tableNamePascalCase}DAO {
+    
+    List<${context.tableNamePascalCase}VO> select${context.tableNamePascalCase}List(${context.tableNamePascalCase}VO searchVO) throws Exception;
+    
+    ${context.tableNamePascalCase}VO select${context.tableNamePascalCase}Detail(${context.tableNamePascalCase}VO ${context.tableNameCamelCase}VO) throws Exception;
+    
+    void insert${context.tableNamePascalCase}(${context.tableNamePascalCase}VO ${context.tableNameCamelCase}VO) throws Exception;
+    
+    void update${context.tableNamePascalCase}(${context.tableNamePascalCase}VO ${context.tableNameCamelCase}VO) throws Exception;
+    
+    void delete${context.tableNamePascalCase}(${context.tableNamePascalCase}VO ${context.tableNameCamelCase}VO) throws Exception;
+}`;
+  }
+
+  private generateControllerFile(context: any): string {
+    return `package ${context.packageName};
+
+import java.util.List;
+import javax.annotation.Resource;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.ModelMap;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+/**
+ * ${context.tableNamePascalCase} Controller
+ */
+@Controller
+public class ${context.tableNamePascalCase}Controller {
+    
+    @Resource(name = "${context.tableNameCamelCase}Service")
+    private ${context.tableNamePascalCase}Service ${context.tableNameCamelCase}Service;
+    
+    @RequestMapping(value = "/${context.tableName}List.do")
+    public String select${context.tableNamePascalCase}List(${context.tableNamePascalCase}VO searchVO, ModelMap model) throws Exception {
+        List<${context.tableNamePascalCase}VO> resultList = ${context.tableNameCamelCase}Service.select${context.tableNamePascalCase}List(searchVO);
+        model.addAttribute("resultList", resultList);
+        return "egovframework/${context.tableName}/${context.tableName}List";
+    }
+    
+    @RequestMapping(value = "/${context.tableName}Detail.do")
+    public String select${context.tableNamePascalCase}Detail(${context.tableNamePascalCase}VO ${context.tableNameCamelCase}VO, ModelMap model) throws Exception {
+        ${context.tableNamePascalCase}VO result = ${context.tableNameCamelCase}Service.select${context.tableNamePascalCase}Detail(${context.tableNameCamelCase}VO);
+        model.addAttribute("result", result);
+        return "egovframework/${context.tableName}/${context.tableName}Detail";
+    }
+}`;
+  }
+
+  private generateSQLMapperFile(context: any): string {
+    const insertColumns = context.attributes.map((attr: any) => attr.columnName).join(', ');
+    const insertValues = context.attributes.map((attr: any) => `#{${attr.ccName}}`).join(', ');
+    const updateSet = context.attributes.filter((attr: any) => !attr.isPrimaryKey)
+      .map((attr: any) => `${attr.columnName} = #{${attr.ccName}}`).join(',\n        ');
+    const whereClause = context.pkAttributes.map((attr: any) => `${attr.columnName} = #{${attr.ccName}}`).join(' AND ');
+
+    return `<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="${context.packageName}.${context.tableNamePascalCase}DAO">
+
+    <resultMap id="${context.tableNameCamelCase}Map" type="${context.packageName}.${context.tableNamePascalCase}VO">
+${context.attributes.map((attr: any) => `        <result property="${attr.ccName}" column="${attr.columnName}" />`).join('\n')}
+    </resultMap>
+
+    <select id="select${context.tableNamePascalCase}List" parameterType="${context.packageName}.${context.tableNamePascalCase}VO" resultMap="${context.tableNameCamelCase}Map">
+        SELECT ${context.attributes.map((attr: any) => attr.columnName).join(', ')}
+        FROM ${context.tableName}
+        WHERE 1=1
+    </select>
+
+    <select id="select${context.tableNamePascalCase}Detail" parameterType="${context.packageName}.${context.tableNamePascalCase}VO" resultMap="${context.tableNameCamelCase}Map">
+        SELECT ${context.attributes.map((attr: any) => attr.columnName).join(', ')}
+        FROM ${context.tableName}
+        WHERE ${whereClause}
+    </select>
+
+    <insert id="insert${context.tableNamePascalCase}" parameterType="${context.packageName}.${context.tableNamePascalCase}VO">
+        INSERT INTO ${context.tableName} (${insertColumns})
+        VALUES (${insertValues})
+    </insert>
+
+    <update id="update${context.tableNamePascalCase}" parameterType="${context.packageName}.${context.tableNamePascalCase}VO">
+        UPDATE ${context.tableName}
+        SET ${updateSet}
+        WHERE ${whereClause}
+    </update>
+
+    <delete id="delete${context.tableNamePascalCase}" parameterType="${context.packageName}.${context.tableNamePascalCase}VO">
+        DELETE FROM ${context.tableName}
+        WHERE ${whereClause}
+    </delete>
+
+</mapper>`;
+  }
+
+  private generateListJSP(context: any): string {
+    return `<%@ page contentType="text/html; charset=utf-8" pageEncoding="utf-8"%>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="ui" uri="http://egovframework.gov/ctl/ui"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>${context.tableNamePascalCase} List</title>
+</head>
+<body>
+    <div id="wrapper">
+        <h1>${context.tableNamePascalCase} List</h1>
+        
+        <div class="board">
+            <table class="board_list">
+                <thead>
+                    <tr>
+${context.attributes.slice(0, 5).map((attr: any) => `                        <th scope="col">${attr.ccName}</th>`).join('\n')}
+                        <th scope="col">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <c:forEach var="result" items="\${resultList}" varStatus="status">
+                        <tr>
+${context.attributes.slice(0, 5).map((attr: any) => `                            <td>\${result.${attr.ccName}}</td>`).join('\n')}
+                            <td>
+                                <a href="${context.tableName}Detail.do?${context.pkAttributes.map((attr: any) => `${attr.ccName}=\${result.${attr.ccName}}`).join('&')}">View</a>
+                            </td>
+                        </tr>
+                    </c:forEach>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+</html>`;
+  }
+
+  private generateDetailJSP(context: any): string {
+    return `<%@ page contentType="text/html; charset=utf-8" pageEncoding="utf-8"%>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>${context.tableNamePascalCase} Detail</title>
+</head>
+<body>
+    <div id="wrapper">
+        <h1>${context.tableNamePascalCase} Detail</h1>
+        
+        <div class="board">
+            <table class="board_view">
+${context.attributes.map((attr: any) => `                <tr>
+                    <th scope="row">${attr.ccName}</th>
+                    <td>\${result.${attr.ccName}}</td>
+                </tr>`).join('\n')}
+            </table>
+        </div>
+        
+        <div class="btn_area">
+            <a href="${context.tableName}List.do" class="btn_s">List</a>
+        </div>
+    </div>
+</body>
+</html>`;
+  }
+
+  private generateRegisterJSP(context: any): string {
+    return `<%@ page contentType="text/html; charset=utf-8" pageEncoding="utf-8"%>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>${context.tableNamePascalCase} Register</title>
+</head>
+<body>
+    <div id="wrapper">
+        <h1>${context.tableNamePascalCase} Register</h1>
+        
+        <form id="registerForm" name="registerForm" method="post">
+            <div class="board">
+                <table class="board_write">
+${context.attributes.filter((attr: any) => !attr.isPrimaryKey).map((attr: any) => `                    <tr>
+                        <th scope="row">${attr.ccName} <span class="sound_only">required</span></th>
+                        <td><input name="${attr.ccName}" id="${attr.ccName}" class="w100" type="text" value="" /></td>
+                    </tr>`).join('\n')}
+                </table>
+            </div>
+            
+            <div class="btn_area">
+                <button type="submit" class="btn_s">Register</button>
+                <a href="${context.tableName}List.do" class="btn_s">Cancel</a>
+            </div>
+        </form>
+    </div>
+</body>
+</html>`;
+  }
+
+  private generateModifyJSP(context: any): string {
+    return `<%@ page contentType="text/html; charset=utf-8" pageEncoding="utf-8"%>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>${context.tableNamePascalCase} Modify</title>
+</head>
+<body>
+    <div id="wrapper">
+        <h1>${context.tableNamePascalCase} Modify</h1>
+        
+        <form id="modifyForm" name="modifyForm" method="post">
+${context.pkAttributes.map((attr: any) => `            <input type="hidden" name="${attr.ccName}" value="\${result.${attr.ccName}}" />`).join('\n')}
+            
+            <div class="board">
+                <table class="board_write">
+${context.attributes.filter((attr: any) => !attr.isPrimaryKey).map((attr: any) => `                    <tr>
+                        <th scope="row">${attr.ccName} <span class="sound_only">required</span></th>
+                        <td><input name="${attr.ccName}" id="${attr.ccName}" class="w100" type="text" value="\${result.${attr.ccName}}" /></td>
+                    </tr>`).join('\n')}
+                </table>
+            </div>
+            
+            <div class="btn_area">
+                <button type="submit" class="btn_s">Update</button>
+                <a href="${context.tableName}Detail.do?${context.pkAttributes.map((attr: any) => `${attr.ccName}=\${result.${attr.ccName}}`).join('&')}" class="btn_s">Cancel</a>
+            </div>
+        </form>
+    </div>
+</body>
+</html>`;
   }
 
   private async handleGenerateConfig(message: any, webview: vscode.Webview) {
