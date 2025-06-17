@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react"
 import EgovView from "./components/egov/EgovView"
-
-export type EgovViewTab = "projects" | "code" | "config"
+import { EgovViewTab } from "./shared/egovframe"
 
 declare global {
   function acquireVsCodeApi(): {
