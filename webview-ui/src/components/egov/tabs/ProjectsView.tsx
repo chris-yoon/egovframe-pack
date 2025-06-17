@@ -22,9 +22,9 @@ declare global {
 interface ProjectTemplate {
 	displayName: string
 	fileName: string
+	pomFile: string
 	description?: string
 	category?: string
-	pomFile?: string
 }
 
 interface ProjectConfig {
@@ -50,73 +50,62 @@ const vscode = (() => {
 
 const PROJECT_CATEGORIES = ["All", "Web", "Template", "Mobile", "Boot", "MSA", "Batch"]
 
-const PROJECT_TEMPLATES: ProjectTemplate[] = [
-	{
-		displayName: "Simple Homepage",
-		fileName: "simple_homepage",
-		description: "Basic homepage template with simple structure",
-		category: "Web"
-	},
-	{
-		displayName: "Advanced Homepage",
-		fileName: "advanced_homepage", 
-		description: "Advanced homepage template with more features",
-		category: "Web"
-	},
-	{
-		displayName: "Portal Site",
-		fileName: "portal_site",
-		description: "Portal site template for enterprise applications",
-		category: "Web"
-	}
-]
-
-const getTemplatesByCategory = (category: string): ProjectTemplate[] => {
-	if (category === "All") return PROJECT_TEMPLATES
-	return PROJECT_TEMPLATES.filter(template => template.category === category)
+const getTemplatesByCategory = (templates: ProjectTemplate[], category: string): ProjectTemplate[] => {
+	if (category === "All") return templates
+	return templates.filter(template => template.category === category)
 }
 
 const validateProjectConfig = (config: Partial<ProjectConfig>): string[] => {
 	const errors: string[] = []
-	
-	if (!config.projectName?.trim()) {
+
+	if (!config.projectName || config.projectName.trim() === "") {
 		errors.push("Project name is required")
+	} else if (!/^[a-zA-Z][a-zA-Z0-9_-]*$/.test(config.projectName)) {
+		errors.push("Project name must start with a letter and contain only letters, numbers, hyphens, and underscores")
 	}
-	
-	if (!config.groupID?.trim()) {
-		errors.push("Group ID is required")
+
+	if (config.template?.pomFile && (!config.groupID || config.groupID.trim() === "")) {
+		errors.push("Group ID is required for this template")
+	} else if (config.groupID && !/^[a-zA-Z][a-zA-Z0-9._-]*$/.test(config.groupID)) {
+		errors.push("Group ID must be a valid Java package name")
 	}
-	
-	if (!config.outputPath?.trim()) {
+
+	if (!config.outputPath || config.outputPath.trim() === "") {
 		errors.push("Output path is required")
 	}
-	
+
 	if (!config.template) {
-		errors.push("Please select a project template")
+		errors.push("Template selection is required")
 	}
-	
+
 	return errors
 }
 
 const getDefaultGroupId = (): string => "egovframework.example.sample"
 
 const generateSampleProjectName = (): string => {
-	const adjectives = ["awesome", "modern", "smart", "quick", "clean"]
-	const nouns = ["project", "app", "system", "portal", "platform"]
-	const adj = adjectives[Math.floor(Math.random() * adjectives.length)]
-	const noun = nouns[Math.floor(Math.random() * nouns.length)]
-	return `${adj}-egov-${noun}`
+	const timestamp = new Date().toISOString().slice(0, 10).replace(/-/g, "")
+	return `egov-project-${timestamp}`
 }
 
 const validateFileSystemPath = (path: string): boolean => {
-	const invalidChars = /[<>:"|?*]/
+	const invalidChars = /[<>:"|?*\x00-\x1f]/
 	return !invalidChars.test(path)
 }
 
 const createProjectGenerationMessage = (config: ProjectConfig, generationMethod: string) => ({
 	type: "generateProject",
-	config,
-	generationMethod
+	projectConfig: {
+		projectName: config.projectName,
+		groupID: config.groupID,
+		outputPath: config.outputPath,
+		template: {
+			displayName: config.template.displayName,
+			fileName: config.template.fileName,
+			pomFile: config.template.pomFile,
+		},
+	},
+	method: generationMethod
 })
 
 const createSelectOutputPathMessage = () => ({
@@ -125,6 +114,10 @@ const createSelectOutputPathMessage = () => ({
 
 const createGenerateProjectByCommandMessage = () => ({
 	type: "generateProjectByCommand"
+})
+
+const createLoadTemplatesMessage = () => ({
+	type: "loadTemplates"
 })
 
 export const ProjectsView = () => {
@@ -137,12 +130,18 @@ export const ProjectsView = () => {
 	const [validationErrors, setValidationErrors] = useState<string[]>([])
 	const [isGenerating, setIsGenerating] = useState<boolean>(false)
 	const [generationStatus, setGenerationStatus] = useState<string>("")
+	const [templates, setTemplates] = useState<ProjectTemplate[]>([])
+	const [isLoadingTemplates, setIsLoadingTemplates] = useState<boolean>(true)
 
-	const filteredTemplates = getTemplatesByCategory(selectedCategory)
+	const filteredTemplates = getTemplatesByCategory(templates, selectedCategory)
 
 	useEffect(() => {
 		// Initialize with sample project name
 		setProjectName(generateSampleProjectName())
+
+		// Load templates from backend
+		console.log("🔄 Loading templates from backend...")
+		vscode.postMessage(createLoadTemplatesMessage())
 
 		// Request current workspace path when component mounts
 		vscode.postMessage({ type: "getWorkspacePath" })
@@ -150,16 +149,23 @@ export const ProjectsView = () => {
 		// Listen for messages from extension
 		const handleMessage = (event: MessageEvent) => {
 			const message = event.data
+			console.log("ProjectsView received message:", message)
+			
 			switch (message.type) {
+				case "templatesLoaded":
+					console.log("📋 Templates loaded:", message.templates)
+					setTemplates(message.templates || [])
+					setIsLoadingTemplates(false)
+					break
 				case "selectedOutputPath":
-					if (message.text) {
-						setOutputPath(message.text)
+					if (message.path || message.text) {
+						setOutputPath(message.path || message.text)
 					}
 					break
 				case "currentWorkspacePath":
 					// Set workspace path as default output path
-					if (message.text) {
-						setOutputPath(message.text)
+					if (message.path || message.text) {
+						setOutputPath(message.path || message.text)
 					}
 					break
 				case "projectGenerationResult":
@@ -197,6 +203,7 @@ export const ProjectsView = () => {
 	}
 
 	const handleSelectOutputPath = () => {
+		console.log("Selecting output path...")
 		vscode.postMessage(createSelectOutputPathMessage())
 	}
 
@@ -242,6 +249,7 @@ export const ProjectsView = () => {
 
 			// Send message to extension for actual project generation
 			const message = createProjectGenerationMessage(config, generationMethod)
+			console.log("Sending project generation message:", message)
 			vscode.postMessage(message)
 		} catch (error) {
 			console.error("Error generating project:", error)
@@ -257,8 +265,8 @@ export const ProjectsView = () => {
 	const handleInsertSample = () => {
 		setProjectName(generateSampleProjectName())
 		setGroupID(getDefaultGroupId())
-		if (PROJECT_TEMPLATES.length > 0) {
-			setSelectedTemplate(PROJECT_TEMPLATES[0])
+		if (templates.length > 0) {
+			setSelectedTemplate(templates[0])
 		}
 		setGenerationStatus("")
 	}
@@ -273,6 +281,55 @@ export const ProjectsView = () => {
 		} else {
 			setValidationErrors([])
 		}
+	}
+
+	// Show loading state while templates are being loaded
+	if (isLoadingTemplates) {
+		return (
+			<div style={{ padding: "20px", textAlign: "center" }}>
+				<div style={{ marginBottom: "20px" }}>
+					<span className="codicon codicon-loading codicon-modifier-spin" style={{ marginRight: "8px" }}></span>
+					Loading templates...
+				</div>
+				<p style={{ fontSize: "12px", color: "var(--vscode-descriptionForeground)" }}>
+					Please wait while we load the available project templates.
+				</p>
+			</div>
+		)
+	}
+
+	// Show error state if no templates were loaded
+	if (!isLoadingTemplates && templates.length === 0) {
+		return (
+			<div style={{ padding: "20px", textAlign: "center" }}>
+				<div 
+					style={{ 
+						backgroundColor: "var(--vscode-inputValidation-errorBackground)",
+						border: "1px solid var(--vscode-inputValidation-errorBorder)",
+						color: "var(--vscode-inputValidation-errorForeground)",
+						padding: "15px",
+						borderRadius: "3px",
+						marginBottom: "15px"
+					}}>
+					<div style={{ fontWeight: "bold", marginBottom: "8px" }}>
+						<span className="codicon codicon-error" style={{ marginRight: "6px" }}></span>
+						No Templates Available
+					</div>
+					<div style={{ fontSize: "12px" }}>
+						Unable to load project templates. Please check if the templates-projects.json file exists and is properly configured.
+					</div>
+				</div>
+				<VSCodeButton 
+					appearance="primary" 
+					onClick={() => {
+						setIsLoadingTemplates(true)
+						vscode.postMessage(createLoadTemplatesMessage())
+					}}>
+					<span className="codicon codicon-refresh" style={{ marginRight: "6px" }}></span>
+					Retry Loading Templates
+				</VSCodeButton>
+			</div>
+		)
 	}
 
 	return (
@@ -387,7 +444,7 @@ export const ProjectsView = () => {
 						<VSCodeDropdown value={selectedCategory} onChange={handleCategoryChange}>
 							{PROJECT_CATEGORIES.map((category) => (
 								<VSCodeOption key={category} value={category}>
-									{category}
+									{category} ({getTemplatesByCategory(templates, category).length} templates)
 								</VSCodeOption>
 							))}
 						</VSCodeDropdown>
@@ -563,6 +620,48 @@ export const ProjectsView = () => {
 					</div>
 				</div>
 			)}
+
+			{/* Available Templates Info */}
+			<div
+				style={{
+					backgroundColor: "var(--vscode-editor-background)",
+					border: "1px solid var(--vscode-panel-border)",
+					borderRadius: "3px",
+					padding: "15px",
+					marginTop: "20px",
+				}}>
+				<h4 style={{ color: "var(--vscode-foreground)", marginBottom: "10px", marginTop: 0 }}>
+					Available Templates ({templates.length})
+				</h4>
+				<div style={{ fontSize: "12px", color: "var(--vscode-foreground)" }}>
+					<div style={{ marginBottom: "8px" }}>
+						<strong>Categories:</strong>
+					</div>
+					<ul style={{ fontSize: "11px", color: "var(--vscode-foreground)", margin: "0", paddingLeft: "20px" }}>
+						<li>
+							<strong>Web:</strong> Basic web application projects ({getTemplatesByCategory(templates, "Web").length})
+						</li>
+						<li>
+							<strong>Template:</strong> Pre-configured project templates ({getTemplatesByCategory(templates, "Template").length})
+						</li>
+						<li>
+							<strong>Mobile:</strong> Mobile and hybrid app projects ({getTemplatesByCategory(templates, "Mobile").length})
+						</li>
+						<li>
+							<strong>Boot:</strong> Spring Boot based projects ({getTemplatesByCategory(templates, "Boot").length})
+						</li>
+						<li>
+							<strong>MSA:</strong> Microservices architecture projects ({getTemplatesByCategory(templates, "MSA").length})
+						</li>
+						<li>
+							<strong>Batch:</strong> Batch processing projects ({getTemplatesByCategory(templates, "Batch").length})
+						</li>
+					</ul>
+					<div style={{ marginTop: "10px", fontSize: "10px", opacity: 0.8 }}>
+						All templates are loaded from templates-projects.json configuration file
+					</div>
+				</div>
+			</div>
 		</div>
 	)
 }
