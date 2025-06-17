@@ -55,6 +55,9 @@ class EgovWebviewViewProvider implements vscode.WebviewViewProvider {
           case 'generateCode':
             await this.handleGenerateCode(data, webviewView.webview);
             break;
+          case 'downloadTemplateContext':
+            await this.handleDownloadTemplateContext(data, webviewView.webview);
+            break;
           case 'generateConfig':
             await this.handleGenerateConfig(data, webviewView.webview);
             break;
@@ -642,6 +645,95 @@ class EgovWebviewViewProvider implements vscode.WebviewViewProvider {
     }
   }
 
+  // Template Context 다운로드 핸들러
+  private async handleDownloadTemplateContext(message: any, webview: vscode.Webview) {
+    try {
+      console.log('📥 Starting template context download with message:', message);
+      
+      // Validate input
+      if (!message.ddl) {
+        throw new Error('No DDL provided for template context generation');
+      }
+
+      webview.postMessage({
+        type: 'progress',
+        text: '🔍 Parsing DDL for template context...'
+      });
+
+      // Parse DDL
+      const parsedDDL = this.parseDDL(message.ddl);
+      console.log('📋 Parsed DDL for context:', parsedDDL);
+
+      if (!parsedDDL.tableName || parsedDDL.attributes.length === 0) {
+        throw new Error('Invalid DDL: Could not extract table information');
+      }
+
+      // Create template context
+      const packageName = message.packageName || 'com.example.project';
+      const context = this.createTemplateContext(parsedDDL, packageName);
+      const outputPath = message.outputPath || vscode.workspace.workspaceFolders?.[0]?.uri.fsPath || '';
+
+      webview.postMessage({
+        type: 'progress',
+        text: '💾 Selecting save location...'
+      });
+
+      // Ask user to select save location
+      const saveUri = await vscode.window.showSaveDialog({
+        defaultUri: vscode.Uri.file(path.join(outputPath, `${parsedDDL.tableName}_TemplateContext.json`)),
+        filters: {
+          'JSON files': ['json'],
+          'All files': ['*']
+        },
+        title: 'Save Template Context'
+      });
+
+      if (!saveUri) {
+        webview.postMessage({
+          type: 'info',
+          message: 'Template context download cancelled by user'
+        });
+        return;
+      }
+
+      // Generate JSON content
+      const jsonContent = JSON.stringify(context, null, 2);
+      
+      // Write file
+      await fs.writeFile(saveUri.fsPath, jsonContent, 'utf8');
+
+      webview.postMessage({
+        type: 'success',
+        message: `✅ Template context saved to: ${saveUri.fsPath}`
+      });
+
+      // Show success message with option to open file
+      const action = await vscode.window.showInformationMessage(
+        `Template context saved successfully for table '${parsedDDL.tableName}'`,
+        'Open File',
+        'Open Folder'
+      );
+
+      if (action === 'Open File') {
+        const document = await vscode.workspace.openTextDocument(saveUri);
+        await vscode.window.showTextDocument(document);
+      } else if (action === 'Open Folder') {
+        vscode.commands.executeCommand('revealFileInOS', saveUri);
+      }
+
+    } catch (error) {
+      console.error('❌ Error in template context download:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+      
+      webview.postMessage({
+        type: 'error',
+        message: errorMessage
+      });
+      
+      vscode.window.showErrorMessage(`Template context download failed: ${errorMessage}`);
+    }
+  }
+
   // DDL 파싱 메서드
   private parseDDL(ddl: string): any {
     const lines = ddl.trim().split('\n');
@@ -669,6 +761,11 @@ class EgovWebviewViewProvider implements vscode.WebviewViewProvider {
           const ccName = this.toCamelCase(columnName);
           const javaType = this.mapSqlToJavaType(dataType);
           const isPrimaryKey = trimmedLine.toUpperCase().includes('PRIMARY KEY');
+          const isTable = trimmedLine.toUpperCase().includes('TABLE');
+
+          if (isTable) {
+            continue;
+          }
 
           attributes.push({
             columnName,

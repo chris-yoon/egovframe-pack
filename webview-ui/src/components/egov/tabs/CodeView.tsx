@@ -45,6 +45,11 @@ const parseDDL = (ddl: string): ParsedDDL => {
 				const ccName = toCamelCase(columnName)
 				const javaType = mapSqlToJavaType(dataType)
 				const isPrimaryKey = trimmedLine.toUpperCase().includes('PRIMARY KEY')
+				const isTable = trimmedLine.toUpperCase().includes('TABLE')
+
+				if (isTable) {
+					continue
+				}
 
 				attributes.push({
 					columnName,
@@ -193,25 +198,36 @@ const CodeView = () => {
 		const handleMessage = (event: MessageEvent) => {
 			const message = event.data
 			console.log("📨 CodeView received message:", message)
-			setIsLoading(false)
 
 			switch (message.type) {
 				case "error":
 					console.error("❌ Extension error:", message.message)
 					setError(message.message || "Unknown error occurred")
+					setIsLoading(false)
 					break
 				case "success":
 					console.log("✅ Extension success:", message.message)
 					setError("")
+					setIsLoading(false)
+					break
+				case "progress":
+					console.log("⏳ Extension progress:", message.text)
+					// Don't reset loading for progress messages
+					break
+				case "info":
+					console.log("ℹ️ Extension info:", message.message)
+					setIsLoading(false)
 					break
 				case "sampleDDL":
 					setDdlContent(message.ddl || "")
+					setIsLoading(false)
 					break
 				case "selectedOutputPath":
 					console.log("📁 Received selectedOutputPath:", message)
 					if (message.path || message.text) {
 						setOutputPath(message.path || message.text)
 					}
+					setIsLoading(false)
 					break
 				case "currentWorkspacePath":
 					console.log("🏠 Received currentWorkspacePath:", message)
@@ -219,6 +235,11 @@ const CodeView = () => {
 					if (message.path || message.text) {
 						setOutputPath(message.path || message.text)
 					}
+					setIsLoading(false)
+					break
+				default:
+					console.log("🤷 Unknown message type:", message.type)
+					setIsLoading(false)
 					break
 			}
 		}
@@ -245,7 +266,7 @@ const CodeView = () => {
 		setError("")
 		try {
 			vscode.postMessage({
-				type: "generateCode",
+				command: "generateCode", // type 대신 command 사용
 				ddl: ddlContent,
 				packageName: packageName.trim(),
 				outputPath: outputPath.trim(),
@@ -265,7 +286,7 @@ const CodeView = () => {
 		setError("")
 		try {
 			vscode.postMessage({
-				type: "uploadTemplates",
+				command: "uploadTemplates", // type 대신 command 사용
 				ddl: ddlContent,
 			})
 		} catch (err) {
@@ -280,18 +301,18 @@ const CodeView = () => {
 		if (!isValid || !parsedDDL || !vscode) return
 
 		try {
-			const context = getTemplateContext(parsedDDL.tableName, parsedDDL.attributes, parsedDDL.pkAttributes)
-
 			setIsLoading(true)
 			setError("")
 			vscode.postMessage({
-				type: "downloadTemplateContext",
+				command: "downloadTemplateContext", // type 대신 command 사용
 				ddl: ddlContent,
-				context,
+				packageName: packageName,
+				outputPath: outputPath.trim(),
 			})
 		} catch (err) {
 			console.error("Error in downloadTemplateContext:", err)
 			setError(err instanceof Error ? err.message : "Context generation error")
+			setIsLoading(false)
 		}
 	}
 
@@ -481,7 +502,6 @@ const CodeView = () => {
 					onClick={handleGenerateCode}
 					disabled={!isValid || isLoading || !ddlContent.trim()}>
 					{isLoading && <VSCodeProgressRing style={{ marginRight: "6px" }} />}
-					<span className="codicon codicon-play" style={{ marginRight: "6px" }}></span>
 					Generate Code
 				</VSCodeButton>
 
@@ -489,7 +509,6 @@ const CodeView = () => {
 					appearance="secondary"
 					onClick={handleUploadTemplates}
 					disabled={!isValid || isLoading || !ddlContent.trim()}>
-					<span className="codicon codicon-cloud-upload" style={{ marginRight: "6px" }}></span>
 					Upload Templates
 				</VSCodeButton>
 
@@ -497,7 +516,6 @@ const CodeView = () => {
 					appearance="secondary"
 					onClick={handleDownloadTemplateContext}
 					disabled={!isValid || isLoading || !parsedDDL}>
-					<span className="codicon codicon-cloud-download" style={{ marginRight: "6px" }}></span>
 					Download Context
 				</VSCodeButton>
 			</div>
