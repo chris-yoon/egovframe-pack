@@ -74,21 +74,24 @@ const parseDDL = (ddl: string): ParsedDDL => {
 }
 
 // DDL 유효성 검사
+// 강력한 DDL 유효성 검사 함수들을 import
+import { validateDDL as validateDDLStrict, generateSampleDDL as generateSampleDDLStrict, type DDLValidationResult } from '../../../utils/ddlUtils'
+
+// 간단한 유효성 검사 (이전 버전 호환용)
 const validateDDL = (ddl: string): boolean => {
-	const trimmed = ddl.trim().toLowerCase()
-	return trimmed.includes('create table') && trimmed.includes('(')
+	const validation = validateDDLStrict(ddl)
+	return validation.isValid
 }
 
-// 샘플 DDL 생성
-const generateSampleDDL = (): string => {
-	return `CREATE TABLE board (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    title VARCHAR(255) NOT NULL,
-    content TEXT,
-    author VARCHAR(100) NOT NULL,
-    created_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);`
+// 상세한 유효성 검사 결과를 반환하는 함수
+const validateDDLDetailed = (ddl: string): DDLValidationResult => {
+	return validateDDLStrict(ddl)
 }
+
+// 샘플 DDL 생성 (deprecated - 새로운 generateSampleDDLStrict 사용)
+// const generateSampleDDL = (): string => {
+// 	return generateSampleDDLStrict()
+// }
 
 // Camel Case 변환
 const toCamelCase = (str: string): string => {
@@ -154,7 +157,7 @@ const CodeView = () => {
 		)
 	}
 
-	// DDL 유효성 검사 및 파싱
+	// DDL 유효성 검사 및 파싱 (강화된 버전)
 	useEffect(() => {
 		console.log("DDL validation effect running...", ddlContent.length)
 
@@ -166,22 +169,34 @@ const CodeView = () => {
 		}
 
 		try {
-			const isValidDDL = validateDDL(ddlContent)
-			setIsValid(isValidDDL)
+			// 상세한 유효성 검사 수행
+			const validationResult = validateDDLDetailed(ddlContent)
+			setIsValid(validationResult.isValid)
 
-			if (isValidDDL) {
+			if (validationResult.isValid) {
 				const parsed = parseDDL(ddlContent)
 				setParsedDDL(parsed)
-				setError("")
+				
+				// 경고가 있으면 표시하되 오류는 아님
+				if (validationResult.warnings.length > 0) {
+					setError(`⚠️ Warnings: ${validationResult.warnings.join('; ')}`)
+				} else {
+					setError("")
+				}
 			} else {
 				setParsedDDL(null)
-				setError("Invalid DDL format")
+				// 상세한 오류 메시지 표시
+				const errorMessages = [
+					...validationResult.errors,
+					...validationResult.warnings
+				]
+				setError(`❌ DDL Validation Errors: ${errorMessages.join('; ')}`)
 			}
 		} catch (err) {
 			console.error("DDL parsing error:", err)
 			setIsValid(false)
 			setParsedDDL(null)
-			setError(err instanceof Error ? err.message : "Parsing error")
+			setError(`❌ Parsing Error: ${err instanceof Error ? err.message : "Unknown parsing error"}`)
 		}
 	}, [ddlContent])
 
@@ -321,7 +336,7 @@ const CodeView = () => {
 	const handleInsertSampleDDL = () => {
 		console.log("Insert sample DDL clicked")
 		try {
-			const sampleDDL = generateSampleDDL()
+			const sampleDDL = generateSampleDDLStrict()
 			setDdlContent(sampleDDL)
 		} catch (err) {
 			console.error("Error generating sample DDL:", err)
