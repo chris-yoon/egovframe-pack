@@ -288,6 +288,8 @@ const CodeView = () => {
 			vscode.postMessage({
 				command: "uploadTemplates", // type 대신 command 사용
 				ddl: ddlContent,
+				packageName: packageName,
+				outputPath: outputPath.trim(),
 			})
 		} catch (err) {
 			console.error("Error sending uploadTemplates message:", err)

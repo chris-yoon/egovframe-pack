@@ -3,6 +3,8 @@ import * as path from 'path';
 import * as fs from 'fs-extra';
 import extractZip from 'extract-zip';
 import { registerHandlebarsHelpers } from './utils/handlebarHelpers';
+import { parseDDL } from './utils/ddlParser';
+import { getTemplateContext } from './utils/codeGeneratorUtils';
 
 let extensionContext: vscode.ExtensionContext;
 
@@ -54,6 +56,9 @@ class EgovWebviewViewProvider implements vscode.WebviewViewProvider {
             break;
           case 'generateCode':
             await this.handleGenerateCode(data, webviewView.webview);
+            break;
+          case 'uploadTemplates':
+            await this.handleUploadTemplates(data, webviewView.webview);
             break;
           case 'downloadTemplateContext':
             await this.handleDownloadTemplateContext(data, webviewView.webview);
@@ -573,8 +578,8 @@ class EgovWebviewViewProvider implements vscode.WebviewViewProvider {
         text: '🔍 Parsing DDL...'
       });
 
-      // Parse DDL
-      const parsedDDL = this.parseDDL(message.ddl);
+      // Parse DDL using the main project's ddlParser
+      const parsedDDL = parseDDL(message.ddl);
       console.log('📋 Parsed DDL:', parsedDDL);
 
       if (!parsedDDL.tableName || parsedDDL.attributes.length === 0) {
@@ -608,11 +613,32 @@ class EgovWebviewViewProvider implements vscode.WebviewViewProvider {
         text: '📝 Creating Java files...'
       });
 
-      // Generate files
-      const context = this.createTemplateContext(parsedDDL, message.packageName);
-      await this.generateJavaFiles(javaDir, context);
-      await this.generateSQLFiles(sqlDir, context);
-      await this.generateJSPFiles(jspDir, context);
+      // Generate files using egovframe-pack's getTemplateContext
+      const context = getTemplateContext(parsedDDL.tableName, parsedDDL.attributes, parsedDDL.pkAttributes);
+      
+      // Helper functions for naming conventions
+      const toCamelCase = (str: string): string => {
+        return str.replace(/_([a-z])/g, (g) => g[1].toUpperCase());
+      };
+      
+      const toPascalCase = (str: string): string => {
+        const camelCase = toCamelCase(str.toLowerCase());
+        return camelCase.charAt(0).toUpperCase() + camelCase.slice(1);
+      };
+      
+      // Enhance context with package information and naming conventions
+      const enhancedContext = {
+        ...context,
+        packageName: message.packageName,
+        packagePath: message.packageName.split('.').join('/'),
+        hasCompositeKey: parsedDDL.pkAttributes.length > 1,
+        packageImport: message.packageName,
+        tableNamePascalCase: toPascalCase(parsedDDL.tableName),
+        tableNameCamelCase: toCamelCase(parsedDDL.tableName)
+      };
+      await this.generateJavaFiles(javaDir, enhancedContext);
+      await this.generateSQLFiles(sqlDir, enhancedContext);
+      await this.generateJSPFiles(jspDir, enhancedContext);
 
       webview.postMessage({
         type: 'success',
@@ -645,6 +671,135 @@ class EgovWebviewViewProvider implements vscode.WebviewViewProvider {
     }
   }
 
+  // Templates 업로드 핸들러
+  private async handleUploadTemplates(message: any, webview: vscode.Webview) {
+    try {
+      console.log('📤 Starting template upload with message:', message);
+      
+      // Validate input
+      if (!message.ddl) {
+        throw new Error('No DDL provided for template processing');
+      }
+
+      webview.postMessage({
+        type: 'progress',
+        text: '📂 Opening file selection dialog...'
+      });
+
+      // Show file selection dialog
+      const selectedFiles = await vscode.window.showOpenDialog({
+        title: "Select HBS Template Files to Upload",
+        canSelectFolders: false,
+        canSelectFiles: true,
+        canSelectMany: true,
+        filters: { "Handlebars Templates": ["hbs"], "All Files": ["*"] },
+      });
+
+      if (!selectedFiles || selectedFiles.length === 0) {
+        webview.postMessage({
+          type: 'error',
+          message: 'No files selected for upload'
+        });
+        return;
+      }
+
+      webview.postMessage({
+        type: 'progress',
+        text: `🔍 Processing ${selectedFiles.length} template file(s)...`
+      });
+
+      // Parse DDL using the main project's ddlParser
+      const parsedDDL = parseDDL(message.ddl);
+      console.log('📋 Parsed DDL for upload:', parsedDDL);
+
+      if (!parsedDDL.tableName || parsedDDL.attributes.length === 0) {
+        throw new Error('Invalid DDL: Could not extract table information');
+      }
+
+      // Process each selected file
+      const selectedFolderPath = path.dirname(selectedFiles[0].fsPath);
+      let processedCount = 0;
+
+      for (const file of selectedFiles) {
+        try {
+          webview.postMessage({
+            type: 'progress',
+            text: `📝 Processing template: ${path.basename(file.fsPath)} (${processedCount + 1}/${selectedFiles.length})`
+          });
+
+          const templatePath = file.fsPath;
+          const outputFileName = path.basename(file.fsPath, ".hbs") + ".generated";
+          const outputPath = path.join(selectedFolderPath, outputFileName);
+
+          // Create template context using egovframe-pack's getTemplateContext
+          const packageName = message.packageName || 'com.example.project';
+          const context = getTemplateContext(parsedDDL.tableName, parsedDDL.attributes, parsedDDL.pkAttributes);
+          
+          // Helper functions for naming conventions
+          const toCamelCase = (str: string): string => {
+            return str.replace(/_([a-z])/g, (g) => g[1].toUpperCase());
+          };
+          
+          const toPascalCase = (str: string): string => {
+            const camelCase = toCamelCase(str.toLowerCase());
+            return camelCase.charAt(0).toUpperCase() + camelCase.slice(1);
+          };
+          
+          // Enhance context with package information and naming conventions
+          const enhancedContext = {
+            ...context,
+            packageName: packageName,
+            packagePath: packageName.split('.').join('/'),
+            hasCompositeKey: parsedDDL.pkAttributes.length > 1,
+            packageImport: packageName,
+            tableNamePascalCase: toPascalCase(parsedDDL.tableName),
+            tableNameCamelCase: toCamelCase(parsedDDL.tableName)
+          };
+
+          // Read template file
+          const templateContent = await fs.readFile(templatePath, 'utf-8');
+          
+          // Render template using Handlebars
+          const Handlebars = require('handlebars');
+          const template = Handlebars.compile(templateContent);
+          const renderedContent = template(enhancedContext);
+
+          // Write rendered content to output file
+          await fs.writeFile(outputPath, renderedContent, 'utf-8');
+          processedCount++;
+
+          console.log(`✅ Template processed: ${outputPath}`);
+
+          // Open the newly created file in the editor
+          const document = await vscode.workspace.openTextDocument(outputPath);
+          await vscode.window.showTextDocument(document);
+
+        } catch (fileError) {
+          console.error(`❌ Error processing file ${file.fsPath}:`, fileError);
+          webview.postMessage({
+            type: 'error',
+            message: `Failed to process ${path.basename(file.fsPath)}: ${fileError instanceof Error ? fileError.message : String(fileError)}`
+          });
+        }
+      }
+
+      // Send success message
+      webview.postMessage({
+        type: 'success',
+        message: `✅ Successfully processed ${processedCount} template file(s)`
+      });
+
+      console.log(`✅ Upload templates completed. Processed ${processedCount}/${selectedFiles.length} files`);
+
+    } catch (error) {
+      console.error('❌ Upload templates failed:', error);
+      webview.postMessage({
+        type: 'error',
+        message: error instanceof Error ? error.message : 'Upload templates failed'
+      });
+    }
+  }
+
   // Template Context 다운로드 핸들러
   private async handleDownloadTemplateContext(message: any, webview: vscode.Webview) {
     try {
@@ -660,17 +815,28 @@ class EgovWebviewViewProvider implements vscode.WebviewViewProvider {
         text: '🔍 Parsing DDL for template context...'
       });
 
-      // Parse DDL
-      const parsedDDL = this.parseDDL(message.ddl);
+      // Parse DDL using the main project's ddlParser
+      const parsedDDL = parseDDL(message.ddl);
       console.log('📋 Parsed DDL for context:', parsedDDL);
 
       if (!parsedDDL.tableName || parsedDDL.attributes.length === 0) {
         throw new Error('Invalid DDL: Could not extract table information');
       }
 
-      // Create template context
+      // Create template context using egovframe-pack's getTemplateContext
       const packageName = message.packageName || 'com.example.project';
-      const context = this.createTemplateContext(parsedDDL, packageName);
+      const context = getTemplateContext(parsedDDL.tableName, parsedDDL.attributes, parsedDDL.pkAttributes);
+      
+      // Enhance context with additional information
+      const enhancedContext = {
+        ...context,
+        packageName: packageName,
+        packagePath: packageName.split('.').join('/'),
+        author: 'Generated by eGovFrame CRUD Generator',
+        date: new Date().toISOString().split('T')[0],
+        version: '1.0'
+      };
+      
       const outputPath = message.outputPath || vscode.workspace.workspaceFolders?.[0]?.uri.fsPath || '';
 
       webview.postMessage({
@@ -697,7 +863,7 @@ class EgovWebviewViewProvider implements vscode.WebviewViewProvider {
       }
 
       // Generate JSON content
-      const jsonContent = JSON.stringify(context, null, 2);
+      const jsonContent = JSON.stringify(enhancedContext, null, 2);
       
       // Write file
       await fs.writeFile(saveUri.fsPath, jsonContent, 'utf8');
@@ -734,91 +900,7 @@ class EgovWebviewViewProvider implements vscode.WebviewViewProvider {
     }
   }
 
-  // DDL 파싱 메서드
-  private parseDDL(ddl: string): any {
-    const lines = ddl.trim().split('\n');
-    let tableName = '';
-    const attributes: any[] = [];
-    const pkAttributes: any[] = [];
 
-    for (const line of lines) {
-      const trimmedLine = line.trim();
-      
-      // Extract table name
-      if (trimmedLine.toUpperCase().includes('CREATE TABLE')) {
-        const match = trimmedLine.match(/CREATE TABLE\s+(\w+)/i);
-        if (match) {
-          tableName = match[1].toLowerCase();
-        }
-      }
-
-      // Extract column definitions
-      if (trimmedLine.includes('(') || (trimmedLine.includes(' ') && !trimmedLine.startsWith('--'))) {
-        const columnMatch = trimmedLine.match(/(\w+)\s+(\w+)(\([^)]*\))?\s*(.*)/i);
-        if (columnMatch) {
-          const columnName = columnMatch[1].toLowerCase();
-          const dataType = columnMatch[2].toUpperCase();
-          const ccName = this.toCamelCase(columnName);
-          const javaType = this.mapSqlToJavaType(dataType);
-          const isPrimaryKey = trimmedLine.toUpperCase().includes('PRIMARY KEY');
-          const isTable = trimmedLine.toUpperCase().includes('TABLE');
-
-          if (isTable) {
-            continue;
-          }
-
-          attributes.push({
-            columnName,
-            dataType,
-            ccName,
-            javaType,
-            isPrimaryKey
-          });
-
-          if (isPrimaryKey) {
-            pkAttributes.push({
-              columnName,
-              ccName,
-              javaType
-            });
-          }
-        }
-      }
-    }
-
-    return { tableName, attributes, pkAttributes };
-  }
-
-  // Camel Case 변환
-  private toCamelCase(str: string): string {
-    return str.replace(/_([a-z])/g, (g) => g[1].toUpperCase());
-  }
-
-  // SQL to Java 타입 매핑
-  private mapSqlToJavaType(sqlType: string): string {
-    const type = sqlType.toUpperCase();
-    if (type.includes('VARCHAR') || type.includes('TEXT') || type.includes('CHAR')) return 'String';
-    if (type.includes('INT') || type.includes('BIGINT')) return 'Long';
-    if (type.includes('DECIMAL') || type.includes('NUMERIC')) return 'BigDecimal';
-    if (type.includes('DATE') || type.includes('TIMESTAMP')) return 'Date';
-    if (type.includes('BOOLEAN')) return 'Boolean';
-    return 'String';
-  }
-
-  // 템플릿 컨텍스트 생성
-  private createTemplateContext(parsedDDL: any, packageName: string) {
-    return {
-      tableName: parsedDDL.tableName,
-      tableNameCamelCase: this.toCamelCase(parsedDDL.tableName),
-      tableNamePascalCase: this.toCamelCase(parsedDDL.tableName).charAt(0).toUpperCase() + this.toCamelCase(parsedDDL.tableName).slice(1),
-      attributes: parsedDDL.attributes,
-      pkAttributes: parsedDDL.pkAttributes,
-      hasCompositeKey: parsedDDL.pkAttributes.length > 1,
-      packageName: packageName,
-      packagePath: packageName.split('.').join('/'),
-      packageImport: packageName
-    };
-  }
 
   // Java 파일 생성
   private async generateJavaFiles(javaDir: string, context: any) {
