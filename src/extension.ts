@@ -19,6 +19,7 @@ class EgovWebviewViewProvider implements vscode.WebviewViewProvider {
     _token: vscode.CancellationToken,
   ) {
     console.log('🔧 EgovWebviewViewProvider.resolveWebviewView called');
+    console.log('📂 Extension URI:', this._extensionUri.toString());
     
     webviewView.webview.options = {
       // Allow scripts in the webview
@@ -29,16 +30,22 @@ class EgovWebviewViewProvider implements vscode.WebviewViewProvider {
       ]
     };
 
-    console.log('⚙️ Webview options set');
+    console.log('⚙️ Webview options set:', webviewView.webview.options);
+    console.log('📁 Local resource roots:', webviewView.webview.options.localResourceRoots?.map(uri => uri.toString()));
 
-    webviewView.webview.html = this._getHtmlForWebview(webviewView.webview);
-    console.log('📄 HTML content set for webview');
+    try {
+      webviewView.webview.html = this._getHtmlForWebview(webviewView.webview);
+      console.log('📄 HTML content set for webview successfully');
+    } catch (error) {
+      console.error('❌ Error setting HTML content:', error);
+    }
 
     webviewView.webview.onDidReceiveMessage(async (data) => {
-      console.log('📨 Received message from EgovView:', data);
+      console.log('📨 Received message from EgovView:', JSON.stringify(data, null, 2));
       try {
         const messageType = data.command || data.type; // command 또는 type 필드 모두 지원
         console.log('🔍 Processing message type:', messageType);
+        console.log('📋 Full message data:', data);
         switch (messageType) {
           case 'generateProject':
             await this.handleGenerateProject(data.projectConfig || data.config, webviewView.webview);
@@ -66,8 +73,28 @@ class EgovWebviewViewProvider implements vscode.WebviewViewProvider {
           case 'generateConfig':
             await this.handleGenerateConfig(data, webviewView.webview);
             break;
+          case 'selectFolderAndGenerate':
+            console.log('🗂️ Handling selectFolderAndGenerate message');
+            console.log('📋 Message data:', JSON.stringify(data, null, 2));
+            try {
+              await this.handleSelectFolderAndGenerate(data, webviewView.webview);
+              console.log('✅ selectFolderAndGenerate handled successfully');
+            } catch (error) {
+              console.error('❌ Error in selectFolderAndGenerate:', error);
+              throw error;
+            }
+            break;
           case 'generateProjectByCommand':
             await this.handleGenerateProjectByCommand(webviewView.webview);
+            break;
+          case 'executeCommand':
+            console.log('🔧 Executing command:', data.command);
+            try {
+              await vscode.commands.executeCommand(data.command);
+              console.log('✅ Command executed successfully');
+            } catch (error) {
+              console.error('❌ Error executing command:', error);
+            }
             break;
           case 'done':
             // 사이드바에서는 done 버튼이 필요없지만, 메시지는 처리
@@ -1299,6 +1326,309 @@ ${context.attributes.filter((attr: any) => !attr.isPrimaryKey).map((attr: any) =
     }
   }
 
+  private async handleSelectFolderAndGenerate(message: any, webview: vscode.Webview) {
+    try {
+      console.log('📂 Starting folder selection and config generation');
+      console.log('📨 Received message:', JSON.stringify(message, null, 2));
+
+      // 폴더 선택 다이얼로그 표시
+      const folderUri = await vscode.window.showOpenDialog({
+        canSelectMany: false,
+        canSelectFiles: false,
+        canSelectFolders: true,
+        openLabel: 'Select Folder',
+        title: 'Select folder to save configuration files'
+      });
+
+      if (!folderUri || folderUri.length === 0) {
+        webview.postMessage({
+          type: 'folderSelectionResult',
+          success: false,
+          error: 'No folder selected'
+        });
+        return;
+      }
+
+      const selectedPath = folderUri[0].fsPath;
+      console.log('✅ Selected folder:', selectedPath);
+
+      // 선택된 폴더 경로를 웹뷰에 전송
+      webview.postMessage({
+        type: 'folderSelectionResult', 
+        success: true,
+        selectedPath: selectedPath
+      });
+
+      // 설정 파일 생성
+      await this.generateConfigurationFiles(message, selectedPath, webview);
+
+    } catch (error) {
+      console.error('❌ Error in folder selection:', error);
+      webview.postMessage({
+        type: 'folderSelectionResult',
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error occurred'
+      });
+    }
+  }
+
+  private async generateConfigurationFiles(message: any, outputPath: string, webview: vscode.Webview) {
+    try {
+      console.log('🔧 Generating configuration files:', message);
+
+      const { templateType, formData } = message;
+      
+      if (!templateType || !formData) {
+        throw new Error('Missing templateType or formData');
+      }
+
+      const generationType = formData.generationType;
+      if (!generationType) {
+        throw new Error('Missing generationType in formData');
+      }
+
+      webview.postMessage({
+        type: 'configGenerationProgress',
+        text: '🔄 Generating configuration files...'
+      });
+
+      // Import and use configGeneratorUtils
+      const { generateFile } = require('./utils/configGeneratorUtils');
+
+      // 선택된 generation type에 따라 단일 파일만 생성
+      const templateConfig = this.getTemplateConfigForType(templateType, generationType, formData);
+      const fileExtension = this.getFileExtensionForType(generationType);
+
+      console.log('📄 Generating single file for type:', generationType);
+      console.log('📂 Template config:', templateConfig);
+
+      await generateFile(
+        formData,
+        extensionContext,
+        templateConfig.templateFolder,
+        templateConfig.templateFile,
+        outputPath,
+        'txtFileName',
+        fileExtension
+      );
+
+      webview.postMessage({
+        type: 'configGenerationResult',
+        success: true,
+        generatedFiles: [path.join(outputPath, `${formData.txtFileName || 'config'}.${fileExtension}`)]
+      });
+
+      console.log('✅ Configuration file generated successfully');
+
+    } catch (error) {
+      console.error('❌ Error generating configuration files:', error);
+      webview.postMessage({
+        type: 'configGenerationResult',
+        success: false,
+        error: error instanceof Error ? error.message : 'Configuration generation failed'
+      });
+    }
+  }
+
+  private getTemplatePath(templateType: string): string {
+    const basePath = path.join(extensionContext.extensionPath, 'templates', 'config');
+    
+    switch (templateType) {
+      case 'datasource':
+        return path.join(basePath, 'datasource');
+      case 'cache':
+        return path.join(basePath, 'cache');
+      case 'idGeneration':
+        return path.join(basePath, 'idGeneration');
+      case 'logging':
+        return path.join(basePath, 'logging');
+      default:
+        throw new Error(`Unknown template type: ${templateType}`);
+    }
+  }
+
+  private async getTemplateFiles(templatePath: string): Promise<string[]> {
+    const files = await fs.readdir(templatePath);
+    return files
+      .filter(file => file.endsWith('.hbs'))
+      .map(file => path.join(templatePath, file));
+  }
+
+  private prepareTemplateData(templateType: string, formData: any): any {
+    const baseData = {
+      ...formData,
+      timestamp: new Date().toISOString(),
+      generatedBy: 'eGovFrame Extension'
+    };
+
+    // 템플릿 타입별 특별한 데이터 처리
+    switch (templateType) {
+      case 'datasource':
+        return {
+          ...baseData,
+          driverClassName: this.getDriverClassName(formData.driver),
+          validationQuery: this.getValidationQuery(formData.driver)
+        };
+      case 'cache':
+        return {
+          ...baseData,
+          cacheType: formData.cacheType || 'ehcache'
+        };
+      case 'idGeneration':
+        return {
+          ...baseData,
+          idType: formData.type || 'table'
+        };
+      case 'logging':
+        return {
+          ...baseData,
+          loggerType: formData.type || 'file'
+        };
+      default:
+        return baseData;
+    }
+  }
+
+  private getDriverClassName(driver: string): string {
+    const driverMap: Record<string, string> = {
+      'mysql': 'com.mysql.cj.jdbc.Driver',
+      'oracle': 'oracle.jdbc.driver.OracleDriver',
+      'postgresql': 'org.postgresql.Driver',
+      'mariadb': 'org.mariadb.jdbc.Driver',
+      'h2': 'org.h2.Driver'
+    };
+    return driverMap[driver] || driver;
+  }
+
+  private getValidationQuery(driver: string): string {
+    const queryMap: Record<string, string> = {
+      'mysql': 'SELECT 1',
+      'oracle': 'SELECT 1 FROM DUAL',
+      'postgresql': 'SELECT 1',
+      'mariadb': 'SELECT 1',
+      'h2': 'SELECT 1'
+    };
+    return queryMap[driver] || 'SELECT 1';
+  }
+
+  private getOutputFileName(templateFile: string, formData: any): string {
+    const templateName = path.basename(templateFile, '.hbs');
+    const fileName = formData.txtFileName || 'config';
+    
+    // 템플릿별 파일 확장자 결정
+    if (templateName.includes('java')) {
+      return `${fileName}.java`;
+    } else {
+      return `${fileName}.xml`;
+    }
+  }
+
+  private getTemplateConfigForType(templateType: string, generationType: string, formData?: any): { templateFolder: string, templateFile: string } {
+    const basePath = templateType;
+    
+    switch (templateType) {
+      case 'datasource':
+        if (generationType === 'javaConfig') {
+          return { templateFolder: basePath, templateFile: 'datasource-java.hbs' };
+        } else {
+          return { templateFolder: basePath, templateFile: 'datasource.hbs' };
+        }
+      
+      case 'cache':
+        if (generationType === 'javaConfig') {
+          return { templateFolder: basePath, templateFile: 'cache-java.hbs' };
+        } else {
+          return { templateFolder: basePath, templateFile: 'cache.hbs' };
+        }
+      
+      case 'logging':
+        // Determine logging type from formData
+        let loggingType = 'console'; // default
+        if (formData?.txtAppenderName) {
+          loggingType = formData.txtAppenderName.toLowerCase();
+        }
+        
+        if (generationType === 'yaml') {
+          return { templateFolder: basePath, templateFile: `${loggingType}-yaml.hbs` };
+        } else if (generationType === 'properties') {
+          return { templateFolder: basePath, templateFile: `${loggingType}-properties.hbs` };
+        } else if (generationType === 'javaConfig') {
+          return { templateFolder: basePath, templateFile: `${loggingType}-java.hbs` };
+        } else {
+          return { templateFolder: basePath, templateFile: `${loggingType}.hbs` };
+        }
+      
+      case 'idGeneration':
+        // ID Generation has specific subtypes
+        let idType = 'table'; // default
+        if (formData?.rdoIdType) {
+          idType = formData.rdoIdType.toLowerCase();
+        }
+        
+        if (generationType === 'javaConfig') {
+          return { templateFolder: basePath, templateFile: `xml-id-gnr-${idType}-service-java.hbs` };
+        } else {
+          return { templateFolder: basePath, templateFile: `xml-id-gnr-${idType}-service.hbs` };
+        }
+      
+      case 'property':
+        if (generationType === 'javaConfig') {
+          return { templateFolder: basePath, templateFile: 'property-java.hbs' };
+        } else {
+          return { templateFolder: basePath, templateFile: 'property.hbs' };
+        }
+      
+      case 'transaction':
+        // Transaction has specific subtypes
+        let transactionType = 'datasource'; // default
+        if (formData?.transactionType) {
+          transactionType = formData.transactionType;
+        }
+        
+        if (generationType === 'javaConfig') {
+          return { templateFolder: basePath, templateFile: `${transactionType}-java.hbs` };
+        } else {
+          return { templateFolder: basePath, templateFile: `${transactionType}.hbs` };
+        }
+      
+      case 'scheduling':
+        // Scheduling has specific subtypes  
+        let schedulingType = 'scheduler'; // default
+        if (formData?.schedulingType) {
+          schedulingType = formData.schedulingType;
+        }
+        
+        if (generationType === 'javaConfig') {
+          return { templateFolder: basePath, templateFile: `${schedulingType}-java.hbs` };
+        } else {
+          return { templateFolder: basePath, templateFile: `${schedulingType}.hbs` };
+        }
+      
+      default:
+        // Fallback for unknown types
+        if (generationType === 'javaConfig') {
+          return { templateFolder: basePath, templateFile: 'config-java.hbs' };
+        } else {
+          return { templateFolder: basePath, templateFile: 'config.hbs' };
+        }
+    }
+  }
+
+  private getFileExtensionForType(generationType: string): string {
+    switch (generationType) {
+      case 'xml':
+        return 'xml';
+      case 'javaConfig':
+        return 'java';
+      case 'yaml':
+        return 'yaml';
+      case 'properties':
+        return 'properties';
+      default:
+        return 'xml';
+    }
+  }
+
   private async handleGenerateProjectByCommand(webview: vscode.Webview) {
     try {
       webview.postMessage({
@@ -1535,6 +1865,9 @@ The project will be created at: ${path.join(outputPath, projectName)}`;
 
 export function activate(context: vscode.ExtensionContext) {
   console.log('🚀 eGovFrame Initializr extension is activating...');
+  console.log('📂 Extension path:', context.extensionPath);
+  console.log('🔧 Extension mode:', context.extensionMode);
+  console.log('📋 Extension URI:', context.extensionUri.toString());
   
   // Register Handlebars helpers once at activation
   registerHandlebarsHelpers();
@@ -1544,6 +1877,7 @@ export function activate(context: vscode.ExtensionContext) {
 
   // WebviewViewProvider 등록
   const provider = new EgovWebviewViewProvider(context.extensionUri);
+  console.log('📝 Registering WebviewViewProvider with type:', EgovWebviewViewProvider.viewType);
   
   context.subscriptions.push(
     vscode.window.registerWebviewViewProvider(EgovWebviewViewProvider.viewType, provider)
@@ -1563,6 +1897,28 @@ export function activate(context: vscode.ExtensionContext) {
       if (newValue !== undefined) {
         await config.update('defaultPackageName', newValue, vscode.ConfigurationTarget.Global);
         vscode.window.showInformationMessage(`Default package name updated to: ${newValue}`);
+      }
+    })
+  );
+
+  context.subscriptions.push(
+    vscode.commands.registerCommand('extension.selectFolderForConfig', async () => {
+      console.log('🗂️ Manual folder selection command triggered');
+      
+      const folderUri = await vscode.window.showOpenDialog({
+        canSelectMany: false,
+        canSelectFiles: false,
+        canSelectFolders: true,
+        openLabel: 'Select Folder',
+        title: 'Select folder to save configuration files'
+      });
+
+      if (folderUri && folderUri.length > 0) {
+        const selectedPath = folderUri[0].fsPath;
+        vscode.window.showInformationMessage(`Selected folder: ${selectedPath}`);
+        console.log('✅ Folder selected via command:', selectedPath);
+      } else {
+        vscode.window.showWarningMessage('No folder selected');
       }
     })
   );

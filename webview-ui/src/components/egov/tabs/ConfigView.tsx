@@ -1,150 +1,9 @@
 import React, { useState, useEffect } from "react"
 import { VSCodeButton, VSCodeDropdown, VSCodeOption, VSCodeDivider, VSCodeLink } from "@vscode/webview-ui-toolkit/react"
-
-// VSCode API 타입 정의
-declare global {
-	function acquireVsCodeApi(): {
-		postMessage: (message: any) => void
-		getState: () => any
-		setState: (state: any) => void
-	}
-}
-
-interface TemplateConfig {
-	displayName: string
-	templateFile: string
-	templateFolder: string
-	description?: string
-}
-
-interface GroupedTemplates {
-	[category: string]: {
-		[subcategory: string]: TemplateConfig
-	}
-}
-
-interface ConfigFormData {
-	[key: string]: any
-}
-
-// VS Code API 래퍼
-const vscode = (() => {
-	try {
-		return acquireVsCodeApi()
-	} catch (err) {
-		console.error("Failed to acquire vscode API:", err)
-		return {
-			postMessage: (message: any) => console.log("Mock vscode message:", message),
-			getState: () => ({}),
-			setState: (state: any) => console.log("Mock vscode setState:", state)
-		}
-	}
-})()
-
-// 샘플 템플릿 데이터
-const loadTemplates = async (): Promise<TemplateConfig[]> => {
-	return [
-		{
-			displayName: "DataSource > DataSource",
-			templateFile: "datasource.xml",
-			templateFolder: "datasource",
-			description: "Database connection configuration"
-		},
-		{
-			displayName: "DataSource > JNDI DataSource", 
-			templateFile: "jndi-datasource.xml",
-			templateFolder: "datasource",
-			description: "JNDI-based database connection"
-		},
-		{
-			displayName: "Transaction > DataSource Transaction",
-			templateFile: "datasource-transaction.xml", 
-			templateFolder: "transaction",
-			description: "Transaction management configuration"
-		},
-		{
-			displayName: "Transaction > JPA Transaction",
-			templateFile: "jpa-transaction.xml",
-			templateFolder: "transaction", 
-			description: "JPA transaction management"
-		},
-		{
-			displayName: "Logging > Console Logging",
-			templateFile: "console-logging.xml",
-			templateFolder: "logging",
-			description: "Console-based logging configuration"
-		},
-		{
-			displayName: "Logging > File Logging",
-			templateFile: "file-logging.xml", 
-			templateFolder: "logging",
-			description: "File-based logging configuration"
-		},
-		{
-			displayName: "Cache > EHCache",
-			templateFile: "ehcache.xml",
-			templateFolder: "cache",
-			description: "EHCache configuration"
-		},
-		{
-			displayName: "Property > Property Configuration",
-			templateFile: "property.xml",
-			templateFolder: "property", 
-			description: "Property management configuration"
-		}
-	]
-}
-
-// 폼 팩토리 컴포넌트 (간단한 버전)
-const FormFactory: React.FC<{
-	template: TemplateConfig
-	onSubmit: (data: ConfigFormData) => void
-	onCancel: () => void
-}> = ({ template, onSubmit, onCancel }) => {
-	const [formData, setFormData] = useState<ConfigFormData>({})
-
-	const handleSubmit = () => {
-		onSubmit(formData)
-	}
-
-	return (
-		<div style={{ padding: "20px", maxWidth: "800px" }}>
-			<h3 style={{ color: "var(--vscode-foreground)", marginTop: 0, marginBottom: "20px" }}>
-				Configure {template.displayName}
-			</h3>
-			
-			<div style={{ marginBottom: "20px" }}>
-				<p style={{ color: "var(--vscode-descriptionForeground)", marginBottom: "15px" }}>
-					{template.description}
-				</p>
-				
-				<div style={{ 
-					backgroundColor: "var(--vscode-textBlockQuote-background)",
-					border: "1px solid var(--vscode-textBlockQuote-border)",
-					padding: "15px",
-					borderRadius: "4px",
-					marginBottom: "20px"
-				}}>
-					<div style={{ fontSize: "12px", marginBottom: "8px" }}>
-						<strong>Template File:</strong> {template.templateFile}
-					</div>
-					<div style={{ fontSize: "12px" }}>
-						<strong>Category:</strong> {template.templateFolder}
-					</div>
-				</div>
-			</div>
-
-			<div style={{ display: "flex", gap: "10px", justifyContent: "flex-end" }}>
-				<VSCodeButton appearance="secondary" onClick={onCancel}>
-					Cancel
-				</VSCodeButton>
-				<VSCodeButton appearance="primary" onClick={handleSubmit}>
-					Generate Configuration
-				</VSCodeButton>
-			</div>
-		</div>
-	)
-}
+import { TemplateConfig, GroupedTemplates, ConfigFormData } from "../types/templates"
+import { loadTemplates } from "../utils/templateUtils"
+import FormFactory from "../forms/FormFactory"
+import { vscode } from "../../../utils/vscode"
 
 const ConfigView: React.FC = () => {
 	const [templates, setTemplates] = useState<TemplateConfig[]>([])
@@ -160,7 +19,12 @@ const ConfigView: React.FC = () => {
 		const initializeTemplates = async () => {
 			try {
 				setLoading(true)
-				const loadedTemplates = await loadTemplates()
+				console.log("🔍 VSCode API test on component mount:", !!vscode)
+				if (vscode) {
+					console.log("✅ VSCode API methods available:", Object.keys(vscode))
+				}
+				
+				const loadedTemplates = loadTemplates()
 				console.log("Loaded templates:", loadedTemplates)
 				setTemplates(loadedTemplates)
 
@@ -218,21 +82,64 @@ const ConfigView: React.FC = () => {
 	const handleFormSubmit = (formData: ConfigFormData) => {
 		console.log("Form submitted with data:", formData)
 		console.log("Selected template:", selectedTemplate)
+		console.log("VSCode API available:", !!vscode)
+		console.log("VSCode API object:", vscode)
 
 		if (!selectedTemplate) {
 			console.error("No template selected")
 			return
 		}
 
-		// Post message to generate config
-		try {
-			vscode.postMessage({
-				type: "generateConfig",
+		// Handle folder selection and config generation
+		if (vscode) {
+			console.log("✅ Sending message to VSCode extension...")
+			
+			// Determine template type from selected template
+			let templateType = ""
+			if (selectedTemplate.displayName.includes("DataSource")) {
+				templateType = "datasource"
+			} else if (selectedTemplate.displayName.includes("Cache")) {
+				templateType = "cache"
+			} else if (selectedTemplate.displayName.includes("ID Generation")) {
+				templateType = "idGeneration"
+			} else if (selectedTemplate.displayName.includes("Logging")) {
+				templateType = "logging"
+			} else {
+				// Fallback to using displayName
+				templateType = selectedTemplate.displayName.toLowerCase().replace(/\s+/g, '-')
+			}
+			
+			const message = {
+				type: "selectFolderAndGenerate",
 				template: selectedTemplate,
 				formData: formData,
-			})
-		} catch (error) {
-			console.error("Error sending message:", error)
+				templateType: templateType
+			}
+			
+			console.log("📨 Message to send:", message)
+			
+			try {
+				vscode.postMessage(message)
+				console.log("✅ Message sent successfully")
+				
+				// Fallback: If extension host is unresponsive, try command execution
+				setTimeout(() => {
+					console.log("🔄 Trying fallback command execution...")
+					try {
+						vscode.postMessage({
+							type: "executeCommand",
+							command: "extension.selectFolderForConfig"
+						})
+					} catch (fallbackError) {
+						console.error("❌ Fallback command failed:", fallbackError)
+					}
+				}, 1000)
+				
+			} catch (error) {
+				console.error("❌ Error sending message:", error)
+			}
+		} else {
+			console.error("❌ VSCode API not available - running in standalone mode")
 		}
 
 		// Return to list view
